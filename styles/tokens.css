@@ -1,0 +1,8 @@
+:root {
+  --primary-action-default: hsl(170deg 85% 40%);
+  --primary-action-hover: hsl(170deg 90% 32%);
+  --primary-action-pressed: hsl(170deg 95% 24%);
+  --primary-muted-default: hsl(170deg 30% 80%);
+  --primary-muted-hover: hsl(170deg 30% 65%);
+  --primary-muted-pressed: hsl(170deg 30% 50%);
+}
