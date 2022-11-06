@@ -1,11 +1,11 @@
 import styled from 'styled-components'
 
-import { Image, ImageLockup } from 'components/ImageLockup'
-import { Area } from 'components/Area'
-import { HeadingText, BodyText } from 'components/Text'
-import { Stack } from 'components/Stack'
-import { Space } from 'components/Space'
-import { ButtonLink } from 'components/Button'
+import { Area } from 'components/shared/Area'
+import { HeadingText, BodyText } from 'components/shared/Text'
+import { Stack } from 'components/shared/Stack'
+import { Space } from 'components/shared/Space'
+import { ButtonLink } from 'components/shared/Button'
+import { Image, ImageLockup } from 'components/site/ImageLockup'
 import { tokens } from 'tokens'
 
 const Root = styled.div`

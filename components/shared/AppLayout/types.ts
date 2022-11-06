@@ -1,4 +1,3 @@
-import React from 'react'
 import type { WidthToken } from 'types/tokens'
 import type { CoreComponent } from 'types/core'
 
