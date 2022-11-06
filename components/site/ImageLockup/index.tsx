@@ -1,12 +1,13 @@
-import NextImage from 'next/image'
 import type { ImageLockupProps } from './types'
 import type { SizeToken } from 'types/tokens'
-import styled from 'styled-components'
-import { useState } from 'react'
 
-import { tokens } from 'tokens'
-import { responsiveProp, responsiveToken } from 'lib/responsive'
+import NextImage from 'next/image'
+import { useState } from 'react'
+import styled from 'styled-components'
+
 import { useInterval } from 'hooks/useInterval'
+import { responsiveProp, responsiveToken } from 'lib/responsive'
+import { tokens } from 'tokens'
 
 export const Image = styled(NextImage).attrs({
   width: 240,
@@ -26,9 +27,9 @@ export const StyledImageLockup = styled.div<
   width: 100%;
 
   ${responsiveToken<SizeToken>('gap', {
-    xs: tokens.size.x12,
-    sm: tokens.size.x20,
-  })};
+  xs: tokens.size.x12,
+  sm: tokens.size.x20,
+})};
 
   ${responsiveProp('grid-template-columns', {
     xs: 'repeat(1, 1fr)',
@@ -42,16 +43,16 @@ export const StyledImageLockup = styled.div<
 
   ${Image}:nth-child(${({ activeIndex }) => activeIndex}) {
     ${responsiveToken('display', {
-      xs: 'block',
-      sm: 'block',
-    })}
+    xs: 'block',
+    sm: 'block',
+  })}
   }
 
   ${Image}:not(:nth-child(${({ activeIndex }) => activeIndex})) {
     ${responsiveToken('display', {
-      xs: 'none',
-      sm: 'block',
-    })}
+    xs: 'none',
+    sm: 'block',
+  })}
   }
 `
 

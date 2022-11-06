@@ -1,5 +1,6 @@
-import { PropertiesHyphen } from 'csstype'
 import type { SizeToken } from 'types/tokens'
+
+import { PropertiesHyphen } from 'csstype'
 
 import { LazyResponsive } from 'lib/responsive'
 import { CoreComponent } from 'types/core'

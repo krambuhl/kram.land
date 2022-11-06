@@ -1,10 +1,10 @@
 import styled from 'styled-components'
 
 import { Area } from 'components/shared/Area'
-import { HeadingText, BodyText } from 'components/shared/Text'
-import { Stack } from 'components/shared/Stack'
-import { Space } from 'components/shared/Space'
 import { ButtonLink } from 'components/shared/Button'
+import { Space } from 'components/shared/Space'
+import { Stack } from 'components/shared/Stack'
+import { HeadingText, BodyText } from 'components/shared/Text'
 import { Image, ImageLockup } from 'components/site/ImageLockup'
 import { tokens } from 'tokens'
 

@@ -1,5 +1,6 @@
-import { PropertiesHyphen } from 'csstype'
 import type { SizeToken, WidthToken } from 'types/tokens'
+
+import { PropertiesHyphen } from 'csstype'
 
 import { CoreComponent } from 'types/core'
 
