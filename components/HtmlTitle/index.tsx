@@ -1,12 +1,10 @@
 import Head from 'next/head'
 import type { HtmlTitleProps } from './types'
 
-import { useDataContext } from 'components/DataContext'
+import { constants } from 'data'
 
 export function HtmlTitle({ title }: HtmlTitleProps) {
-  const {
-    constants: { SITE_NAME },
-  } = useDataContext()
+  const { SITE_NAME } = constants
 
   const pageTitle = title ? ` — ${title}` : ''
   const fullTitle = `${SITE_NAME}${pageTitle}`

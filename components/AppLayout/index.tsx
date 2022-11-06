@@ -2,7 +2,7 @@ import NextLink from 'next/link'
 import styled from 'styled-components'
 import type { AppLayoutProps } from './types'
 
-import { useDataContext } from 'components/DataContext'
+import { constants } from 'data'
 import { Stack } from 'components/Stack'
 import { Space } from 'components/Space'
 import { HeadingText } from 'components/Text'
@@ -37,9 +37,7 @@ export function AppLayout({
   children,
   ...props
 }: AppLayoutProps) {
-  const {
-    constants: { SITE_NAME },
-  } = useDataContext()
+  const { SITE_NAME } = constants
 
   return (
     <Root width={width} {...props}>
