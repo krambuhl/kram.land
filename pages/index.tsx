@@ -8,13 +8,20 @@ import { Stack } from 'components/shared/Stack'
 import { HeadingText, BodyText } from 'components/shared/Text'
 import { tokens } from 'tokens'
 
-const Root = styled.div`
+const RootSpace = styled(Space)`
   text-align: center;
 `
 
 export default function Index() {
   return (
-    <Root>
+    <RootSpace
+      pv={{
+        xs: tokens.size.x32,
+        sm: tokens.size.x56,
+        md: tokens.size.x72,
+      }}
+      ph={tokens.size.x24}
+    >
       <Area width={tokens.width.x384}>
         <Stack
           gap={{
@@ -66,6 +73,6 @@ export default function Index() {
           </Stack>
         </Stack>
       </Area>
-    </Root>
+    </RootSpace>
   )
 }

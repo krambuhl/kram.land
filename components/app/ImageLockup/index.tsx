@@ -1,12 +1,9 @@
 import type { ImageLockupProps } from './types'
-import type { SizeToken } from 'types/tokens'
 
 import NextImage from 'next/image'
-import { useState } from 'react'
 import styled from 'styled-components'
 
-import { useInterval } from 'hooks/useInterval'
-import { responsiveProp, responsiveToken } from 'lib/responsive'
+import { responsiveProp } from 'lib/responsive'
 import { tokens } from 'tokens'
 
 export const Image = styled(NextImage).attrs({
@@ -20,46 +17,22 @@ export const Image = styled(NextImage).attrs({
   aspect-ratio: 1;
 `
 
-export const StyledImageLockup = styled.div<
-  ImageLockupProps & { activeIndex: number }
->`
+export const StyledImageLockup = styled.div`
   display: grid;
   width: 100%;
+  grid-template-columns: repeat(2, 1fr);
 
-  ${responsiveToken<SizeToken>('gap', {
-  xs: tokens.size.x12,
-  sm: tokens.size.x20,
-})};
-
-  ${responsiveProp('grid-template-columns', {
-    xs: 'repeat(1, 1fr)',
-    sm: 'repeat(2, 1fr)',
-  })}
+  ${responsiveProp('gap', {
+    xs: tokens.size.x12,
+    sm: tokens.size.x20,
+  })};
 
   ${Image} {
     width: 100%;
     border-radius: ${tokens.size.x8};
   }
-
-  ${Image}:nth-child(${({ activeIndex }) => activeIndex}) {
-    ${responsiveToken('display', {
-    xs: 'block',
-    sm: 'block',
-  })}
-  }
-
-  ${Image}:not(:nth-child(${({ activeIndex }) => activeIndex})) {
-    ${responsiveToken('display', {
-    xs: 'none',
-    sm: 'block',
-  })}
-  }
 `
 
 export function ImageLockup(props: ImageLockupProps) {
-  const [activeIndex, setActiveIndex] = useState<number>(1)
-  useInterval(() => {
-    setActiveIndex(activeIndex >= 4 ? 1 : activeIndex + 1)
-  }, Math.random() * 2000)
-  return <StyledImageLockup activeIndex={activeIndex} {...props} />
+  return <StyledImageLockup {...props} />
 }
