@@ -1,46 +1,44 @@
 {
-  "name": "kram.land",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev -p 3000",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
-  "dependencies": {
-    "classnames": "^2.3.1",
-    "csstype": "^3.1.1",
-    "dirty-json": "^0.9.2",
-    "fast-glob": "^3.2.12",
-    "humps": "^2.0.1",
-    "next": "^13",
-    "react": "^18.2",
-    "react-dom": "^18.2",
-    "react-is": "^18.2",
-    "styled-components": "^5.3.5",
-    "the-new-css-reset": "^1.6.0"
-  },
-  "devDependencies": {
-    "@types/humps": "^2.0.1",
-    "@types/node": "17.0.21",
-    "@types/react": "17.0.40",
-    "@types/styled-components": "^5.1.26",
-    "@typescript-eslint/eslint-plugin": "^5.42.0",
-    "@typescript-eslint/parser": "^5.42.0",
-    "eslint": "^8",
-    "eslint-config-next": "13.0.2",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-react": "7.28.0",
-    "postcss": ">=8.4.6 <9.0.0",
-    "postcss-flexbugs-fixes": "^5.0.2",
-    "postcss-preset-env": "^7.5.0",
-    "stylelint": "^14",
-    "stylelint-config-css-modules": "^4.1.0",
-    "stylelint-config-standard": "^25.0.0",
-    "stylelint-order": "^5.0.0",
-    "typescript": "~4.8.3",
-    "typescript-plugin-css-modules": "^3.4.0"
-  }
+	"name": "kram.land",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview",
+		"test": "playwright test",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+		"test:unit": "vitest",
+		"lint": "prettier --plugin-search-dir . --check . && eslint .",
+		"format": "prettier --plugin-search-dir . --write ."
+	},
+	"devDependencies": {
+		"@playwright/test": "^1.28.1",
+		"@sveltejs/adapter-auto": "^1.0.0",
+		"@sveltejs/kit": "^1.0.0",
+		"@typescript-eslint/eslint-plugin": "^5.45.0",
+		"@typescript-eslint/parser": "^5.45.0",
+		"autoprefixer": "^10.4.7",
+		"eslint": "^8.28.0",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-svelte3": "^4.0.0",
+		"postcss": "^8.4.14",
+		"postcss-flexbugs-fixes": "^5.0.2",
+		"postcss-load-config": "^4.0.1",
+		"postcss-preset-env": "^7.8.3",
+		"prettier": "^2.8.0",
+		"prettier-plugin-svelte": "^2.8.1",
+		"svelte": "^3.54.0",
+		"svelte-check": "^2.9.2",
+		"svelte-preprocess": "^4.10.7",
+		"tslib": "^2.4.1",
+		"typescript": "^4.9.3",
+		"vite": "^4.0.0",
+		"vitest": "^0.25.3"
+	},
+	"type": "module",
+	"dependencies": {
+		"the-new-css-reset": "^1.8.2"
+	}
 }
