@@ -1,11 +1,9 @@
-<script>import "../app.postcss";</script>
+<script>
+	import '../app.postcss'
+</script>
 
-<div>
-  <slot></slot>
-</div>
+<svelte:head>
+	<title>kram.land</title>
+</svelte:head>
 
-<style>
-  div {
-    padding: var(--size-24);
-  }
-</style>
+<slot />

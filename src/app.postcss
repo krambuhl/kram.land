@@ -1,3 +1,14 @@
-@import "the-new-css-reset";
-@import "./styles/tokens.css";
-@import "./styles/globals.css";
+@import 'the-new-css-reset';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-white text-black;
+  @apply dark:bg-black dark:text-white;
+}
+
+a {
+  @apply text-current underline decoration-2;
+  @apply focus:outline outline-2 outline-offset-4 outline-blue-500;
+}
