@@ -43,7 +43,7 @@
 
 		<p>———</p>
 
-		<p>
+		<p class="text-sm">
 			say hello: <a href="mailto:hello@kram.land">email</a>
 			<a href="https://stumptownbear.com">portfolio</a>
 		</p>
