@@ -29,7 +29,7 @@
 		</p>
 
 		<p>
-			an <Tooltip title="read: no unbrellas allowed">oregonian</Tooltip> at heart, you'll find me outdoorsing
+			an <Tooltip title="read: never owned an unbrella">oregon</Tooltip> native, you'll find me outdoorsing
 			and swimming in the rivers when they're not mountain runoff
 		</p>
 
