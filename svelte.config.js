@@ -17,10 +17,8 @@ const config = {
 		alias: {
 			src: 'src',
 			components: 'src/components',
-			lib: 'src/lib',
 			routes: 'src/routes',
-			styles: 'src/styles',
-			tokens: 'src/tokens',
+			static: 'static',
 			types: 'src/types'
 		}
 	}
