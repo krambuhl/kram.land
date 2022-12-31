@@ -28,4 +28,3 @@
 		<p class="m-auto max-w-[192px] body-xs">* i’m a busy hotdog, please be nice</p>
 	</div>
 </div>
-n
