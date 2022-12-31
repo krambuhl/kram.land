@@ -29,8 +29,8 @@
 		</p>
 
 		<p>
-			an <Tooltip title="read: no unbrellas allowed">oregonian</Tooltip> at heart, you'll find me swimming
-			and outdoorsing in the few warm months of the year
+			an <Tooltip title="read: no unbrellas allowed">oregonian</Tooltip> at heart, you'll find me outdoorsing
+			and swimming in the rivers during the few warm months
 		</p>
 
 		<p>
