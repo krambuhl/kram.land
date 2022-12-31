@@ -18,22 +18,22 @@
 	<div class="m-auto max-w-sm space-y-6">
 		<h1 class="heading-md">oh hi. hello!</h1>
 
-		<p class="body-md">
+		<p>
 			i’m <b>evan krambuhl</b> and i make <b>internet</b> with real nice people at
 			<b>patreon</b>
 		</p>
 
-		<p class="body-md">
+		<p>
 			i specialize in <b>high quality ui</b> and <b>thoughtful patterns</b> to make developers more happy
 			and productive
 		</p>
 
-		<p class="body-md">
+		<p>
 			an <Tooltip title="read: no unbrellas allowed">oregonian</Tooltip> at heart, you'll find me swimming
 			and outdoorsing in the few warm months of the year
 		</p>
 
-		<p class="body-md">
+		<p>
 			i love making
 			<a href="https://www.instagram.com/ev.aart" target="_blank" rel="noreferrer">generative art</a
 			>
@@ -41,13 +41,13 @@
 			<Tooltip title="one must imagine sisyphus happy">absurdity</Tooltip>
 		</p>
 
-		<p class="body-md">———</p>
+		<p>———</p>
 
-		<p class="body-sm">
+		<p>
 			say hello: <a href="mailto:hello@kram.land">email</a>
 			<a href="https://stumptownbear.com">portfolio</a>
 		</p>
 
-		<p class="m-auto max-w-[192px] body-xs">* i’m a busy hotdog, please be nice</p>
+		<p class="m-auto max-w-[192px] text-xs">* i’m a busy hotdog, please be nice</p>
 	</div>
 </div>

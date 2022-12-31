@@ -27,8 +27,8 @@
 		class="
 			absolute py-2 px-3 rounded-md
 			text-xs
-			bg-neutral-200 text-black 
-			dark:bg-neutral-800 dark:text-white
+			bg-neutral-300 border-neutral-300 text-black 
+			dark:bg-neutral-800 dark:border-neutral-600 dark:text-white
 		"
 		use:floatingContent
 	>
