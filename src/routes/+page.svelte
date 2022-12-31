@@ -30,7 +30,7 @@
 
 		<p>
 			an <Tooltip title="read: no unbrellas allowed">oregonian</Tooltip> at heart, you'll find me outdoorsing
-			and swimming in the rivers during the few warm months
+			and swimming in the rivers when they're not mountain runoff
 		</p>
 
 		<p>
