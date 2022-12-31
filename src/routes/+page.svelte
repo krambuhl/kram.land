@@ -1,10 +1,17 @@
 <script>
+	import IkeaAvif from '../../static/ikea.png?w=192;384&format=avif&srcset'
+	import IkeaWebp from '../../static/ikea.png?w=192;384&format=webp&srcset'
+	import IkeaJpg from '../../static/ikea.png?w=192&format=jpg'
 	export const prerender = true
 </script>
 
 <div class="py-20 px-6 text-center flex flex-col items-center space-y-12">
 	<div class="m-auto max-w-[192px]">
-		<img src="/ikea.png" alt="" class="rounded-lg" width={192} height={192} />
+		<picture>
+			<source srcset={IkeaAvif} sizes="" type="image/avif" />
+			<source srcset={IkeaWebp} type="image/webp" />
+			<img src={IkeaJpg} alt="" class="rounded-lg" width={192} height={192} />
+		</picture>
 	</div>
 
 	<div class="m-auto max-w-sm space-y-6">
