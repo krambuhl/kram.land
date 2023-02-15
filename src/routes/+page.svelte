@@ -24,8 +24,8 @@
 		</p>
 
 		<p>
-			i specialize in <b>high quality ui</b> and <b>thoughtful patterns</b> to help developers be more
-			productive
+			i specialize in <b>high quality ui</b> and <b>thoughtful patterns</b> to help developers to be
+			more productive
 		</p>
 
 		<p>
