@@ -25,9 +25,9 @@ export default async function (opts: RenderToStreamOptions) {
 
   return renderToStream(
     <Root
-      emotionExtract={{
-        css,
-      }}
+    // emotionExtract={{
+    //   css,
+    // }}
     />,
     {
       manifest,
