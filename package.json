@@ -1,9 +1,6 @@
 {
   "name": "kram.land",
   "description": "kram.land with qwik",
-  "engines": {
-    "node": ">=15.0.0"
-  },
   "private": true,
   "scripts": {
     "build": "qwik build",
