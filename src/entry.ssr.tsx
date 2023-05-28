@@ -11,23 +11,23 @@
  *
  */
 import {
-  // renderToString,
+  renderToString,
   renderToStream,
   type RenderToStreamOptions,
 } from "@builder.io/qwik/server";
-// import { extractCritical } from "@emotion/server";
+import { extractCritical } from "@emotion/server";
 import { manifest } from "@qwik-client-manifest";
 import Root from "./root";
 
 export default async function (opts: RenderToStreamOptions) {
-  // const render = await renderToString(<Root />, { manifest, ...opts });
-  // const { css } = extractCritical(render.html);
+  const render = await renderToString(<Root />, { manifest, ...opts });
+  const { css } = extractCritical(render.html);
 
   return renderToStream(
     <Root
-    // emotionExtract={{
-    //   css,
-    // }}
+      emotionExtract={{
+        css,
+      }}
     />,
     {
       manifest,
