@@ -1,6 +1,5 @@
 import { component$ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
-import { Image } from "@unpic/qwik";
 import { Area } from "~/components/area";
 import { PageContainer } from "~/components/page-container";
 import { Card } from "~/components/card";
@@ -18,9 +17,10 @@ export default component$(() => {
           <Area width={tokens.size.x384}>
             <Stack gap={tokens.size.x48} align="center">
               <Card padding="none">
-                <Image
-                  src="/ikea.png"
-                  layout="constrained"
+                <img
+                  src="/ikea@2x.png"
+                  srcSet="/ikea@1x.png 1x, /ikea@2x.png 2x"
+                  alt=""
                   width={196}
                   height={196}
                   loading="eager"
