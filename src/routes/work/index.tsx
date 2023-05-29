@@ -1,6 +1,5 @@
 import { component$ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
-import { css } from "@emotion/css";
 import { Area } from "~/components/area";
 import { Card } from "~/components/card";
 import { Grid } from "~/components/grid";
