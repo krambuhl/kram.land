@@ -10,7 +10,7 @@ export const Link = styled.a`
   width: ${tokens.size.x96};
   height: ${tokens.size.x96};
   background-color: ${tokens.content.default};
-  fill: ${tokens.bg.high};
+  fill: ${tokens.bg.mid};
   border-radius: ${tokens.size.x96};
   transition: all 0.3s ease;
 
