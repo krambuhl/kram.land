@@ -1,0 +1,141 @@
+/**
+ * WHAT IS THIS FILE?
+ *
+ * Globally applied styles. No matter which components are in the page or matching route,
+ * the styles in here will be applied to the Document, without any sort of CSS scoping.
+ *
+ */
+
+@import "the-new-css-reset";
+
+:root {
+  --size-0: 0;
+  --size-4: 0.25rem;
+  --size-8: 0.5rem;
+  --size-12: 0.75rem;
+  --size-16: 1rem;
+  --size-24: 1.5rem;
+  --size-32: 2rem;
+  --size-48: 3rem;
+  --size-64: 4rem;
+  --size-80: 5rem;
+  --size-96: 6rem;
+  --size-128: 8rem;
+  --size-192: 12rem;
+  --size-256: 16rem;
+  --size-384: 24rem;
+  --size-512: 32rem;
+  --size-640: 40rem;
+  --size-768: 48rem;
+  --size-896: 56rem;
+  --size-1024: 64rem;
+  --size-1152: 72rem;
+  --size-1280: 80rem;
+  --size-1408: 88rem;
+  --size-1536: 96rem;
+  --size-1664: 104rem;
+  --size-1792: 112rem;
+  --size-1920: 120rem;
+
+  --font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    Liberation Mono, Courier New, monospace;
+  --font-size: 1rem;
+
+  --font-family-header: var(--font-family);
+  --font-family-body: var(--font-family);
+  --font-family-data: var(--font-family);
+
+  --font-weight-header: 700;
+  --font-weight-body: 400;
+  --font-weight-data: 500;
+
+  --line-height-header: 1.2;
+  --line-height-body: 1.5;
+  --line-height-data: 1.4;
+
+  --font-size-header-xl: 1.5rem;
+  --font-size-header-lg: 1.35rem;
+  --font-size-header-md: 1.2rem;
+  --font-size-header-sm: 1.1rem;
+  --font-size-header-xs: 1rem;
+
+  --font-size-body-xl: 1.3rem;
+  --font-size-body-lg: 1.15rem;
+  --font-size-body-md: 1rem;
+  --font-size-body-sm: 0.875rem;
+  --font-size-body-xs: 0.75rem;
+
+  --font-size-data-xl: 1.3rem;
+  --font-size-data-lg: 1.15rem;
+  --font-size-data-md: 1rem;
+  --font-size-data-sm: 0.875rem;
+  --font-size-data-xl: 0.75rem;
+
+  --radius-container: 1.5rem;
+  --radius-lg: 1rem;
+  --radius-md: 0.5rem;
+  --radius-sm: 0.25rem;
+
+  --bg-base: hsl(215, 0%, 100%);
+  --bg-alt: hsl(215, 20%, 94%);
+  --bg-elevated: hsl(215, 25%, 88%);
+  --bg-inverted: hsl(215, 0%, 5%);
+
+  --content-default: hsl(215, 100%, 5%);
+  --content-hover: hsl(215, 100%, 7.5%);
+  --content-pressed: hsl(215, 100%, 10%);
+
+  --action-default: hsl(215, 100%, 5%);
+  --action-hover: hsl(215, 100%, 7.5%);
+  --action-pressed: hsl(215, 100%, 10%);
+
+  --muted-default: hsl(215, 10%, 30%);
+  --muted-hover: hsl(215, 10%, 37.5%);
+  --muted-pressed: hsl(215, 10%, 35%);
+
+  --inverted-default: hsl(215, 0%, 100%);
+  --inverted-hover: hsl(215, 0%, 95%);
+  --inverted-pressed: hsl(215, 0%, 90%);
+
+  @media (prefers-color-scheme: dark) {
+    --bg-base: hsl(215, 0%, 0%);
+    --bg-alt: hsl(215, 50%, 6%);
+    --bg-elevated: hsl(215, 40%, 10%);
+    --bg-inverted: hsl(215, 25%, 75%);
+
+    --content-default: hsl(215, 0%, 100%);
+    --content-hover: hsl(215, 0%, 95%);
+    --content-pressed: hsl(215, 0%, 90%);
+
+    --action-default: hsl(215, 5%, 100%);
+    --action-hover: hsl(215, 5%, 95%);
+    --action-pressed: hsl(215, 5%, 90%);
+
+    --muted-default: hsl(215, 5%, 75%);
+    --muted-hover: hsl(215, 5%, 70%);
+    --muted-pressed: hsl(215, 5%, 65%);
+
+    --inverted-default: hsl(215, 0%, 0%);
+    --inverted-hover: hsl(215, 0%, 5%);
+    --inverted-pressed: hsl(215, 0%, 10%);
+  }
+}
+
+html {
+  line-height: --line-height-body;
+  tab-size: 4;
+  font-family: var(--font-family);
+  font-size: var(--font-size);
+  background-color: var(--bg-base);
+  color: var(--content-default);
+}
+
+body {
+  padding: 0;
+  margin: 0;
+  line-height: inherit;
+}
+
+a {
+  text-decoration: underline;
+}
