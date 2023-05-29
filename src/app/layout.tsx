@@ -1,5 +1,5 @@
-import './globals.css';
 import StyledComponentsRegistry from './lib/registry';
+import './globals.css';
 
 export const metadata = {
   title: 'kram.land',

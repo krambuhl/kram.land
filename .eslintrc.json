@@ -1,9 +1,13 @@
 {
   "plugins": ["@typescript-eslint"],
+  "parser": "@typescript-eslint/parser",
   "extends": [
     "next/core-web-vitals",
     "plugin:@typescript-eslint/recommended"
   ],
+  "parserOptions": {
+    "project": ["./tsconfig.json"]
+  },
   "rules": {
     "max-len": ["error", { "code": 120 }],
     "import/order": [
@@ -16,13 +20,6 @@
     "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/member-ordering": "error",
-    "@typescript-eslint/naming-convention": [
-      "error",
-      {
-        "selector": "variable",
-        "format": ["camelCase", "UPPER_CASE"]
-      }
-    ],
     "@typescript-eslint/no-non-null-assertion": "error",
     "@typescript-eslint/no-require-imports": "error",
     "@typescript-eslint/prefer-nullish-coalescing": "error"
