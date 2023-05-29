@@ -12,6 +12,8 @@ const Text = component$<TextProps>(
   ({ as = "span", variant = "body", size = "md" }) => {
     useStyles$(style);
 
+    console.log(as);
+
     return (
       <Root
         style={{
