@@ -23,8 +23,8 @@ export const Link = styled.a`
     transform: scale(1.1);
     background-image: linear-gradient(
       165deg,
-      ${tokens.content.pressed},
-      ${tokens.content.pressed}
+      ${tokens.content.default},
+      ${tokens.content.default}
     );
   }
 `;
