@@ -18,12 +18,11 @@ export const Root = styled.div`
   background-size: cover;
   mask-image: paint(smooth-corners);
   -webkit-mask-image: paint(smooth-corners);
-  min-height: 80vw;
+  min-height: 0vh;
+  aspect-ratio: 1 / 1;
 
   @media (${tokens.breakpoints.sm}) {
     --smooth-corners: 5;
-    min-height: 0vh;
-    aspect-ratio: 1 / 1;
   }
 
   @media (${tokens.breakpoints.lg}) {
