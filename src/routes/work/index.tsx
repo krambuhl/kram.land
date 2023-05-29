@@ -19,8 +19,8 @@ export default component$(() => {
           <Stack gap={tokens.size.x64}>
             <Grid columns={2}>
               <Card
-                backgroundColor={tokens.bg.elevated}
-                backgroundGradient={[tokens.bg.elevated, tokens.bg.base]}
+                backgroundColor={tokens.bg.mid}
+                backgroundGradient={[tokens.bg.low, tokens.bg.base]}
               >
                 <Stack gap={tokens.size.x16}>
                   <HeadingText as="h1" size="xl">
@@ -62,8 +62,8 @@ export default component$(() => {
                 </Stack>
               </Card>
               <Card
-                backgroundColor={tokens.bg.alt}
-                backgroundGradient={[tokens.bg.alt, tokens.bg.base]}
+                backgroundColor={tokens.bg.low}
+                backgroundGradient={[tokens.bg.low, tokens.bg.base]}
                 backgroundImage="/map@2x.jpg"
                 color={tokens.inverted.default}
                 padding="none"
@@ -77,115 +77,133 @@ export default component$(() => {
                 </Area>
               </Card>
             </Grid>
-            <Grid columns={4}>
-              <Card
-                backgroundColor={tokens.bg.alt}
-                backgroundGradient={[tokens.bg.elevated, tokens.bg.base]}
-                padding="none"
-              >
-                <Area width={tokens.size.x192}>
-                  <Stack gap={tokens.size.x16}>
-                    <HeadingText as="h2">
-                      Patreon
-                      <br />
-                      Platform
-                    </HeadingText>
-                  </Stack>
-                </Area>
-              </Card>
+            <Area width={tokens.size.x768}>
+              <Grid columns={3}>
+                <Card
+                  backgroundColor={tokens.bg.mid}
+                  backgroundGradient={[tokens.bg.high, tokens.bg.low]}
+                  padding="none"
+                >
+                  <Area width={tokens.size.x192}>
+                    <Stack gap={tokens.size.x16}>
+                      <HeadingText as="h2">
+                        Patreon
+                        <br />
+                        Platform
+                      </HeadingText>
+                    </Stack>
+                  </Area>
+                </Card>
 
-              <Card
-                backgroundColor={tokens.bg.alt}
-                backgroundGradient={[tokens.bg.elevated, tokens.bg.base]}
-                padding="none"
-              >
-                <Area width={tokens.size.x192}>
-                  <Stack gap={tokens.size.x16}>
-                    <HeadingText as="h2">
-                      Patreon
-                      <br />
-                      Marketing
-                    </HeadingText>
-                  </Stack>
-                </Area>
-              </Card>
+                <Card
+                  backgroundColor={tokens.bg.mid}
+                  backgroundGradient={[tokens.bg.high, tokens.bg.low]}
+                  padding="none"
+                >
+                  <Area width={tokens.size.x192}>
+                    <Stack gap={tokens.size.x16}>
+                      <HeadingText as="h2">
+                        Patreon
+                        <br />
+                        Marketing
+                      </HeadingText>
+                    </Stack>
+                  </Area>
+                </Card>
 
-              <Card
-                backgroundColor={tokens.bg.alt}
-                backgroundGradient={[tokens.bg.elevated, tokens.bg.base]}
-                padding="none"
-              >
-                <Area width={tokens.size.x192}>
-                  <Stack gap={tokens.size.x16}>
-                    <HeadingText as="h2">
-                      Patreon
-                      <br />
-                      Product
-                    </HeadingText>
-                  </Stack>
-                </Area>
-              </Card>
+                <Card
+                  backgroundColor={tokens.bg.mid}
+                  backgroundGradient={[tokens.bg.high, tokens.bg.low]}
+                  padding="none"
+                >
+                  <Area width={tokens.size.x192}>
+                    <Stack gap={tokens.size.x16}>
+                      <HeadingText as="h2">
+                        Patreon
+                        <br />
+                        Product
+                      </HeadingText>
+                    </Stack>
+                  </Area>
+                </Card>
 
-              <Card
-                backgroundColor={tokens.bg.alt}
-                backgroundGradient={[tokens.bg.elevated, tokens.bg.base]}
-                padding="none"
-              >
-                <Area width={tokens.size.x192}>
-                  <Stack gap={tokens.size.x16}>
-                    <HeadingText as="h2">Spotify</HeadingText>
-                  </Stack>
-                </Area>
-              </Card>
+                <Card
+                  backgroundColor={tokens.bg.mid}
+                  backgroundGradient={[tokens.bg.high, tokens.bg.low]}
+                  padding="none"
+                >
+                  <Area width={tokens.size.x192}>
+                    <Stack gap={tokens.size.x16}>
+                      <HeadingText as="h2">Spotify</HeadingText>
+                    </Stack>
+                  </Area>
+                </Card>
 
-              <Card
-                backgroundColor={tokens.bg.alt}
-                backgroundGradient={[tokens.bg.elevated, tokens.bg.base]}
-                padding="none"
-              >
-                <Area width={tokens.size.x192}>
-                  <Stack gap={tokens.size.x16}>
-                    <HeadingText as="h2">Tezos</HeadingText>
-                  </Stack>
-                </Area>
-              </Card>
+                <Card
+                  backgroundColor={tokens.bg.mid}
+                  backgroundGradient={[tokens.bg.high, tokens.bg.low]}
+                  padding="none"
+                >
+                  <Area width={tokens.size.x192}>
+                    <Stack gap={tokens.size.x16}>
+                      <HeadingText as="h2">Tezos</HeadingText>
+                    </Stack>
+                  </Area>
+                </Card>
 
-              <Card
-                backgroundColor={tokens.bg.alt}
-                backgroundGradient={[tokens.bg.elevated, tokens.bg.base]}
-                padding="none"
-              >
-                <Area width={tokens.size.x192}>
-                  <Stack gap={tokens.size.x16}>
-                    <HeadingText as="h2">Nike</HeadingText>
-                  </Stack>
-                </Area>
-              </Card>
+                <Card
+                  backgroundColor={tokens.bg.mid}
+                  backgroundGradient={[tokens.bg.high, tokens.bg.low]}
+                  padding="none"
+                >
+                  <Area width={tokens.size.x192}>
+                    <Stack gap={tokens.size.x16}>
+                      <HeadingText as="h2">Nike</HeadingText>
+                    </Stack>
+                  </Area>
+                </Card>
 
-              <Card
-                backgroundColor={tokens.bg.alt}
-                backgroundGradient={[tokens.bg.elevated, tokens.bg.base]}
-                padding="none"
-              >
-                <Area width={tokens.size.x192}>
-                  <Stack gap={tokens.size.x16}>
-                    <HeadingText as="h2">Intuit</HeadingText>
-                  </Stack>
-                </Area>
-              </Card>
+                <Card
+                  backgroundColor={tokens.bg.mid}
+                  backgroundGradient={[tokens.bg.high, tokens.bg.low]}
+                  padding="none"
+                >
+                  <Area width={tokens.size.x192}>
+                    <Stack gap={tokens.size.x16}>
+                      <HeadingText as="h2">Intuit</HeadingText>
+                    </Stack>
+                  </Area>
+                </Card>
 
-              <Card
-                backgroundColor={tokens.bg.alt}
-                backgroundGradient={[tokens.bg.elevated, tokens.bg.base]}
-                padding="none"
-              >
-                <Area width={tokens.size.x192}>
-                  <Stack gap={tokens.size.x16}>
-                    <HeadingText as="h2">Old Navy</HeadingText>
-                  </Stack>
-                </Area>
-              </Card>
-            </Grid>
+                <Card
+                  backgroundColor={tokens.bg.mid}
+                  backgroundGradient={[tokens.bg.high, tokens.bg.low]}
+                  padding="none"
+                >
+                  <Area width={tokens.size.x192}>
+                    <Stack gap={tokens.size.x16}>
+                      <HeadingText as="h2">Old Navy</HeadingText>
+                    </Stack>
+                  </Area>
+                </Card>
+
+                <Card
+                  backgroundColor={tokens.bg.mid}
+                  backgroundGradient={[tokens.bg.high, tokens.bg.low]}
+                  padding="none"
+                >
+                  <Area width={tokens.size.x192}>
+                    <Stack gap={tokens.size.x16}>
+                      <HeadingText as="h2">
+                        MacFadden and
+                        <br />
+                        Thrope
+                      </HeadingText>
+                    </Stack>
+                  </Area>
+                </Card>
+              </Grid>
+            </Area>
           </Stack>
         </Area>
       </PageContainer>

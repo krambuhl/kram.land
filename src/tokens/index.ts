@@ -81,9 +81,9 @@ export const tokens = {
   },
   bg: {
     base: "var(--bg-base)",
-    alt: "var(--bg-alt)",
-    elevated: "var(--bg-elevated)",
-    inverted: "var(--bg-inverted)",
+    low: "var(--bg-low)",
+    mid: "var(--bg-mid)",
+    high: "var(--bg-high)",
   },
   content: {
     default: "var(--content-default)",

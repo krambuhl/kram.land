@@ -26,7 +26,7 @@ export const Card = component$<CardProps>(
   ({
     padding = "default",
     color = tokens.content.default,
-    backgroundColor = tokens.bg.alt,
+    backgroundColor = tokens.bg.low,
     backgroundImage,
     backgroundGradient,
   }) => {
