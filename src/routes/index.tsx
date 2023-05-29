@@ -59,7 +59,7 @@ export default component$(() => {
                 <Rule />
 
                 <BodyText as="p" size="sm">
-                  say hello: <a href="hello@kram.land">email</a>{" "}
+                  say hello: <a href="emailto:evan.krambuhl@gmail.com">email</a>{" "}
                   <a href="./work">portfolio</a>
                 </BodyText>
 
