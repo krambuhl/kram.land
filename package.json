@@ -56,6 +56,7 @@
   },
   "dependencies": {
     "@unpic/qwik": "^0.0.19",
+    "smooth-corners": "^1.0.8",
     "the-new-css-reset": "^1.8.4"
   }
 }

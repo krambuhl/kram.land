@@ -29,6 +29,13 @@ export default component$(
             data-emotion="css"
             dangerouslySetInnerHTML={emotionExtract?.css}
           />
+          <script
+            dangerouslySetInnerHTML={`
+              if (CSS && 'paintWorklet' in CSS) {
+                CSS.paintWorklet.addModule('https://unpkg.com/smooth-corners')
+              }
+          `}
+          />
         </head>
         <body lang="en">
           <RouterOutlet />
