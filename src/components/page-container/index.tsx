@@ -1,4 +1,4 @@
-import { Component, component$, Slot, useStyles$ } from "@builder.io/qwik";
+import { component$, Slot, useStyles$ } from "@builder.io/qwik";
 import type { PageContainerProps } from "./types";
 import style, { Root } from "./index.css";
 
