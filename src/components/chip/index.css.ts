@@ -10,4 +10,5 @@ export const Root = styled.div`
   background-color: ${tokens.bg.inverted};
   color: ${tokens.inverted.default};
   padding: ${tokens.size.x12} ${tokens.size.x16};
+  border-radius: ${tokens.size.x12};
 `;

@@ -4,35 +4,11 @@ import { Area } from "~/components/area";
 import { Card } from "~/components/card";
 import { Chip } from "~/components/chip";
 import { Grid } from "~/components/grid";
+import { Header } from "~/components/header";
 import { PageContainer } from "~/components/page-container";
 import { Stack } from "~/components/stack";
 import { BodyText, HeadingText } from "~/components/text";
 import { tokens } from "~/tokens";
-
-export const Header = component$(() => (
-  <Area width={tokens.size.x192}>
-    <a href="/">
-      <svg
-        width="48"
-        height="48"
-        viewBox="0 0 512 512"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M109.5 402.5C190.41 483.41 321.59 483.41 402.5 402.5C475.75 329.25 512.375 292.625 512.375 256C512.375 219.375 475.75 182.75 402.5 109.5C321.59 28.5903 190.41 28.5903 109.5 109.5C36.25 182.75 -0.375 219.375 -0.375 256C-0.375 292.625 36.25 329.25 109.5 402.5ZM151.429 360.568C209.18 418.32 302.814 418.32 360.566 360.568C441.634 279.5 443 233.866 360.566 151.432C302.814 93.6801 209.18 93.6801 151.429 151.432C69.5 233.361 69.5 278.639 151.429 360.568Z"
-          fill="white"
-        />
-        <path
-          d="M319.52 319.523C284.437 354.606 227.557 354.606 192.474 319.523C157.392 284.44 157.392 227.56 192.474 192.477C227.557 157.394 284.437 157.394 319.52 192.477C354.603 227.56 354.603 284.44 319.52 319.523Z"
-          fill="white"
-        />
-      </svg>
-    </a>
-  </Area>
-));
 
 export default component$(() => {
   return (
@@ -43,7 +19,7 @@ export default component$(() => {
           <Grid columns={2}>
             <Card
               backgroundColor={tokens.bg.elevated}
-              backgroundGradient={[tokens.bg.elevated, tokens.bg.alt]}
+              backgroundGradient={[tokens.bg.elevated, tokens.bg.base]}
             >
               <Stack gap={tokens.size.x16}>
                 <HeadingText as="h1" size="xl">
@@ -87,7 +63,7 @@ export default component$(() => {
             <Card
               backgroundColor={tokens.bg.alt}
               backgroundGradient={[tokens.bg.alt, tokens.bg.base]}
-              backgroundImage="/map.png"
+              backgroundImage="/map@2x.jpg"
               color={tokens.inverted.default}
               padding="none"
             >

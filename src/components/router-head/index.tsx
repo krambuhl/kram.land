@@ -29,7 +29,7 @@ export const RouterHead = component$(() => {
         property="og:description"
         content="making internet with the nice people who live there"
       />
-      <meta property="og:image" content="https://kram.land/ikea.png" />
+      <meta property="og:image" content="https://kram.land/ikea@4x.jpg" />
 
       <meta name="twitter:card" content="summary" />
       <meta property="twitter:domain" content="kram.land" />
@@ -39,7 +39,7 @@ export const RouterHead = component$(() => {
         name="twitter:description"
         content="making internet with the nice people who live there"
       />
-      <meta name="twitter:image" content="https://kram.land/ikea.png" />
+      <meta name="twitter:image" content="https://kram.land/ikea@4x.jpg" />
 
       {head.meta.map((m) => (
         <meta key={m.key} {...m} />

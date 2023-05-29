@@ -18,8 +18,8 @@ export default component$(() => {
             <Stack gap={tokens.size.x48} align="center">
               <Card padding="none">
                 <img
-                  src="/ikea@1x.png"
-                  srcSet="/ikea@1x.png 1x, /ikea@2x.png 2x"
+                  src="/ikea@1x.jpg"
+                  srcSet="/ikea@1x.jpg 1x, /ikea@2x.jpg 2x"
                   alt=""
                   width={196}
                   height={196}

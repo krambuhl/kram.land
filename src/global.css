@@ -81,17 +81,17 @@
   --bg-elevated: hsl(215, 25%, 88%);
   --bg-inverted: hsl(215, 0%, 5%);
 
-  --content-default: hsl(215, 100%, 5%);
-  --content-hover: hsl(215, 100%, 7.5%);
-  --content-pressed: hsl(215, 100%, 10%);
+  --content-default: hsl(195, 100%, 0%);
+  --content-hover: hsl(195, 100%, 2.5%);
+  --content-pressed: hsl(195, 100%, 5%);
 
-  --action-default: hsl(215, 100%, 5%);
-  --action-hover: hsl(215, 100%, 7.5%);
-  --action-pressed: hsl(215, 100%, 10%);
+  --action-default: hsl(195, 100%, 5%);
+  --action-hover: hsl(195, 100%, 8%);
+  --action-pressed: hsl(195, 100%, 11%);
 
-  --muted-default: hsl(215, 10%, 30%);
-  --muted-hover: hsl(215, 10%, 37.5%);
-  --muted-pressed: hsl(215, 10%, 35%);
+  --muted-default: hsl(195, 10%, 30%);
+  --muted-hover: hsl(195, 10%, 37.5%);
+  --muted-pressed: hsl(195, 10%, 35%);
 
   --inverted-default: hsl(215, 0%, 100%);
   --inverted-hover: hsl(215, 0%, 95%);
@@ -104,8 +104,8 @@
     --bg-inverted: hsl(215, 25%, 75%);
 
     --content-default: hsl(215, 0%, 100%);
-    --content-hover: hsl(215, 0%, 95%);
-    --content-pressed: hsl(215, 0%, 90%);
+    --content-hover: hsl(215, 0%, 92.5%);
+    --content-pressed: hsl(215, 0%, 85%);
 
     --action-default: hsl(215, 5%, 100%);
     --action-hover: hsl(215, 5%, 95%);
