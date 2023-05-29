@@ -14,8 +14,7 @@ export const Root = styled.div`
   padding: var(--card-padding);
   color: var(--card-color);
   background-color: var(--card-background-color);
-  background-image: var(--card-background-image),
-    var(--card-background-gradient);
+  background-image: var(--card-background-image);
   background-size: cover;
   mask-image: paint(smooth-corners);
   -webkit-mask-image: paint(smooth-corners);

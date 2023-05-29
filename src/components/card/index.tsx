@@ -3,6 +3,25 @@ import type { CardProps } from "./types";
 import { tokens } from "~/tokens";
 import style, { Root } from "./index.css";
 
+function getImage({
+  backgroundImage,
+  backgroundGradient,
+}: Pick<CardProps, "backgroundImage" | "backgroundGradient">) {
+  const bg = [];
+
+  if (backgroundImage) {
+    bg.push(`url(${backgroundImage})`);
+  }
+
+  if (backgroundGradient) {
+    bg.push(
+      `linear-gradient(to bottom right, ${backgroundGradient[0]}, ${backgroundGradient[1]})`
+    );
+  }
+
+  return bg.join(", ");
+}
+
 export const Card = component$<CardProps>(
   ({
     padding = "default",
@@ -20,12 +39,10 @@ export const Card = component$<CardProps>(
             padding === "default" ? tokens.size.x32 : tokens.size.x0,
           "--card-color": color,
           "--card-background-color": backgroundColor,
-          "--card-background-image": backgroundImage
-            ? `url(${backgroundImage})`
-            : "",
-          "--card-background-gradient": backgroundGradient
-            ? `linear-gradient(to bottom right, ${backgroundGradient[0]}, ${backgroundGradient[1]})`
-            : "",
+          "--card-background-image": getImage({
+            backgroundImage,
+            backgroundGradient,
+          }),
         }}
       >
         <Slot></Slot>
