@@ -15,7 +15,7 @@ function getImage({
 
   if (backgroundGradient) {
     bg.push(
-      `linear-gradient(to bottom right, ${backgroundGradient[0]}, ${backgroundGradient[1]})`
+      `linear-gradient(150deg, ${backgroundGradient[0]}, ${backgroundGradient[1]} 85%)`
     );
   }
 
