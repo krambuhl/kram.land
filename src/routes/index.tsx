@@ -1,32 +1,20 @@
 import { component$ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
-import { css } from "@emotion/css";
 import { Image } from "@unpic/qwik";
 import { Area } from "~/components/area";
+import { PageContainer } from "~/components/page-container";
 import { Card } from "~/components/card";
 import { Stack } from "~/components/stack";
 import { Strata } from "~/components/strata";
 import { BodyText, HeadingText } from "~/components/text";
+import { Rule } from "~/components/rule";
 import { tokens } from "~/tokens";
 
 export default component$(() => {
   return (
     <>
       <Strata>
-        <div
-          class={css`
-            text-align: center;
-            padding: ${tokens.size.x24} ${tokens.size.x24};
-
-            @media (${tokens.breakpoints.sm}) {
-              padding: ${tokens.size.x48} ${tokens.size.x32};
-            }
-
-            @media (${tokens.breakpoints.lg}) {
-              padding: ${tokens.size.x96} ${tokens.size.x48};
-            }
-          `}
-        >
+        <PageContainer>
           <Area width={tokens.size.x384}>
             <Stack gap={tokens.size.x48} align="center">
               <Card padding="none">
@@ -40,7 +28,7 @@ export default component$(() => {
               </Card>
 
               <Stack gap={tokens.size.x24} align="center">
-                <HeadingText as="h1" size="lg">
+                <HeadingText as="h1" size="xl">
                   oh hi. hello!
                 </HeadingText>
 
@@ -68,27 +56,22 @@ export default component$(() => {
                   and absurdity
                 </BodyText>
 
-                <div
-                  class={css`
-                    margin: ${tokens.size.x12} 0;
-                    height: 1px;
-                    width: ${tokens.size.x96};
-                    background: ${tokens.content.default};
-                  `}
-                />
+                <Rule />
 
-                <BodyText as="p">
+                <BodyText as="p" size="sm">
                   say hello: <a href="hello@kram.land">email</a>{" "}
                   <a href="./work">portfolio</a>
                 </BodyText>
 
-                <BodyText as="p" size="sm">
-                  * i’m a busy hotdog, please be nice
+                <BodyText as="p" size="xs">
+                  * i’m a busy hotdog,
+                  <br />
+                  please be nice
                 </BodyText>
               </Stack>
             </Stack>
           </Area>
-        </div>
+        </PageContainer>
       </Strata>
     </>
   );

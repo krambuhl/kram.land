@@ -4,6 +4,7 @@ import { css } from "@emotion/css";
 import { Area } from "~/components/area";
 import { Card } from "~/components/card";
 import { Grid } from "~/components/grid";
+import { PageContainer } from "~/components/page-container";
 import { Stack } from "~/components/stack";
 import { Strata } from "~/components/strata";
 import { BodyText, HeadingText } from "~/components/text";
@@ -13,19 +14,7 @@ export default component$(() => {
   return (
     <>
       <Strata>
-        <div
-          class={css`
-            padding: ${tokens.size.x24} ${tokens.size.x24};
-
-            @media (${tokens.breakpoints.sm}) {
-              padding: ${tokens.size.x48} ${tokens.size.x32};
-            }
-
-            @media (${tokens.breakpoints.lg}) {
-              padding: ${tokens.size.x96} ${tokens.size.x48};
-            }
-          `}
-        >
+        <PageContainer>
           <Area width={tokens.size.x1024}>
             <Grid columns={2}>
               <Card>
@@ -63,7 +52,7 @@ export default component$(() => {
               </Card>
             </Grid>
           </Area>
-        </div>
+        </PageContainer>
       </Strata>
     </>
   );

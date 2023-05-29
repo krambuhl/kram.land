@@ -16,6 +16,7 @@ export const tokens = {
     x32: "var(--size-32)",
     x48: "var(--size-48)",
     x64: "var(--size-64)",
+    x80: "var(--size-80)",
     x96: "var(--size-96)",
     x128: "var(--size-128)",
     x192: "var(--size-192)",
@@ -51,19 +52,25 @@ export const tokens = {
   },
   fontSize: {
     heading: {
+      xs: "var(--font-size-header-xs)",
       sm: "var(--font-size-header-sm)",
       md: "var(--font-size-header-md)",
       lg: "var(--font-size-header-lg)",
+      xl: "var(--font-size-header-xl)",
     },
     body: {
+      xs: "var(--font-size-body-xs)",
       sm: "var(--font-size-body-sm)",
       md: "var(--font-size-body-md)",
       lg: "var(--font-size-body-lg)",
+      xl: "var(--font-size-body-xl)",
     },
     data: {
+      xs: "var(--font-size-data-xs)",
       sm: "var(--font-size-data-sm)",
       md: "var(--font-size-data-md)",
       lg: "var(--font-size-data-lg)",
+      xl: "var(--font-size-data-xl)",
     },
   },
   radius: {

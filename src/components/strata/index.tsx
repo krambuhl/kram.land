@@ -1,18 +1,20 @@
-import { component$, Slot } from "@builder.io/qwik";
+import { component$, Slot, useStyles$ } from "@builder.io/qwik";
 import type { StrataProps } from "./types";
 import { tokens } from "~/tokens";
-import { css } from "@emotion/css";
+import style, { Root } from "./index.css";
 
 export const Strata = component$<StrataProps>(
   ({ backgroundColor = tokens.bg.base }) => {
+    useStyles$(style);
+
     return (
-      <section
-        class={css`
-          background-color: ${backgroundColor};
-        `}
+      <Root
+        style={{
+          "--strata-bg-color": backgroundColor,
+        }}
       >
         <Slot></Slot>
-      </section>
+      </Root>
     );
   }
 );

@@ -1,24 +1,21 @@
-import { component$, Slot } from "@builder.io/qwik";
+import { component$, Slot, useStyles$ } from "@builder.io/qwik";
 import type { GridProps } from "./types";
-import { css } from "@emotion/css";
 import { tokens } from "~/tokens";
+import style, { Root } from "./index.css";
 
 export const Grid = component$<GridProps>(
   ({ columns = 2, gap = tokens.size.x32 }) => {
-    return (
-      <div
-        class={css`
-          display: grid;
-          gap: ${gap};
+    useStyles$(style);
 
-          @media (${tokens.breakpoints.lg}) {
-            grid-template-columns: repeat(${columns}, 1fr);
-            grid-template-rows: auto;
-          }
-        `}
+    return (
+      <Root
+        style={{
+          "--grid-columns": columns,
+          "--grid-gap": gap,
+        }}
       >
         <Slot></Slot>
-      </div>
+      </Root>
     );
   }
 );

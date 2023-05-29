@@ -1,29 +1,27 @@
-import { component$, Slot } from "@builder.io/qwik";
+import { component$, Slot, useStyles$ } from "@builder.io/qwik";
 import type {
   BodyTextProps,
   DataTextProps,
   HeadingTextProps,
   TextProps,
 } from "./types";
-import { css } from "@emotion/css";
 import { tokens } from "~/tokens";
+import style, { Root } from "./index.css";
 
 const Text = component$<TextProps>(
-  ({ as: Tag = "span", variant = "body", size = "md" }) => {
-    return (
-      <Tag
-        class={css`
-          font-size: ${tokens.fontSize[variant][size]};
-          font-weight: ${tokens.fontWeight[variant]};
-          line-height: ${tokens.lineHeight[variant]};
+  ({ as = "span", variant = "body", size = "md" }) => {
+    useStyles$(style);
 
-          strong {
-            font-weight: 700;
-          }
-        `}
+    return (
+      <Root
+        style={{
+          "--text-font-size": tokens.fontSize[variant][size],
+          "--text-font-weight": tokens.fontWeight[variant],
+          "--text-line-height": tokens.lineHeight[variant],
+        }}
       >
         <Slot></Slot>
-      </Tag>
+      </Root>
     );
   }
 );

@@ -1,24 +1,16 @@
-import { component$, Slot } from "@builder.io/qwik";
+import { component$, useStyles$, Slot } from "@builder.io/qwik";
 import type { AreaProps } from "./types";
 import { tokens } from "~/tokens";
-import { css } from "@emotion/css";
+import style, { Container, Root } from "./index.css";
 
 export const Area = component$<AreaProps>(({ width = tokens.size.x1280 }) => {
+  useStyles$(style);
+
   return (
-    <div
-      class={css`
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      `}
-    >
-      <div
-        class={css`
-          max-width: ${width};
-        `}
-      >
+    <Root style={{ "--area-width": width }}>
+      <Container>
         <Slot></Slot>
-      </div>
-    </div>
+      </Container>
+    </Root>
   );
 });

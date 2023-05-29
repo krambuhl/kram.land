@@ -18,6 +18,7 @@
   --size-32: 2rem;
   --size-48: 3rem;
   --size-64: 4rem;
+  --size-80: 5rem;
   --size-96: 6rem;
   --size-128: 8rem;
   --size-192: 12rem;
@@ -50,19 +51,25 @@
 
   --line-height-header: 1.2;
   --line-height-body: 1.5;
-  --line-height-data: 1.5;
+  --line-height-data: 1.4;
 
-  --font-size-header-lg: 1.3rem;
+  --font-size-header-xl: 1.5rem;
+  --font-size-header-lg: 1.35rem;
   --font-size-header-md: 1.2rem;
   --font-size-header-sm: 1.1rem;
+  --font-size-header-xs: 1rem;
 
-  --font-size-body-lg: 1.1rem;
+  --font-size-body-xl: 1.3rem;
+  --font-size-body-lg: 1.15rem;
   --font-size-body-md: 1rem;
-  --font-size-body-sm: 0.9rem;
+  --font-size-body-sm: 0.875rem;
+  --font-size-body-xs: 0.75rem;
 
-  --font-size-data-lg: 1.2rem;
+  --font-size-data-xl: 1.3rem;
+  --font-size-data-lg: 1.15rem;
   --font-size-data-md: 1rem;
-  --font-size-data-sm: 0.8rem;
+  --font-size-data-sm: 0.875rem;
+  --font-size-data-xl: 0.75rem;
 
   --radius-container: 1.5rem;
   --radius-lg: 1rem;

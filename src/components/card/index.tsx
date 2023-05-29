@@ -1,7 +1,7 @@
-import { component$, Slot } from "@builder.io/qwik";
+import { component$, Slot, useStyles$ } from "@builder.io/qwik";
 import type { CardProps } from "./types";
 import { tokens } from "~/tokens";
-import { css } from "@emotion/css";
+import style, { Root } from "./index.css";
 
 export const Card = component$<CardProps>(
   ({
@@ -11,33 +11,25 @@ export const Card = component$<CardProps>(
     backgroundImage,
     backgroundGradient,
   }) => {
+    useStyles$(style);
+
     return (
-      <div
-        class={css`
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
-          border-radius: ${tokens.radius.container};
-          overflow: hidden;
-          padding: ${padding === "default" ? tokens.size.x32 : tokens.size.x0};
-          background-color: ${backgroundColor};
-          color: ${color};
-          ${backgroundImage &&
-          css`
-            background-image: url(${backgroundImage});
-          `};
-          ${backgroundGradient &&
-          css`
-            background-image: linear-gradient(
-              to bottom right,
-              ${backgroundGradient[0]},
-              ${backgroundGradient[1]}
-            );
-          `};
-        `}
+      <Root
+        style={{
+          "--card-padding":
+            padding === "default" ? tokens.size.x32 : tokens.size.x0,
+          "--card-color": color,
+          "--card-background-color": backgroundColor,
+          "--card-background-image": backgroundImage
+            ? `url(${backgroundImage})`
+            : "",
+          "--card-background-gradient": backgroundGradient
+            ? `linear-gradient(to bottom right, ${backgroundGradient[0]}, ${backgroundGradient[1]})`
+            : "",
+        }}
       >
         <Slot></Slot>
-      </div>
+      </Root>
     );
   }
 );
