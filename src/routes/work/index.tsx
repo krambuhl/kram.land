@@ -13,8 +13,8 @@ export const Header = component$(() => (
   <Area width={tokens.size.x192}>
     <a href="/">
       <svg
-        width="96"
-        height="96"
+        width="48"
+        height="48"
         viewBox="0 0 512 512"
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
