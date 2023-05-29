@@ -1,4 +1,4 @@
-import { component$ } from "@builder.io/qwik";
+import { Slot, component$ } from "@builder.io/qwik";
 import type { DocumentHead } from "@builder.io/qwik-city";
 import { Area } from "~/components/area";
 import { Card } from "~/components/card";
@@ -37,7 +37,8 @@ export const Header = component$(() => (
 export default component$(() => {
   return (
     <>
-      <PageContainer Header={Header}>
+      <PageContainer>
+        <Header q:slot="header" />
         <Area width={tokens.size.x1024}>
           <Grid columns={2}>
             <Card
