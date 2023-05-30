@@ -47,6 +47,7 @@ export const Root = styled.div<CardProps>`
 export const ImageWrapper = styled.div`
   position: absolute;
   inset: 0;
+  z-index: 0;
 
   img {
     width: 100%;
@@ -55,12 +56,16 @@ export const ImageWrapper = styled.div`
   }
 `;
 
+export const ContentWrapper = styled.div`
+  z-index: 1;
+`;
+
 export function Card({ padding, color, backgroundColor, backgroundGradient, backgroundImage, children }: CardProps) {
   return (
     <SuperEllipse r1={0.075} r2={0.5} p1={18}>
       <Root padding={padding} color={color} backgroundColor={backgroundColor} backgroundGradient={backgroundGradient}>
         {backgroundImage && <ImageWrapper>{backgroundImage}</ImageWrapper>}
-        {children}
+        <ContentWrapper>{children}</ContentWrapper>
       </Root>
     </SuperEllipse>
   );
