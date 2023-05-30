@@ -46,7 +46,16 @@ export default function Work() {
           <Card
             backgroundColor={tokens.bg.mid}
             backgroundGradient={[tokens.bg.mid, tokens.bg.base]}
-            backgroundImage={<Image src="/map.png" alt="Map" height={480} width={480} />}
+            backgroundImage={
+              <Image
+                src="/map.png"
+                alt="Map"
+                height={480}
+                width={480}
+                sizes="(max-width: 768px) 100vw, 25vw"
+                priority
+              />
+            }
             color={tokens.inverted.default}
             padding="none"
           >
