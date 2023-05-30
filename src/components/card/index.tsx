@@ -57,7 +57,7 @@ export const ImageWrapper = styled.div`
 
 export function Card({ padding, color, backgroundColor, backgroundGradient, backgroundImage, children }: CardProps) {
   return (
-    <SuperEllipse r1={0.075} r2={0.5}>
+    <SuperEllipse r1={0.075} r2={0.5} p1={18}>
       <Root padding={padding} color={color} backgroundColor={backgroundColor} backgroundGradient={backgroundGradient}>
         {backgroundImage && <ImageWrapper>{backgroundImage}</ImageWrapper>}
         {children}
