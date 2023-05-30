@@ -8,7 +8,7 @@ export const PageContainer = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: ${tokens.size.x24};
+  gap: ${tokens.size.x32};
   text-align: center;
   padding: ${tokens.size.x24} ${tokens.size.x24};
   text-align: center;
@@ -27,7 +27,6 @@ export const PageContainer = styled.div`
 
   @media ${tokens.breakpoints.lg} {
     padding: ${tokens.size.x80} ${tokens.size.x48};
-    gap: ${tokens.size.x80};
     max-width: 100%;
   }
 `;
