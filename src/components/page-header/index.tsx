@@ -4,7 +4,6 @@ import styled from 'styled-components';
 
 import { Stack } from 'components/stack';
 import { tokens } from 'tokens';
-import { Area } from 'components/area';
 import { IconEye } from 'components/icon';
 
 export const Link = styled.a`
