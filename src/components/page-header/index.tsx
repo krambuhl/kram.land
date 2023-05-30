@@ -33,7 +33,7 @@ export function PageHeader() {
   return (
     <Area width={tokens.size.x192}>
       <Stack align="center">
-        <Link href="/">
+        <Link href="/" aria-label="Link to the home page">
           <IconEye />
         </Link>
       </Stack>
