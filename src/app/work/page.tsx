@@ -13,7 +13,7 @@ export default function Work() {
     <Area width={tokens.size.x1024}>
       <Stack gap={tokens.size.x64} align="center">
         <Grid columns={2}>
-          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.low]}>
+          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.base]}>
             <Stack gap={tokens.size.x16} align="center">
               <HeadingText as="h1" size="xl">
                 Evan Krambuhl
@@ -61,7 +61,7 @@ export default function Work() {
         </Grid>
 
         <Grid columns={4}>
-          <Card backgroundColor={tokens.bg.high} backgroundGradient={[tokens.bg.high, tokens.bg.low]}>
+          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.low]}>
             <Area width={tokens.size.x192}>
               <Stack gap={tokens.size.x16} align="center">
                 <HeadingText as="h2">
@@ -73,7 +73,7 @@ export default function Work() {
             </Area>
           </Card>
 
-          <Card backgroundColor={tokens.bg.high} backgroundGradient={[tokens.bg.high, tokens.bg.low]}>
+          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.low]}>
             <Area width={tokens.size.x192}>
               <Stack gap={tokens.size.x16} align="center">
                 <HeadingText as="h2">
@@ -85,7 +85,7 @@ export default function Work() {
             </Area>
           </Card>
 
-          <Card backgroundColor={tokens.bg.high} backgroundGradient={[tokens.bg.high, tokens.bg.low]}>
+          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.low]}>
             <Area width={tokens.size.x192}>
               <Stack gap={tokens.size.x16} align="center">
                 <HeadingText as="h2">
@@ -97,7 +97,7 @@ export default function Work() {
             </Area>
           </Card>
 
-          <Card backgroundColor={tokens.bg.high} backgroundGradient={[tokens.bg.high, tokens.bg.low]}>
+          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.low]}>
             <Area width={tokens.size.x192}>
               <Stack gap={tokens.size.x16} align="center">
                 <HeadingText as="h2">Spotify</HeadingText>
@@ -105,7 +105,7 @@ export default function Work() {
             </Area>
           </Card>
 
-          <Card backgroundColor={tokens.bg.high} backgroundGradient={[tokens.bg.high, tokens.bg.low]}>
+          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.low]}>
             <Area width={tokens.size.x192}>
               <Stack gap={tokens.size.x16} align="center">
                 <HeadingText as="h2">Tezos</HeadingText>
@@ -113,7 +113,7 @@ export default function Work() {
             </Area>
           </Card>
 
-          <Card backgroundColor={tokens.bg.high} backgroundGradient={[tokens.bg.high, tokens.bg.low]}>
+          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.low]}>
             <Area width={tokens.size.x192}>
               <Stack gap={tokens.size.x16} align="center">
                 <HeadingText as="h2">Nike</HeadingText>
@@ -121,7 +121,7 @@ export default function Work() {
             </Area>
           </Card>
 
-          <Card backgroundColor={tokens.bg.high} backgroundGradient={[tokens.bg.high, tokens.bg.low]}>
+          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.low]}>
             <Area width={tokens.size.x192}>
               <Stack gap={tokens.size.x16} align="center">
                 <HeadingText as="h2">Intuit</HeadingText>
@@ -129,7 +129,7 @@ export default function Work() {
             </Area>
           </Card>
 
-          <Card backgroundColor={tokens.bg.high} backgroundGradient={[tokens.bg.high, tokens.bg.low]}>
+          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.low]}>
             <Area width={tokens.size.x192}>
               <Stack gap={tokens.size.x16} align="center">
                 <HeadingText as="h2">Old Navy</HeadingText>
