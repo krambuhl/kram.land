@@ -18,6 +18,11 @@ export const Link = styled.a`
   border-radius: ${tokens.size.x96};
   transition: all 0.3s ease;
 
+  svg {
+    width: ${tokens.size.x48};
+    height: ${tokens.size.x48};
+  }
+
   &:hover {
     transform: scale(1.1);
     background-color: ${tokens.content.hover};
