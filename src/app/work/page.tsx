@@ -11,7 +11,7 @@ import { Chip } from 'components/chip';
 export default function Work() {
   return (
     <Area width={tokens.size.x1024}>
-      <Stack gap={tokens.size.x64} align="center">
+      <Stack gap={tokens.size.x48} align="center">
         <Grid columns={2}>
           <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.base]}>
             <Stack gap={tokens.size.x16} align="center">

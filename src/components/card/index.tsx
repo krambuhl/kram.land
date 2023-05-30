@@ -40,8 +40,8 @@ export const Root = styled.div<CardProps>`
   background-image: ${({ backgroundGradient }) =>
     backgroundGradient ? `linear-gradient(150deg, ${backgroundGradient.join(', ')})` : undefined};
   background-size: cover;
-  min-height: 0vh;
-  aspect-ratio: 1 / 1;
+  /* min-height: 180px; */
+  aspect-ratio: 2 / 1;
 `;
 
 export const ImageWrapper = styled.div`
