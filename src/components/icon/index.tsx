@@ -1,4 +1,4 @@
-'use client';
+/* eslint-disable max-len */
 
 export function IconEye() {
   return (
