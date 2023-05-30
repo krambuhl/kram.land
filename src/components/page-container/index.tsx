@@ -11,6 +11,9 @@ export const PageContainer = styled.div`
   gap: ${tokens.size.x24};
   text-align: center;
   padding: ${tokens.size.x24} ${tokens.size.x24};
+  text-align: center;
+  max-width: ${tokens.size.x640};
+  margin: auto;
 
   @media ${tokens.breakpoints.sm} {
     padding: ${tokens.size.x48} ${tokens.size.x32};
@@ -25,5 +28,6 @@ export const PageContainer = styled.div`
   @media ${tokens.breakpoints.lg} {
     padding: ${tokens.size.x80} ${tokens.size.x48};
     gap: ${tokens.size.x80};
+    max-width: 100%;
   }
 `;

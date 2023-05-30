@@ -66,17 +66,17 @@
   --radius-sm: 0.25rem;
 
   --bg-base: hsl(215, 0%, 100%);
-  --bg-low: hsl(215, 20%, 94%);
-  --bg-mid: hsl(215, 23%, 86%);
-  --bg-high: hsl(215, 26%, 78%);
+  --bg-low: hsl(215, 10%, 94%);
+  --bg-mid: hsl(215, 12%, 86%);
+  --bg-high: hsl(215, 18%, 78%);
 
-  --content-default: hsl(215, 100%, 0%);
-  --content-hover: hsl(215, 100%, 2.5%);
-  --content-pressed: hsl(215, 100%, 5%);
+  --content-default: hsl(215, 70%, 0%);
+  --content-hover: hsl(215, 70%, 2.5%);
+  --content-pressed: hsl(215, 70%, 5%);
 
-  --action-default: hsl(215, 100%, 5%);
-  --action-hover: hsl(215, 100%, 8%);
-  --action-pressed: hsl(215, 100%, 11%);
+  --action-default: hsl(215, 70%, 5%);
+  --action-hover: hsl(215, 70%, 8%);
+  --action-pressed: hsl(215, 70%, 11%);
 
   --muted-default: hsl(215, 10%, 30%);
   --muted-hover: hsl(215, 10%, 37.5%);
@@ -88,9 +88,9 @@
 
   @media (prefers-color-scheme: dark) {
     --bg-base: hsl(215, 0%, 0%);
-    --bg-low: hsl(215, 50%, 8%);
-    --bg-mid: hsl(215, 45%, 12%);
-    --bg-high: hsl(215, 40%, 18%);
+    --bg-low: hsl(215, 30%, 8%);
+    --bg-mid: hsl(215, 25%, 12%);
+    --bg-high: hsl(215, 20%, 18%);
 
     --content-default: hsl(215, 0%, 100%);
     --content-hover: hsl(215, 0%, 92.5%);

@@ -34,6 +34,17 @@ interface RootLayoutProps {
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+            if (CSS && 'paintWorklet' in CSS) {
+              CSS.paintWorklet.addModule('https://unpkg.com/smooth-corners')
+            }
+          `,
+          }}
+        />
+      </head>
       <body>
         <StyledComponentsRegistry>
           <PageContainer>{children}</PageContainer>
