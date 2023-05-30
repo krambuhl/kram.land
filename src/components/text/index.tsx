@@ -1,15 +1,16 @@
+'use client';
+
 import React from 'react';
+import styled from 'styled-components';
 
 import type { BodyTextProps, DataTextProps, HeadingTextProps, TextProps } from './types';
-import { Root } from './styles';
+import { tokens } from 'tokens';
 
-function Text({ as = 'span', variant = 'body', size = 'md', children }: TextProps) {
-  return (
-    <Root as={as} variant={variant} size={size}>
-      {children}
-    </Root>
-  );
-}
+export const Text = styled.div<Pick<TextProps, 'variant' | 'size'>>`
+  font-size: ${({ variant = 'body', size = 'md' }) => tokens.fontSize[variant][size]};
+  font-weight: ${({ variant = 'body' }) => tokens.fontWeight[variant]};
+  line-height: ${({ variant = 'body' }) => tokens.lineHeight[variant]};
+`;
 
 export function HeadingText({ as = 'h1', size = 'md', children }: HeadingTextProps) {
   return (
