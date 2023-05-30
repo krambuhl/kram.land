@@ -13,7 +13,7 @@ export default function Work() {
     <Area width={tokens.size.x1024}>
       <Stack gap={tokens.size.x48} align="center">
         <Grid columns={2}>
-          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.base]}>
+          <Card backgroundColor={tokens.bg.mid} backgroundGradient={[tokens.bg.mid, tokens.bg.base]} ratio={1.6 / 1}>
             <Stack gap={tokens.size.x16} align="center">
               <HeadingText as="h1" size="xl">
                 Evan Krambuhl
@@ -58,6 +58,7 @@ export default function Work() {
             }
             color={tokens.inverted.default}
             padding="none"
+            ratio={1.6 / 1}
           >
             <Area width={tokens.size.x192}>
               <Stack gap={tokens.size.x16} align="center">

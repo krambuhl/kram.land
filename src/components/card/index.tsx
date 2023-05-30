@@ -9,6 +9,7 @@ import type { Padding } from 'types/common';
 import type { ActionToken, BgToken, ColorToken, ContentToken, InvertedToken, MutedToken } from 'types/tokens';
 
 export interface CardProps {
+  ratio?: number;
   padding?: Padding;
   color?: ContentToken | ActionToken | MutedToken | InvertedToken;
   backgroundColor?: BgToken;
@@ -40,8 +41,7 @@ export const Root = styled.div<CardProps>`
   background-image: ${({ backgroundGradient }) =>
     backgroundGradient ? `linear-gradient(150deg, ${backgroundGradient.join(', ')})` : undefined};
   background-size: cover;
-  /* min-height: 180px; */
-  aspect-ratio: 2 / 1;
+  aspect-ratio: ${({ ratio = 2 / 1 }) => ratio};
 `;
 
 export const ImageWrapper = styled.div`
@@ -60,10 +60,24 @@ export const ContentWrapper = styled.div`
   z-index: 1;
 `;
 
-export function Card({ padding, color, backgroundColor, backgroundGradient, backgroundImage, children }: CardProps) {
+export function Card({
+  ratio,
+  padding,
+  color,
+  backgroundColor,
+  backgroundGradient,
+  backgroundImage,
+  children,
+}: CardProps) {
   return (
     <SuperEllipse r1={0.075} r2={0.5} p1={18}>
-      <Root padding={padding} color={color} backgroundColor={backgroundColor} backgroundGradient={backgroundGradient}>
+      <Root
+        ratio={ratio}
+        padding={padding}
+        color={color}
+        backgroundColor={backgroundColor}
+        backgroundGradient={backgroundGradient}
+      >
         {backgroundImage && <ImageWrapper>{backgroundImage}</ImageWrapper>}
         <ContentWrapper>{children}</ContentWrapper>
       </Root>
