@@ -32,13 +32,13 @@ export default function Home() {
           </BodyText>
 
           <BodyText as="p">
-            an oregon native, you&apos;ll find me outdoorsing and swimming in the rivers when they&apos;re not mountain
-            runoff
+            an <abbr title="read: never owned an unbrella">oregon</abbr> native, you&apos;ll find me outdoorsing and
+            swimming in the rivers when they&apos;re not mountain runoff
           </BodyText>
 
           <BodyText as="p">
             i love making <a href="https://www.instagram.com/ev.aart">generative art</a> and playing drums and have an
-            endless appetite for live music and absurdity
+            endless appetite for live music and <abbr title="one must imagine sisyphus happy">absurdity</abbr>
           </BodyText>
 
           <Rule />
