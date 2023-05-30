@@ -19,7 +19,7 @@ export default function Work() {
                 Evan Krambuhl
               </HeadingText>
               <BodyText as="div">
-                <ul>
+                <Stack as="ul" gap={tokens.size.x8} align="center">
                   <li>
                     <strong>github</strong>
                     <span> &rarr; </span>
@@ -39,7 +39,7 @@ export default function Work() {
                     <span> &rarr; </span>
                     <a href="mailto:evan.krambuhl@gmail.com">evan.krambuhl@gmail.com</a>
                   </li>
-                </ul>
+                </Stack>
               </BodyText>
             </Stack>
           </Card>
