@@ -1,21 +1,26 @@
-import { component$, Slot, useStyles$ } from "@builder.io/qwik";
-import type { GridProps } from "./types";
-import { tokens } from "~/tokens";
-import style, { Root } from "./index.css";
+'use client';
 
-export const Grid = component$<GridProps>(
-  ({ columns = 2, gap = tokens.size.x32 }) => {
-    useStyles$(style);
+import styled from 'styled-components';
 
-    return (
-      <Root
-        style={{
-          "--grid-columns": columns,
-          "--grid-gap": gap,
-        }}
-      >
-        <Slot></Slot>
-      </Root>
-    );
+import type { SizeToken } from 'types/tokens';
+import { tokens } from 'tokens';
+
+export interface GridProps {
+  columns?: 1 | 2 | 3 | 4;
+  gap?: SizeToken;
+}
+
+export const Grid = styled.div<GridProps>`
+  display: grid;
+  width: 100%;
+  gap: ${({ gap = tokens.size.x32 }) => gap};
+
+  @media ${tokens.breakpoints.sm} {
+    grid-template-columns: repeat(${({ columns = 2 }) => Math.floor(columns / 2)}, 1fr);
+    grid-template-rows: auto;
   }
-);
+
+  @media ${tokens.breakpoints.lg} {
+    grid-template-columns: repeat(${({ columns = 2 }) => columns}, 1fr);
+  }
+`;

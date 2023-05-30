@@ -1,7 +1,11 @@
-import { styled } from "styled-vanilla-extract/qwik";
-import { tokens } from "~/tokens";
+'use client';
 
-export default "";
+import styled from 'styled-components';
+
+import { Stack } from 'components/stack';
+import { tokens } from 'tokens';
+import { Area } from 'components/area';
+import { IconEye } from 'components/icon';
 
 export const Link = styled.a`
   display: flex;
@@ -24,3 +28,15 @@ export const Link = styled.a`
     background-color: ${tokens.content.pressed};
   }
 `;
+
+export function PageHeader() {
+  return (
+    <Area width={tokens.size.x192}>
+      <Stack align="center">
+        <Link href="/">
+          <IconEye />
+        </Link>
+      </Stack>
+    </Area>
+  );
+}

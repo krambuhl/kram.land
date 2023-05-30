@@ -1,52 +1,67 @@
-import { component$, Slot, useStyles$ } from "@builder.io/qwik";
-import type { CardProps } from "./types";
-import { tokens } from "~/tokens";
-import style, { Root } from "./index.css";
+'use client';
 
-function getImage({
-  backgroundImage,
-  backgroundGradient,
-}: Pick<CardProps, "backgroundImage" | "backgroundGradient">) {
-  const bg = [];
+import styled from 'styled-components';
+import SuperEllipse from 'react-superellipse';
 
-  if (backgroundImage) {
-    bg.push(`url(${backgroundImage})`);
-  }
+import type Image from 'next/image';
+import { tokens } from 'tokens';
+import type { Padding } from 'types/common';
+import type { ActionToken, BgToken, ColorToken, ContentToken, InvertedToken, MutedToken } from 'types/tokens';
 
-  if (backgroundGradient) {
-    bg.push(
-      `linear-gradient(150deg, ${backgroundGradient[0]}, ${backgroundGradient[1]} 85%)`
-    );
-  }
-
-  return bg.join(", ");
+export interface CardProps {
+  padding?: Padding;
+  color?: ContentToken | ActionToken | MutedToken | InvertedToken;
+  backgroundColor?: BgToken;
+  backgroundImage?: React.ReactElement<typeof Image>;
+  backgroundGradient?: [ColorToken, ColorToken];
+  children: React.ReactNode;
 }
 
-export const Card = component$<CardProps>(
-  ({
-    padding = "default",
-    color = tokens.content.default,
-    backgroundColor = tokens.bg.low,
-    backgroundImage,
-    backgroundGradient,
-  }) => {
-    useStyles$(style);
-
-    return (
-      <Root
-        style={{
-          "--card-padding":
-            padding === "default" ? tokens.size.x32 : tokens.size.x0,
-          "--card-color": color,
-          "--card-background-color": backgroundColor,
-          "--card-background-image": getImage({
-            backgroundImage,
-            backgroundGradient,
-          }),
-        }}
-      >
-        <Slot></Slot>
-      </Root>
-    );
+function getPadding({ padding = 'default' }: Pick<CardProps, 'padding'>) {
+  switch (padding) {
+    case 'none':
+      return tokens.size.x0;
+    case 'default':
+    default:
+      return tokens.size.x32;
   }
-);
+}
+
+export const Root = styled.div<CardProps>`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-radius: ${tokens.radius.container};
+  overflow: hidden;
+  padding: ${getPadding};
+  color: ${({ color = tokens.content.default }) => color};
+  background-color: ${({ backgroundColor = tokens.bg.low }) => backgroundColor};
+  background-image: ${({ backgroundGradient }) =>
+    backgroundGradient ? `linear-gradient(150deg, ${backgroundGradient.join(', ')})` : undefined};
+  background-size: cover;
+  min-height: 0vh;
+  aspect-ratio: 1 / 1;
+`;
+
+export const ImageWrapper = styled.div`
+  position: absolute;
+  inset: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+export function Card({ padding, color, backgroundColor, backgroundGradient, backgroundImage, children }: CardProps) {
+  return (
+    <SuperEllipse r1={0.075} r2={0.5}>
+      <Root padding={padding} color={color} backgroundColor={backgroundColor} backgroundGradient={backgroundGradient}>
+        {backgroundImage && <ImageWrapper>{backgroundImage}</ImageWrapper>}
+        {children}
+      </Root>
+    </SuperEllipse>
+  );
+}

@@ -1,20 +1,15 @@
-import { component$, Slot, useStyles$ } from "@builder.io/qwik";
-import type { StrataProps } from "./types";
-import { tokens } from "~/tokens";
-import style, { Root } from "./index.css";
+'use client';
 
-export const Strata = component$<StrataProps>(
-  ({ backgroundColor = tokens.bg.base }) => {
-    useStyles$(style);
+import styled from 'styled-components';
 
-    return (
-      <Root
-        style={{
-          "--strata-bg-color": backgroundColor,
-        }}
-      >
-        <Slot></Slot>
-      </Root>
-    );
-  }
-);
+import type { BgToken } from 'types/tokens';
+import { tokens } from 'tokens';
+
+export interface StrataProps {
+  backgroundColor?: BgToken;
+  children: React.ReactNode;
+}
+
+export const Strata = styled.section<Required<StrataProps>>`
+  background-color: ${({ backgroundColor = tokens.bg.base }) => backgroundColor};
+`;

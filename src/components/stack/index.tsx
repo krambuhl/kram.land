@@ -1,22 +1,20 @@
-import { component$, Slot, useStyles$ } from "@builder.io/qwik";
-import type { StackProps } from "./types";
-import { tokens } from "~/tokens";
-import style, { Root } from "./index.css";
+'use client';
 
-export const Stack = component$<StackProps>(
-  ({ direction = "column", align = "left", gap = tokens.size.x16 }) => {
-    useStyles$(style);
+import styled from 'styled-components';
 
-    return (
-      <Root
-        style={{
-          "--stack-direction": direction,
-          "--stack-align": align,
-          "--stack-gap": gap,
-        }}
-      >
-        <Slot></Slot>
-      </Root>
-    );
-  }
-);
+import type { Align, Direction } from 'types/common';
+import type { SizeToken } from 'types/tokens';
+import { tokens } from 'tokens';
+
+export interface StackProps {
+  direction?: Direction;
+  align?: Align;
+  gap?: SizeToken;
+}
+
+export const Stack = styled.div<StackProps>`
+  display: flex;
+  flex-direction: ${({ direction = 'column' }) => direction};
+  align-items: ${({ align = 'start' }) => align};
+  gap: ${({ gap = tokens.size.x16 }) => gap};
+`;

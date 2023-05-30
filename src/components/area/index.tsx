@@ -1,16 +1,30 @@
-import { component$, useStyles$, Slot } from "@builder.io/qwik";
-import type { AreaProps } from "./types";
-import { tokens } from "~/tokens";
-import style, { Container, Root } from "./index.css";
+'use client';
 
-export const Area = component$<AreaProps>(({ width = tokens.size.x1280 }) => {
-  useStyles$(style);
+import styled from 'styled-components';
 
+import { tokens } from 'tokens';
+import type { SizeToken } from 'types/tokens';
+
+interface AreaProps {
+  width?: SizeToken;
+  children: React.ReactNode;
+}
+
+export const Root = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const Container = styled.div<Pick<AreaProps, 'width'>>`
+  width: 100%;
+  max-width: ${({ width = tokens.size.x1280 }) => width};
+`;
+
+export function Area({ width, children }: AreaProps) {
   return (
-    <Root style={{ "--area-width": width }}>
-      <Container>
-        <Slot></Slot>
-      </Container>
+    <Root>
+      <Container width={width}>{children}</Container>
     </Root>
   );
-});
+}

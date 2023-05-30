@@ -1,8 +1,14 @@
-# Build
-/dist
-/lib
-/lib-types
-/server
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
 
 # Development
 node_modules

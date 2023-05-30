@@ -1,13 +1,3 @@
-/**
- * WHAT IS THIS FILE?
- *
- * Globally applied styles. No matter which components are in the page or matching route,
- * the styles in here will be applied to the Document, without any sort of CSS scoping.
- *
- */
-
-@import "the-new-css-reset";
-
 :root {
   --size-0: 0;
   --size-4: 0.25rem;
@@ -37,8 +27,7 @@
   --size-1792: 112rem;
   --size-1920: 120rem;
 
-  --font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-    Liberation Mono, Courier New, monospace;
+  --font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
   --font-size: 1rem;
 
   --font-family-header: var(--font-family);
@@ -77,17 +66,17 @@
   --radius-sm: 0.25rem;
 
   --bg-base: hsl(215, 0%, 100%);
-  --bg-low: hsl(215, 20%, 94%);
-  --bg-mid: hsl(215, 23%, 86%);
-  --bg-high: hsl(215, 26%, 78%);
+  --bg-low: hsl(215, 10%, 94%);
+  --bg-mid: hsl(215, 12%, 86%);
+  --bg-high: hsl(215, 18%, 78%);
 
-  --content-default: hsl(215, 100%, 0%);
-  --content-hover: hsl(215, 100%, 2.5%);
-  --content-pressed: hsl(215, 100%, 5%);
+  --content-default: hsl(215, 70%, 0%);
+  --content-hover: hsl(215, 70%, 2.5%);
+  --content-pressed: hsl(215, 70%, 5%);
 
-  --action-default: hsl(215, 100%, 5%);
-  --action-hover: hsl(215, 100%, 8%);
-  --action-pressed: hsl(215, 100%, 11%);
+  --action-default: hsl(215, 70%, 5%);
+  --action-hover: hsl(215, 70%, 8%);
+  --action-pressed: hsl(215, 70%, 11%);
 
   --muted-default: hsl(215, 10%, 30%);
   --muted-hover: hsl(215, 10%, 37.5%);
@@ -99,9 +88,9 @@
 
   @media (prefers-color-scheme: dark) {
     --bg-base: hsl(215, 0%, 0%);
-    --bg-low: hsl(215, 50%, 8%);
-    --bg-mid: hsl(215, 45%, 12%);
-    --bg-high: hsl(215, 40%, 18%);
+    --bg-low: hsl(215, 30%, 8%);
+    --bg-mid: hsl(215, 25%, 12%);
+    --bg-high: hsl(215, 20%, 18%);
 
     --content-default: hsl(215, 0%, 100%);
     --content-hover: hsl(215, 0%, 92.5%);
@@ -119,23 +108,4 @@
     --inverted-hover: hsl(215, 0%, 95%);
     --inverted-pressed: hsl(215, 0%, 90%);
   }
-}
-
-html {
-  line-height: --line-height-body;
-  tab-size: 4;
-  font-family: var(--font-family);
-  font-size: var(--font-size);
-  background-color: var(--bg-base);
-  color: var(--content-default);
-}
-
-body {
-  padding: 0;
-  margin: 0;
-  line-height: inherit;
-}
-
-a {
-  text-decoration: underline;
 }
