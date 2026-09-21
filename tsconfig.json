@@ -8,8 +8,13 @@
       "layouts/*": ["./src/layouts/*"],
       "tokens": ["./src/tokens"],
       "types/*": ["./src/types/*"]
-    }
+    },
+    "rootDirs": [".", "generated"]
   },
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "node_modules"]
+  "exclude": ["dist", "node_modules"],
+  "cmkOptions": {
+    "enabled": true,
+    "dtsOutDir": "generated"
+  }
 }

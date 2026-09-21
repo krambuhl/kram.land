@@ -31,6 +31,10 @@ Requires Node 22.12 or later.
 - A variant is a class named prop + value, such as `.alignCenter`, applied with `classnames`. Variant rules sit below `.root` in the file, because they tie it on specificity.
 - A token-valued prop, such as `gap`, is passed as an inline custom property with its default in CSS: `gap: var(--stack-gap, var(--size-16))`.
 
+## Typed CSS Modules
+
+`npm run check` runs `cmk` first, which writes a `.d.ts` for every `*.module.css` into `generated/` (gitignored). `tsconfig.json` maps that folder in with `rootDirs`, so a class name that does not exist in the stylesheet is a type error.
+
 ## No client JavaScript
 
 React components render at build time only. Adding a `client:*` directive to a component in a `.astro` file ships React to the browser, so none of them have one.

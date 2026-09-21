@@ -6,7 +6,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "lint": "oxlint",
-    "check": "astro check",
+    "check": "cmk && astro check",
     "preview": "astro preview",
     "knip": "knip",
     "format": "prettier --check .",
@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
+    "@css-modules-kit/codegen": "^1.4.0",
     "@types/node": "24.13.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
