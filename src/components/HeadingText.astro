@@ -11,4 +11,6 @@ interface Props {
 const { as = 'h1', size = 'md' } = Astro.props;
 ---
 
-<Text as={as} variant="heading" size={size}><slot /></Text>
+<Text as={as} variant="heading" size={size}>
+  <slot />
+</Text>

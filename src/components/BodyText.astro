@@ -11,4 +11,6 @@ interface Props {
 const { as = 'span', size = 'md' } = Astro.props;
 ---
 
-<Text as={as} variant="body" size={size}><slot /></Text>
+<Text as={as} variant="body" size={size}>
+  <slot />
+</Text>
