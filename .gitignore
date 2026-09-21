@@ -6,9 +6,9 @@
 # testing
 /coverage
 
-# next.js
-/.next/
-/out/
+# astro
+/dist/
+/.astro/
 
 # Development
 node_modules
