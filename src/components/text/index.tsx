@@ -1,4 +1,5 @@
 import React from 'react';
+import cx from 'classnames';
 
 import type { BodyTextProps, HeadingTextProps, TextProps } from './types';
 import { tokens } from 'tokens';
@@ -8,8 +9,7 @@ import styles from './styles.module.css';
 export function Text({ as: Component = 'div', variant = 'body', size = 'md', children }: TextProps) {
   return (
     <Component
-      className={styles.root}
-      data-variant={variant}
+      className={cx(styles.root, { [styles.variantHeading]: variant === 'heading' })}
       style={{ '--text-font-size': tokens.fontSize[variant][size] } as React.CSSProperties}
     >
       {children}

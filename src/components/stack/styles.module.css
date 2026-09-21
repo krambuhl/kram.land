@@ -5,10 +5,10 @@
   gap: var(--stack-gap, var(--size-16));
 }
 
-.root[data-align='center'] {
+.alignCenter {
   align-items: center;
 }
 
-.root[data-align='end'] {
+.alignEnd {
   align-items: end;
 }

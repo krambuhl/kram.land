@@ -1,3 +1,5 @@
+import cx from 'classnames';
+
 import type { Padding } from 'types/common';
 
 import styles from './styles.module.css';
@@ -8,9 +10,5 @@ export interface CardProps {
 }
 
 export function Card({ padding, children }: CardProps) {
-  return (
-    <div className={styles.root} data-padding={padding}>
-      {children}
-    </div>
-  );
+  return <div className={cx(styles.root, { [styles.paddingNone]: padding === 'none' })}>{children}</div>;
 }

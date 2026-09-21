@@ -4,7 +4,7 @@
   line-height: var(--line-height-body);
 }
 
-.root[data-variant='heading'] {
+.variantHeading {
   font-weight: var(--font-weight-header);
   line-height: var(--line-height-header);
 }

@@ -1,3 +1,5 @@
+import cx from 'classnames';
+
 import type { Align } from 'types/common';
 import type { SizeToken } from 'types/tokens';
 
@@ -10,8 +12,13 @@ export interface StackProps {
 }
 
 export function Stack({ align, gap, children }: StackProps) {
+  const className = cx(styles.root, {
+    [styles.alignCenter]: align === 'center',
+    [styles.alignEnd]: align === 'end',
+  });
+
   return (
-    <div className={styles.root} data-align={align} style={{ '--stack-gap': gap } as React.CSSProperties}>
+    <div className={className} style={{ '--stack-gap': gap } as React.CSSProperties}>
       {children}
     </div>
   );
