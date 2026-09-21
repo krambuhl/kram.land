@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 
 import type { BodyTextProps, DataTextProps, HeadingTextProps, TextProps } from './types';

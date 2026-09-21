@@ -1,6 +1,4 @@
-'use client';
-
-import SuperEllipse from 'react-superellipse';
+import { SuperEllipse } from 'components/superellipse';
 
 import styles from './styles.module.css';
 

@@ -1,8 +1,5 @@
-'use client';
-
-import SuperEllipse from 'react-superellipse';
-
 import type Image from 'next/image';
+import { SuperEllipse } from 'components/superellipse';
 import type { Padding } from 'types/common';
 import type { ActionToken, BgToken, ColorToken, ContentToken, InvertedToken, MutedToken } from 'types/tokens';
 

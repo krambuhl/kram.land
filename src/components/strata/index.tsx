@@ -1,5 +1,3 @@
-'use client';
-
 import type { BgToken } from 'types/tokens';
 
 import styles from './styles.module.css';

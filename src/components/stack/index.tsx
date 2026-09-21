@@ -1,5 +1,3 @@
-'use client';
-
 import type { Align, Direction } from 'types/common';
 import type { SizeToken } from 'types/tokens';
 
