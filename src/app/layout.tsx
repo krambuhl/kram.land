@@ -20,11 +20,12 @@ export const metadata = {
     description: 'making internet with the nice people who live there',
     images: ['https://kram.land/ikea.png'],
   },
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-  },
   icons: { icon: '/favicon.png' },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 interface RootLayoutProps {
