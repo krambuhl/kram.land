@@ -1,0 +1,17 @@
+---
+import type { SizeToken } from 'types/tokens';
+
+import styles from './Area.module.css';
+
+interface Props {
+  width?: SizeToken;
+}
+
+const { width } = Astro.props;
+---
+
+<div class={styles.root}>
+  <div class={styles.container} style={width && `--area-width: ${width}`}>
+    <slot />
+  </div>
+</div>
