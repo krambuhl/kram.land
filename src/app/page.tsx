@@ -12,7 +12,7 @@ export default function Home() {
     <Area width={tokens.size.x384}>
       <Stack gap={tokens.size.x48} align="center">
         <Card padding="none" ratio={1}>
-          <Image src="/ikea.png" alt="" width={192} height={192} sizes="(max-width: 384px) 100vw, 25vw" priority />
+          <Image src="/ikea.png" alt="" width={192} height={192} sizes="192px" priority />
         </Card>
 
         <Stack gap={tokens.size.x24} align="center">
