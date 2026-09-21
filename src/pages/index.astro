@@ -2,21 +2,19 @@
 import { Image } from 'astro:assets';
 
 import { Area } from 'components/area';
-import { Card } from 'components/card';
 import { Rule } from 'components/rule';
 import { BodyText, HeadingText } from 'components/text';
 import Layout from 'layouts/Layout.astro';
 import { tokens } from 'tokens';
 import { stack } from 'utilities/stack';
+import { superellipse } from 'utilities/superellipse';
 import ikea from '../assets/ikea.png';
 ---
 
 <Layout>
   <Area width={tokens.size.x384}>
     <div class={stack({ gap: tokens.size.x48, align: 'center' })}>
-      <Card padding="none">
-        <Image src={ikea} alt="" width={192} height={192} densities={[1, 2, 3]} priority />
-      </Card>
+      <Image src={ikea} alt="" width={192} height={192} densities={[1, 2, 3]} priority class={superellipse()} />
 
       <div class={stack({ gap: tokens.size.x24, align: 'center' })}>
         <HeadingText as="h1" size="xl">
