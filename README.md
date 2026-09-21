@@ -10,7 +10,7 @@ A one-page personal site. Components are React, and [Astro](https://astro.build)
 | `npm run build`   | Build the static site to `dist/`                |
 | `npm run preview` | Serve the built site locally                    |
 | `npm run check`   | Type-check `.astro` and `.ts` files             |
-| `npm run lint`    | Run ESLint                                      |
+| `npm run lint`    | Run oxlint                                      |
 
 Requires Node 22.12 or later.
 
