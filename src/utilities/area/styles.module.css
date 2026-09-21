@@ -1,0 +1,68 @@
+.root {
+  width: 100%;
+  margin-inline: auto;
+}
+
+.widthX128 {
+  max-width: var(--size-128);
+}
+
+.widthX192 {
+  max-width: var(--size-192);
+}
+
+.widthX256 {
+  max-width: var(--size-256);
+}
+
+.widthX384 {
+  max-width: var(--size-384);
+}
+
+.widthX512 {
+  max-width: var(--size-512);
+}
+
+.widthX640 {
+  max-width: var(--size-640);
+}
+
+.widthX768 {
+  max-width: var(--size-768);
+}
+
+.widthX896 {
+  max-width: var(--size-896);
+}
+
+.widthX1024 {
+  max-width: var(--size-1024);
+}
+
+.widthX1152 {
+  max-width: var(--size-1152);
+}
+
+.widthX1280 {
+  max-width: var(--size-1280);
+}
+
+.widthX1408 {
+  max-width: var(--size-1408);
+}
+
+.widthX1536 {
+  max-width: var(--size-1536);
+}
+
+.widthX1664 {
+  max-width: var(--size-1664);
+}
+
+.widthX1792 {
+  max-width: var(--size-1792);
+}
+
+.widthX1920 {
+  max-width: var(--size-1920);
+}
