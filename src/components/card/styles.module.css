@@ -3,7 +3,8 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  border-radius: var(--radius-container);
+  border-radius: 50%;
+  corner-shape: superellipse(1.35);
   overflow: hidden;
   padding: var(--size-32);
   color: var(--card-color, var(--content-default));

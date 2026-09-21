@@ -1,5 +1,4 @@
 import type Image from 'next/image';
-import { SuperEllipse } from 'components/superellipse';
 import type { Padding } from 'types/common';
 import type { ActionToken, BgToken, ColorToken, ContentToken, InvertedToken, MutedToken } from 'types/tokens';
 
@@ -32,11 +31,9 @@ export function Card({
   } as React.CSSProperties;
 
   return (
-    <SuperEllipse r1={0.075} r2={0.5} p1={18}>
-      <div className={styles.root} data-padding={padding} style={style}>
-        {backgroundImage && <div className={styles.image}>{backgroundImage}</div>}
-        <div className={styles.content}>{children}</div>
-      </div>
-    </SuperEllipse>
+    <div className={styles.root} data-padding={padding} style={style}>
+      {backgroundImage && <div className={styles.image}>{backgroundImage}</div>}
+      <div className={styles.content}>{children}</div>
+    </div>
   );
 }
