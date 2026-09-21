@@ -4,16 +4,17 @@ A one-page personal site. Components are React, and [Astro](https://astro.build)
 
 ## Commands
 
-| Command           | What it does                                    |
-| ----------------- | ----------------------------------------------- |
-| `npm run dev`     | Start the dev server at `http://localhost:4321` |
-| `npm run build`   | Build the static site to `dist/`                |
-| `npm run preview` | Serve the built site locally                    |
-| `npm run check`   | Type-check `.astro` and `.ts` files             |
-| `npm run lint`    | Run oxlint                                      |
-| `npm run format`  | Check formatting with Prettier                  |
-| `npm run knip`    | Find unused files, dependencies and exports     |
-| `npm run verify`  | Run every check above, then build. CI runs this |
+| Command            | What it does                                    |
+| ------------------ | ----------------------------------------------- |
+| `npm run dev`      | Start the dev server at `http://localhost:4321` |
+| `npm run build`    | Build the static site to `dist/`                |
+| `npm run preview`  | Serve the built site locally                    |
+| `npm run check`    | Type-check `.astro` and `.ts` files             |
+| `npm run lint`     | Run oxlint                                      |
+| `npm run lint:css` | Run stylelint on the stylesheets                |
+| `npm run format`   | Check formatting with Prettier                  |
+| `npm run knip`     | Find unused files, dependencies and exports     |
+| `npm run verify`   | Run every check above, then build. CI runs this |
 
 Requires Node 22.12 or later.
 

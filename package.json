@@ -10,7 +10,8 @@
     "preview": "astro preview",
     "knip": "knip",
     "format": "prettier --check .",
-    "verify": "npm run format && npm run lint && npm run check && npm run knip && npm run build"
+    "verify": "npm run format && npm run lint && npm run lint:css && npm run check && npm run knip && npm run build",
+    "lint:css": "stylelint \"src/**/*.css\""
   },
   "dependencies": {
     "@astrojs/react": "^6.0.6",
@@ -29,6 +30,9 @@
     "oxlint": "^1.83.0",
     "prettier": "^3.9.8",
     "prettier-plugin-astro": "^1.0.1",
+    "stylelint": "^17.15.0",
+    "stylelint-config-standard": "^40.0.0",
+    "stylelint-value-no-unknown-custom-properties": "^6.1.1",
     "typescript": "6.0.3"
   },
   "engines": {

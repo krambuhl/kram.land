@@ -1,0 +1,10 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "plugins": ["stylelint-value-no-unknown-custom-properties"],
+  "rules": {
+    "csstools/value-no-unknown-custom-properties": [true, { "importFrom": ["src/styles/tokens.css"] }],
+    "selector-class-pattern": ["^[a-z][a-zA-Z0-9]*$", { "message": "Expected class selector to be camelCase" }],
+    "value-keyword-case": ["lower", { "ignoreProperties": ["/^--font-family/"] }],
+    "import-notation": "string"
+  }
+}
