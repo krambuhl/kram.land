@@ -6,7 +6,7 @@ import { tokens } from 'tokens';
 
 import styles from './styles.module.css';
 
-export function Text({ as: Component = 'div', variant = 'body', size = 'md', children }: TextProps) {
+function Text({ as: Component = 'div', variant = 'body', size = 'md', children }: TextProps) {
   return (
     <Component
       className={cx(styles.root, { [styles.variantHeading]: variant === 'heading' })}
