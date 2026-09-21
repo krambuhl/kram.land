@@ -1,14 +1,16 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
 import astro from 'eslint-plugin-astro';
 import importPlugin from 'eslint-plugin-import';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
 import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   ...tseslint.configs.recommended,
   ...astro.configs.recommended,
   ...astro.configs['jsx-a11y-recommended'],
+  { files: ['**/*.tsx'], rules: jsxA11y.flatConfigs.recommended.rules },
   {
-    files: ['**/*.ts'],
+    files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parserOptions: {
         projectService: true,
