@@ -1,4 +1,6 @@
 ---
+import { PageContainer } from 'components/page-container';
+
 import '../styles/globals.css';
 
 const title = 'kram.land';
@@ -29,6 +31,8 @@ const image = 'https://kram.land/ikea.png';
     <link rel="icon" href="/favicon.png" />
   </head>
   <body>
-    <slot />
+    <PageContainer>
+      <slot />
+    </PageContainer>
   </body>
 </html>

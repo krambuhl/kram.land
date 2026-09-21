@@ -16,9 +16,8 @@ Requires Node 22.12 or later.
 
 ## Layout
 
-- `src/pages/` holds the routes, `index.astro` and `404.astro`. Each one renders a single React view and does the build-time work React cannot, such as resizing images with `getImage`.
-- `src/layouts/Layout.astro` holds the document `<html>` and `<head>`. It stays in Astro: a `<head>` rendered by React gets no stylesheet links, so the page comes out unstyled.
-- `src/views/` holds the page content as React components.
+- `src/pages/` holds the routes, `index.astro` and `404.astro`. Each one composes the React components into a page, and uses Astro's `<Image>` for build-time image resizing.
+- `src/layouts/Layout.astro` holds the document `<html>` and `<head>` and wraps each page in `PageContainer`. It stays in Astro: a `<head>` rendered by React gets no stylesheet links, so the page comes out unstyled.
 - `src/components/` holds each component as `name/index.tsx` beside `name/styles.module.css`.
 - `src/styles/tokens.css` defines the design tokens as CSS custom properties. `src/tokens/index.ts` mirrors them as `var(--…)` strings for use in component props.
 - `src/assets/` holds images Astro resizes at build time. `public/` holds files served as-is.
