@@ -1,34 +1,34 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# kram.land
 
-## Getting Started
+A one-page personal site built with [Astro](https://astro.build). It ships HTML and CSS only, with no client-side JavaScript.
 
-First, run the development server:
+## Commands
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-```
+| Command           | What it does                                    |
+| ----------------- | ----------------------------------------------- |
+| `npm run dev`     | Start the dev server at `http://localhost:4321` |
+| `npm run build`   | Build the static site to `dist/`                |
+| `npm run preview` | Serve the built site locally                    |
+| `npm run check`   | Type-check `.astro` and `.ts` files             |
+| `npm run lint`    | Run ESLint                                      |
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Requires Node 22.12 or later.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Layout
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- `src/pages/` holds the routes: `index.astro` and `404.astro`.
+- `src/layouts/Layout.astro` holds the document head and page container.
+- `src/components/` holds each component as `Name.astro` beside `Name.module.css`.
+- `src/styles/tokens.css` defines the design tokens as CSS custom properties. `src/tokens/index.ts` mirrors them as `var(--…)` strings for use in component props.
+- `src/assets/` holds images Astro resizes at build time. `public/` holds files served as-is.
 
-## Learn More
+## Styling conventions
 
-To learn more about Next.js, take a look at the following resources:
+- A variant is a class named prop + value, such as `.alignCenter`, applied with `class:list`. Variant rules sit below `.root` in the file, because they tie it on specificity.
+- A token-valued prop, such as `gap`, is passed as an inline custom property with its default in CSS: `gap: var(--stack-gap, var(--size-16))`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Deploy
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Deployed on Vercel as a static site. `vercel.json` sets the Astro framework preset.
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+See `AGENTS.md` for the git workflow.
