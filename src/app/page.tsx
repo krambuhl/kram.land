@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <Area width={tokens.size.x384}>
       <Stack gap={tokens.size.x48} align="center">
-        <Card padding="none" ratio={1}>
+        <Card padding="none">
           <Image src="/ikea.png" alt="" width={192} height={192} sizes="192px" priority />
         </Card>
 

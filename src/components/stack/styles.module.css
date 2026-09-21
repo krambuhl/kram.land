@@ -5,10 +5,6 @@
   gap: var(--stack-gap, var(--size-16));
 }
 
-.root[data-direction='row'] {
-  flex-direction: row;
-}
-
 .root[data-align='center'] {
   align-items: center;
 }

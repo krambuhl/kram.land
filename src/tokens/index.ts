@@ -1,11 +1,4 @@
 export const tokens = {
-  breakpoints: {
-    xs: '(min-width: 0rem)',
-    sm: '(min-width: 32rem)',
-    md: '(min-width: 48rem)',
-    lg: '(min-width: 64rem)',
-    xl: '(min-width: 80rem)',
-  },
   size: {
     x0: 'var(--size-0)',
     x4: 'var(--size-4)',

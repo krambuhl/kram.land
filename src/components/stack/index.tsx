@@ -1,25 +1,18 @@
-import type { Align, Direction } from 'types/common';
+import type { Align } from 'types/common';
 import type { SizeToken } from 'types/tokens';
 
 import styles from './styles.module.css';
 
 export interface StackProps {
-  as?: React.ElementType;
-  direction?: Direction;
   align?: Align;
   gap?: SizeToken;
   children?: React.ReactNode;
 }
 
-export function Stack({ as: Component = 'div', direction, align, gap, children }: StackProps) {
+export function Stack({ align, gap, children }: StackProps) {
   return (
-    <Component
-      className={styles.root}
-      data-direction={direction}
-      data-align={align}
-      style={{ '--stack-gap': gap } as React.CSSProperties}
-    >
+    <div className={styles.root} data-align={align} style={{ '--stack-gap': gap } as React.CSSProperties}>
       {children}
-    </Component>
+    </div>
   );
 }

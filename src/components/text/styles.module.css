@@ -9,11 +9,6 @@
   line-height: var(--line-height-header);
 }
 
-.root[data-variant='data'] {
-  font-weight: var(--font-weight-data);
-  line-height: var(--line-height-data);
-}
-
 .root strong {
   font-weight: 700;
 }

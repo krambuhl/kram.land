@@ -1,5 +1,4 @@
 .root {
-  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -7,29 +6,10 @@
   corner-shape: superellipse(1.35);
   overflow: hidden;
   padding: var(--size-32);
-  color: var(--card-color, var(--content-default));
-  background-color: var(--card-background-color, var(--bg-low));
-  background-image: var(--card-background-image, none);
-  background-size: cover;
-  aspect-ratio: var(--card-ratio, 2 / 1);
+  background-color: var(--bg-low);
+  aspect-ratio: 1;
 }
 
 .root[data-padding='none'] {
   padding: var(--size-0);
-}
-
-.image {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-}
-
-.image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.content {
-  z-index: 1;
 }
