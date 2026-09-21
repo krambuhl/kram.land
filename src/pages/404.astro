@@ -2,13 +2,13 @@
 import Layout from 'layouts/Layout.astro';
 import { tokens } from 'tokens';
 import { stack } from 'utilities/stack';
-import { text } from 'utilities/text';
+import { bodyText, headingText } from 'utilities/text';
 ---
 
 <Layout>
   <div class={stack({ gap: tokens.size.x16, align: 'center' })}>
-    <h1 class={text({ variant: 'heading', size: 'xl' })}>404</h1>
-    <p class={text()}>
+    <h1 class={headingText({ size: 'xl' })}>404</h1>
+    <p class={bodyText()}>
       this page could not be found. <a href="/">go home</a>
     </p>
   </div>

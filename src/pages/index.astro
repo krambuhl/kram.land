@@ -7,7 +7,7 @@ import { tokens } from 'tokens';
 import { area } from 'utilities/area';
 import { stack } from 'utilities/stack';
 import { superellipse } from 'utilities/superellipse';
-import { text } from 'utilities/text';
+import { bodyText, headingText } from 'utilities/text';
 import ikea from '../assets/ikea.png';
 ---
 
@@ -16,35 +16,35 @@ import ikea from '../assets/ikea.png';
     <Image src={ikea} alt="" width={192} height={192} densities={[1, 2, 3]} priority class={superellipse()} />
 
     <div class={stack({ gap: tokens.size.x24, align: 'center' })}>
-      <h1 class={text({ variant: 'heading', size: 'xl' })}>oh hi. hello!</h1>
+      <h1 class={headingText({ size: 'xl' })}>oh hi. hello!</h1>
 
-      <p class={text()}>
+      <p class={bodyText()}>
         i’m <strong>evan krambuhl</strong> and i make <strong>internet</strong> with real nice people at{' '}
         <strong>patreon</strong>
       </p>
 
-      <p class={text()}>
+      <p class={bodyText()}>
         i specialize in <strong>high quality ui</strong> and <strong>thoughtful patterns</strong> to help developers to
         be more productive
       </p>
 
-      <p class={text()}>
+      <p class={bodyText()}>
         an <abbr title="read: never owned an unbrella">oregon</abbr> native, you'll find me outdoorsing and swimming in
         the rivers when they're not mountain runoff
       </p>
 
-      <p class={text()}>
+      <p class={bodyText()}>
         i love making <a href="https://www.instagram.com/ev.aart">generative art</a> and playing drums and have an
         endless appetite for live music and <abbr title="one must imagine sisyphus happy">absurdity</abbr>
       </p>
 
       <Rule />
 
-      <p class={text({ size: 'sm' })}>
+      <p class={bodyText({ size: 'sm' })}>
         say hello: <a href="mailto:evan.krambuhl@gmail.com">email</a>
       </p>
 
-      <p class={text({ size: 'xs' })}>
+      <p class={bodyText({ size: 'xs' })}>
         * i’m a busy hotdog,
         <br />
         please be nice

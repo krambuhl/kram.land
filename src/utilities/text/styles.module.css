@@ -1,19 +1,19 @@
-.root {
-  font-weight: var(--font-weight-body);
-  line-height: var(--line-height-body);
-}
-
-.variantHeading {
-  font-weight: var(--font-weight-header);
-  line-height: var(--line-height-header);
-}
-
 .root strong {
   font-weight: 700;
 }
 
 .root abbr {
   text-decoration: underline dotted;
+}
+
+.body {
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+}
+
+.heading {
+  font-weight: var(--font-weight-header);
+  line-height: var(--line-height-header);
 }
 
 .bodyXs {
