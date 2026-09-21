@@ -6,7 +6,7 @@
 }
 
 html {
-  line-height: --line-height-body;
+  line-height: var(--line-height-body);
   tab-size: 4;
   font-family: var(--font-family);
   font-size: var(--font-size);

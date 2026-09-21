@@ -1,5 +1,5 @@
 .root {
-  font-size: var(--text-font-size);
+  font-size: var(--text-font-size, var(--font-size-body-md));
   font-weight: var(--font-weight-body);
   line-height: var(--line-height-body);
 }
