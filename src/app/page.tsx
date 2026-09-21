@@ -1,5 +1,4 @@
 import Image from 'next/image';
-import Link from 'next/link';
 
 import { Area } from 'components/area';
 import { Card } from 'components/card';
@@ -44,7 +43,7 @@ export default function Home() {
           <Rule />
 
           <BodyText as="p" size="sm">
-            say hello: <a href="mailto:evan.krambuhl@gmail.com">email</a> <Link href="/work">portfolio</Link>
+            say hello: <a href="mailto:evan.krambuhl@gmail.com">email</a>
           </BodyText>
 
           <BodyText as="p" size="xs">
