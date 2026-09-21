@@ -11,7 +11,8 @@ token-jet turns one typed config file into a design token system: CSS custom pro
 
 ## Non-goals
 
-- Generating utility classes or components. token-jet ends at tokens. The site's `stack()`, `spacer()` and `area()` stay in the site and retype against the generated unions.
+- Generating utility classes inside token-jet. token-jet ends at tokens. Per-token class names are the job of a separate companion package, `token-jet-classnames`, described below. The site's `stack()`, `spacer()` and `area()` stay in the site.
+- Responsive utilities. Spacing that changes at a breakpoint is written in a CSS Module.
 - Unit conversion. Values are emitted exactly as written in the config.
 - Go-to-definition and color swatches in the editor. These are deferred.
 
@@ -19,22 +20,24 @@ token-jet turns one typed config file into a design token system: CSS custom pro
 
 Each of these was settled with the repo owner before writing this plan.
 
-| Topic           | Decision                                                                                                                                                                        |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Location        | npm workspace at `packages/token-jet`. The site depends on it by package name.                                                                                                  |
-| Config format   | `export default defineConfig({ modes, tokens, types })`. The helper type-checks the config, so a mode key on a token must exist in `modes`.                                     |
-| `default` key   | No special meaning. Tokens are addressed by full path only. `token('bg.page')` is an error because `bg.page` is a group.                                                        |
-| Units           | Emitted as written. Space and size tokens are authored in `px`. Font-size tokens are authored in `rem` so text follows the user's font-size setting.                            |
-| Generated files | Written to `generated/tokens/`, gitignored, rebuilt by npm pre-scripts.                                                                                                         |
-| TypeScript API  | `token('path')` function only. No `tokens` object.                                                                                                                              |
-| Globs           | Standard semantics: `*` matches one path segment, `**` matches any depth. A pattern that matches no token is an error.                                                          |
-| Type names      | A single token's type is its PascalCase path (`SpaceX16`). Every union ends in `Token` (`SpaceToken`, `BgPageToken`, `ColorToken`). A name produced by two sources is an error. |
-| Modes           | Each mode emits a media-query block and an attribute selector, so the OS setting is the default and `data-mode` can force a mode.                                               |
-| Integration     | Framework-agnostic core and CLI, plus a thin Vite adapter.                                                                                                                      |
-| Execution       | Run from TypeScript source on Node 22.18 or later. A compile step is added at roll-off.                                                                                         |
-| Tests           | Vitest inside the package, with file snapshots and type-level tests.                                                                                                            |
-| Site migration  | Pipeline first with a 0-pixel diff, then the rename, then the new palette, as separate commits.                                                                                 |
-| Editor support  | A language server plus a small VS Code extension. Version one does completion, hover and diagnostics.                                                                           |
+| Topic            | Decision                                                                                                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Location         | npm workspace at `packages/token-jet`. The site depends on it by package name.                                                                                                  |
+| Config format    | `export default defineConfig({ modes, tokens, types })`. The helper type-checks the config, so a mode key on a token must exist in `modes`.                                     |
+| `default` key    | No special meaning. Tokens are addressed by full path only. `token('bg.page')` is an error because `bg.page` is a group.                                                        |
+| Units            | Emitted as written. Space and size tokens are authored in `px`. Font-size tokens are authored in `rem` so text follows the user's font-size setting.                            |
+| Generated files  | Written to `generated/tokens/`, gitignored, rebuilt by npm pre-scripts.                                                                                                         |
+| TypeScript API   | `token('path')` function only. No `tokens` object.                                                                                                                              |
+| Globs            | Standard semantics: `*` matches one path segment, `**` matches any depth. A pattern that matches no token is an error.                                                          |
+| Type names       | A single token's type is its PascalCase path (`SpaceX16`). Every union ends in `Token` (`SpaceToken`, `BgPageToken`, `ColorToken`). A name produced by two sources is an error. |
+| Modes            | Each mode emits a media-query block and an attribute selector, so the OS setting is the default and `data-mode` can force a mode.                                               |
+| Integration      | Framework-agnostic core and CLI, plus a thin Vite adapter.                                                                                                                      |
+| Execution        | Run from TypeScript source on Node 22.18 or later. A compile step is added at roll-off.                                                                                         |
+| Tests            | Vitest inside the package, with file snapshots and type-level tests.                                                                                                            |
+| Site migration   | Pipeline first with a 0-pixel diff, then the rename, then the new palette, as separate commits.                                                                                 |
+| Editor support   | A language server plus a small VS Code extension. Version one does completion, hover and diagnostics.                                                                           |
+| Companions       | Extra generators are separate packages built on token-jet's public API. token-jet never depends on them.                                                                        |
+| Plugin readiness | No public plugin API yet. Every emitter, built-in or companion, shares one signature so a plugin hook can be added later without rewriting any of them.                         |
 
 ## Architecture
 
@@ -59,6 +62,7 @@ packages/
 │  │  ├─ postcss.ts       the token() function in CSS
 │  │  └─ vite.ts          generate on start, regenerate on config change, register postcss
 │  └─ test/
+├─ token-jet-classnames/  companion: classNameFor… generator
 ├─ token-jet-lsp/         language server, editor-agnostic
 └─ token-jet-vscode/      launches the server for CSS files
 ```
@@ -66,6 +70,16 @@ packages/
 `loadTokens()` is the one entry point that reads a config and returns the resolved token list. The CLI, the PostCSS plugin, the Vite adapter and the language server all call it, so they cannot disagree about what tokens exist.
 
 The core imports nothing from Vite, PostCSS or any editor library. Adapters sit at the edge and depend on the core, never the other way round.
+
+### Emitter contract
+
+Every generator has the same shape:
+
+```ts
+type Emitter = (tokens: ResolvedTokens, context: EmitContext) => OutputFile[];
+```
+
+token-jet's CSS, types and JavaScript emitters are three functions of this type, run as a list. A companion package exports a function of the same type and, for now, calls it from its own CLI. If a `plugins` option is added to `defineConfig` later, built-in emitters and companions slot into it unchanged. The contract is internal until a second real companion exists to test it against.
 
 ## Generated output
 
@@ -195,7 +209,47 @@ Two commits, never combined:
 1. Rename to the new vocabulary (`bg.page`, `bg.base`, `bg.elevated`, `content.regular`, `content.muted`) keeping today's values. Pixel diff must be 0.
 2. Change the values to the new palette. Pixels change on purpose and are reviewed by eye, in light and dark.
 
-### Phase 7: editor support
+### Phase 7: classnames companion
+
+`packages/token-jet-classnames` generates typed functions that turn a token into a CSS Module class name. It replaces the per-token classes and lookup tables that `stack`, `spacer` and `area` write by hand.
+
+```ts
+// classnames.config.ts
+export default defineClassNames({
+  classNameForPadding: { property: 'padding', tokens: 'SpaceToken' },
+  classNameForGap: { property: 'gap', tokens: 'SpaceToken' },
+  classNameForMaxWidth: { property: 'max-width', tokens: 'SizeToken' },
+});
+```
+
+```ts
+// generated/classnames/padding.ts
+export function classNameForPadding(token: SpaceToken): string;
+export function classNameForPadding(token: SpaceToken | undefined): string | undefined;
+
+classNameForPadding(token('space.x16')); // a hashed class from padding.module.css
+classNameForPadding(token('size.x1024')); // type error
+```
+
+Decisions:
+
+- Build-time generation. A class must exist in a `.module.css` file for the bundler to hash, so a runtime factory cannot work.
+- The config key is the function name. Each utility sets one CSS property.
+- `tokens` names a union token-jet already generates, from a group (`SpaceToken`) or from the `types` block (`ColorToken`). The `types` block stays the only place unions are defined. A narrower set is a new `types` entry, which accepts a list of paths. An unknown type name is an error that lists the valid names.
+- One `.ts` and one `.module.css` per utility, imported from its own path. There is no index file, because a bundler ships a CSS Module's whole stylesheet once anything imports it, and a barrel would ship every utility's classes to every page. A declared but unused utility ships nothing.
+- The companion writes a `.d.ts` beside each stylesheet. It knows every class name, so it does not depend on CSS Modules Kit.
+- `undefined` in gives `undefined` out, so a call drops into `classnames(...)` without a guard.
+- The options object is shaped as it would be for a plugin, so it can move into `plugins: [classNames({ ... })]` unchanged.
+
+Tests first:
+
+- Snapshot the emitted `.ts`, `.module.css` and `.d.ts` for a fixture config.
+- An unknown type name throws and lists the valid names.
+- Type-level: the function accepts every member of its union and rejects a token outside it.
+
+Then adopt it in the site: `stack`, `spacer` and `area` call the generated functions, and their hand-written per-token classes and lookup tables are deleted. Done when the pixel diff is 0 and `npm run verify` passes.
+
+### Phase 8: editor support
 
 `packages/token-jet-lsp`, a Node language server over stdio:
 
@@ -212,13 +266,13 @@ Tested by driving the server with LSP messages against fixture documents.
 - Starts the server for CSS files in a workspace that contains a `tokens.config.ts`.
 - Packaged as a `.vsix` and installed locally. No marketplace publishing.
 
-### Phase 8: roll-off checklist
+### Phase 9: roll-off checklist
 
 Not executed as part of this plan. Recorded so the package stays ready.
 
 - Add a compile step (tsdown) producing `dist/`, and point `bin` and `exports` at it. A published package must ship JavaScript, because Node does not strip types inside `node_modules`.
 - Confirm no import reaches outside `packages/token-jet`.
-- Move the three packages to their own repo with history (`git subtree split`).
+- Move the four packages to their own repo with history (`git subtree split`).
 - Write a README with the config reference. Publish. `token-jet` is unclaimed on npm as of 2026-09-21.
 - Replace the workspace dependency in kram.land with the published version.
 
