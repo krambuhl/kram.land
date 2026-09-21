@@ -1,0 +1,31 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--size-32);
+  padding: var(--size-24) var(--size-24);
+  text-align: center;
+  max-width: var(--size-640);
+  margin: auto;
+}
+
+@media (min-width: 32rem) {
+  .root {
+    padding: var(--size-48) var(--size-32);
+    gap: var(--size-48);
+  }
+}
+
+@media (min-width: 48rem) {
+  .root {
+    padding: var(--size-64) var(--size-48);
+    gap: var(--size-64);
+  }
+}
+
+@media (min-width: 64rem) {
+  .root {
+    padding: var(--size-80) var(--size-48);
+    max-width: 100%;
+  }
+}

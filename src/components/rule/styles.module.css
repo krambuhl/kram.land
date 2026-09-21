@@ -1,0 +1,6 @@
+.root {
+  margin: var(--size-12) 0;
+  height: 1px;
+  width: var(--size-32);
+  background: var(--content-default);
+}

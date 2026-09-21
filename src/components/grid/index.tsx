@@ -1,26 +1,19 @@
 'use client';
 
-import styled from 'styled-components';
-
 import type { SizeToken } from 'types/tokens';
-import { tokens } from 'tokens';
+
+import styles from './styles.module.css';
 
 export interface GridProps {
   columns?: 1 | 2 | 3 | 4;
   gap?: SizeToken;
+  children?: React.ReactNode;
 }
 
-export const Grid = styled.div<GridProps>`
-  display: grid;
-  width: 100%;
-  gap: ${({ gap = tokens.size.x32 }) => gap};
-
-  @media ${tokens.breakpoints.sm} {
-    grid-template-columns: repeat(${({ columns = 2 }) => Math.floor(columns / 2)}, 1fr);
-    grid-template-rows: auto;
-  }
-
-  @media ${tokens.breakpoints.lg} {
-    grid-template-columns: repeat(${({ columns = 2 }) => columns}, 1fr);
-  }
-`;
+export function Grid({ columns, gap, children }: GridProps) {
+  return (
+    <div className={styles.root} data-columns={columns} style={{ '--grid-gap': gap } as React.CSSProperties}>
+      {children}
+    </div>
+  );
+}

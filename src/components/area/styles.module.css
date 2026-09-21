@@ -1,0 +1,10 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.container {
+  width: 100%;
+  max-width: var(--area-width, var(--size-1280));
+}

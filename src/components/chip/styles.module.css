@@ -1,0 +1,7 @@
+.root {
+  background-color: var(--bg-high);
+  color: var(--inverted-default);
+  padding: var(--size-12) var(--size-24);
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+}

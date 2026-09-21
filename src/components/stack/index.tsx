@@ -1,20 +1,27 @@
 'use client';
 
-import styled from 'styled-components';
-
 import type { Align, Direction } from 'types/common';
 import type { SizeToken } from 'types/tokens';
-import { tokens } from 'tokens';
+
+import styles from './styles.module.css';
 
 export interface StackProps {
+  as?: React.ElementType;
   direction?: Direction;
   align?: Align;
   gap?: SizeToken;
+  children?: React.ReactNode;
 }
 
-export const Stack = styled.div<StackProps>`
-  display: flex;
-  flex-direction: ${({ direction = 'column' }) => direction};
-  align-items: ${({ align = 'start' }) => align};
-  gap: ${({ gap = tokens.size.x16 }) => gap};
-`;
+export function Stack({ as: Component = 'div', direction, align, gap, children }: StackProps) {
+  return (
+    <Component
+      className={styles.root}
+      data-direction={direction}
+      data-align={align}
+      style={{ '--stack-gap': gap } as React.CSSProperties}
+    >
+      {children}
+    </Component>
+  );
+}

@@ -1,15 +1,18 @@
 'use client';
 
-import styled from 'styled-components';
-
 import type { BgToken } from 'types/tokens';
-import { tokens } from 'tokens';
+
+import styles from './styles.module.css';
 
 export interface StrataProps {
   backgroundColor?: BgToken;
   children: React.ReactNode;
 }
 
-export const Strata = styled.section<Required<StrataProps>>`
-  background-color: ${({ backgroundColor = tokens.bg.base }) => backgroundColor};
-`;
+export function Strata({ backgroundColor, children }: StrataProps) {
+  return (
+    <section className={styles.root} style={{ '--strata-background-color': backgroundColor } as React.CSSProperties}>
+      {children}
+    </section>
+  );
+}

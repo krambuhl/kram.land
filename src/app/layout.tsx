@@ -1,8 +1,6 @@
 import './globals.css';
 import { PageContainer } from 'components/page-container';
 
-import StyledComponentsRegistry from './lib/registry';
-
 export const metadata = {
   title: 'kram.land',
   description: 'making internet with the nice people who live there',
@@ -36,9 +34,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en">
       <body>
-        <StyledComponentsRegistry>
-          <PageContainer>{children}</PageContainer>
-        </StyledComponentsRegistry>
+        <PageContainer>{children}</PageContainer>
       </body>
     </html>
   );

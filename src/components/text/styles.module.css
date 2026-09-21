@@ -1,0 +1,23 @@
+.root {
+  font-size: var(--text-font-size);
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+}
+
+.root[data-variant='heading'] {
+  font-weight: var(--font-weight-header);
+  line-height: var(--line-height-header);
+}
+
+.root[data-variant='data'] {
+  font-weight: var(--font-weight-data);
+  line-height: var(--line-height-data);
+}
+
+.root strong {
+  font-weight: 700;
+}
+
+.root abbr {
+  text-decoration: underline dotted;
+}
