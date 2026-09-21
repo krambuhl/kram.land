@@ -1,0 +1,25 @@
+{
+  "name": "token-jet",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Design tokens from one typed config: CSS custom properties, TypeScript types, and a token() function for both.",
+  "type": "module",
+  "bin": {
+    "token-jet": "./src/cli.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "check": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.6",
+    "typescript": "6.0.3",
+    "vitest": "^5.0.1"
+  }
+}
