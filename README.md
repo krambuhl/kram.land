@@ -36,6 +36,7 @@ Requires Node 22.12 or later.
 
 Layout behaviour that applies to any element is a utility function, not a component. A utility returns a class string, so it composes with `classnames` in `.tsx` and `class:list` in `.astro`.
 
+- `stack({ gap, align })` makes an element a vertical flex stack. `spacer({ p, ph, pv })` sets padding on all sides, horizontally and vertically. `superellipse()` gives an element the site's curved shape and clips its children to it.
 - Token arguments take `tokens.size` values. Spacing accepts `x0` to `x128`, and the type rejects anything larger.
 - Utilities are not responsive. Spacing that changes at a breakpoint is written in a CSS Module, as `PageContainer` does.
 

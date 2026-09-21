@@ -1,4 +1,5 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "ignoreDependencies": ["the-new-css-reset"]
+  "ignoreDependencies": ["the-new-css-reset"],
+  "ignore": ["src/utilities/spacer/**"]
 }
