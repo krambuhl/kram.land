@@ -1,0 +1,57 @@
+.root {
+  font-weight: var(--font-weight-body);
+  line-height: var(--line-height-body);
+}
+
+.variantHeading {
+  font-weight: var(--font-weight-header);
+  line-height: var(--line-height-header);
+}
+
+.root strong {
+  font-weight: 700;
+}
+
+.root abbr {
+  text-decoration: underline dotted;
+}
+
+.bodyXs {
+  font-size: var(--font-size-body-xs);
+}
+
+.bodySm {
+  font-size: var(--font-size-body-sm);
+}
+
+.bodyMd {
+  font-size: var(--font-size-body-md);
+}
+
+.bodyLg {
+  font-size: var(--font-size-body-lg);
+}
+
+.bodyXl {
+  font-size: var(--font-size-body-xl);
+}
+
+.headingXs {
+  font-size: var(--font-size-header-xs);
+}
+
+.headingSm {
+  font-size: var(--font-size-header-sm);
+}
+
+.headingMd {
+  font-size: var(--font-size-header-md);
+}
+
+.headingLg {
+  font-size: var(--font-size-header-lg);
+}
+
+.headingXl {
+  font-size: var(--font-size-header-xl);
+}

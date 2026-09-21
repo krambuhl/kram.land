@@ -1,17 +1,15 @@
 ---
-import { BodyText, HeadingText } from 'components/text';
 import Layout from 'layouts/Layout.astro';
 import { tokens } from 'tokens';
 import { stack } from 'utilities/stack';
+import { text } from 'utilities/text';
 ---
 
 <Layout>
   <div class={stack({ gap: tokens.size.x16, align: 'center' })}>
-    <HeadingText as="h1" size="xl">
-      404
-    </HeadingText>
-    <BodyText as="p">
+    <h1 class={text({ variant: 'heading', size: 'xl' })}>404</h1>
+    <p class={text()}>
       this page could not be found. <a href="/">go home</a>
-    </BodyText>
+    </p>
   </div>
 </Layout>
