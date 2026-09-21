@@ -7,7 +7,8 @@
       "components/*": ["./src/components/*"],
       "layouts/*": ["./src/layouts/*"],
       "tokens": ["./src/tokens"],
-      "types/*": ["./src/types/*"]
+      "types/*": ["./src/types/*"],
+      "utilities/*": ["./src/utilities/*"]
     },
     "rootDirs": [".", "generated"]
   },

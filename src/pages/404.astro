@@ -1,17 +1,17 @@
 ---
-import { Stack } from 'components/stack';
 import { BodyText, HeadingText } from 'components/text';
 import Layout from 'layouts/Layout.astro';
 import { tokens } from 'tokens';
+import { stack } from 'utilities/stack';
 ---
 
 <Layout>
-  <Stack gap={tokens.size.x16} align="center">
+  <div class={stack({ gap: tokens.size.x16, align: 'center' })}>
     <HeadingText as="h1" size="xl">
       404
     </HeadingText>
     <BodyText as="p">
       this page could not be found. <a href="/">go home</a>
     </BodyText>
-  </Stack>
+  </div>
 </Layout>

@@ -1,0 +1,61 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+
+.alignCenter {
+  align-items: center;
+}
+
+.alignEnd {
+  align-items: end;
+}
+
+.gapX0 {
+  gap: var(--size-0);
+}
+
+.gapX4 {
+  gap: var(--size-4);
+}
+
+.gapX8 {
+  gap: var(--size-8);
+}
+
+.gapX12 {
+  gap: var(--size-12);
+}
+
+.gapX16 {
+  gap: var(--size-16);
+}
+
+.gapX24 {
+  gap: var(--size-24);
+}
+
+.gapX32 {
+  gap: var(--size-32);
+}
+
+.gapX48 {
+  gap: var(--size-48);
+}
+
+.gapX64 {
+  gap: var(--size-64);
+}
+
+.gapX80 {
+  gap: var(--size-80);
+}
+
+.gapX96 {
+  gap: var(--size-96);
+}
+
+.gapX128 {
+  gap: var(--size-128);
+}

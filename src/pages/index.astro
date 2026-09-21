@@ -4,21 +4,21 @@ import { Image } from 'astro:assets';
 import { Area } from 'components/area';
 import { Card } from 'components/card';
 import { Rule } from 'components/rule';
-import { Stack } from 'components/stack';
 import { BodyText, HeadingText } from 'components/text';
 import Layout from 'layouts/Layout.astro';
 import { tokens } from 'tokens';
+import { stack } from 'utilities/stack';
 import ikea from '../assets/ikea.png';
 ---
 
 <Layout>
   <Area width={tokens.size.x384}>
-    <Stack gap={tokens.size.x48} align="center">
+    <div class={stack({ gap: tokens.size.x48, align: 'center' })}>
       <Card padding="none">
         <Image src={ikea} alt="" width={192} height={192} densities={[1, 2, 3]} priority />
       </Card>
 
-      <Stack gap={tokens.size.x24} align="center">
+      <div class={stack({ gap: tokens.size.x24, align: 'center' })}>
         <HeadingText as="h1" size="xl">
           oh hi. hello!
         </HeadingText>
@@ -54,7 +54,7 @@ import ikea from '../assets/ikea.png';
           <br />
           please be nice
         </BodyText>
-      </Stack>
-    </Stack>
+      </div>
+    </div>
   </Area>
 </Layout>

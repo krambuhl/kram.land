@@ -23,6 +23,7 @@ Requires Node 22.12 or later.
 - `src/pages/` holds the routes, `index.astro` and `404.astro`. Each one composes the React components into a page, and uses Astro's `<Image>` for build-time image resizing.
 - `src/layouts/Layout.astro` holds the document `<html>` and `<head>` and wraps each page in `PageContainer`. It stays in Astro: a `<head>` rendered by React gets no stylesheet links, so the page comes out unstyled.
 - `src/components/` holds each component as `name/index.tsx` beside `name/styles.module.css`.
+- `src/utilities/` holds style utilities: functions that return CSS Module class names to put on any element, such as `stack({ gap: tokens.size.x16 })`.
 - `src/styles/tokens.css` defines the design tokens as CSS custom properties. `src/tokens/index.ts` mirrors them as `var(--…)` strings for use in component props.
 - `src/assets/` holds images Astro resizes at build time. `public/` holds files served as-is.
 
@@ -30,6 +31,13 @@ Requires Node 22.12 or later.
 
 - A variant is a class named prop + value, such as `.alignCenter`, applied with `classnames`. Variant rules sit below `.root` in the file, because they tie it on specificity.
 - A token-valued prop, such as `gap`, is passed as an inline custom property with its default in CSS: `gap: var(--stack-gap, var(--size-16))`.
+
+## Style utilities
+
+Layout behaviour that applies to any element is a utility function, not a component. A utility returns a class string, so it composes with `classnames` in `.tsx` and `class:list` in `.astro`.
+
+- Token arguments take `tokens.size` values. Spacing accepts `x0` to `x128`, and the type rejects anything larger.
+- Utilities are not responsive. Spacing that changes at a breakpoint is written in a CSS Module, as `PageContainer` does.
 
 ## Typed CSS Modules
 
