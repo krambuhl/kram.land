@@ -1,12 +1,16 @@
 ---
+import { getImage } from 'astro:assets';
+
 import { PageContainer } from 'components/page-container';
+import ikea from '../assets/ikea.png';
 
 import '../styles/globals.css';
 
 const title = 'kram.land';
 const description = 'making internet with the nice people who live there';
 const url = 'https://kram.land';
-const image = 'https://kram.land/ikea.png';
+const social = await getImage({ src: ikea, width: 960, height: 504, fit: 'cover', position: 'center', format: 'jpg' });
+const image = new URL(social.src, Astro.site).href;
 ---
 
 <!doctype html>
@@ -21,8 +25,8 @@ const image = 'https://kram.land/ikea.png';
     <meta property="og:url" content={url} />
     <meta property="og:site_name" content={title} />
     <meta property="og:image" content={image} />
-    <meta property="og:image:width" content="800" />
-    <meta property="og:image:height" content="800" />
+    <meta property="og:image:width" content={social.attributes.width} />
+    <meta property="og:image:height" content={social.attributes.height} />
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
