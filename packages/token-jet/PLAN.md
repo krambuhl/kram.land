@@ -36,6 +36,10 @@ Each of these was settled with the repo owner before writing this plan.
 | Tests            | Vitest inside the package, with file snapshots and type-level tests.                                                                                                            |
 | Site migration   | Pipeline first with a 0-pixel diff, then the rename, then the new palette, as separate commits.                                                                                 |
 | Editor support   | A language server plus a small VS Code extension. Version one does completion, hover and diagnostics.                                                                           |
+| References       | A value of the form `{path}` points at another token and emits as `var(--path)`. A missing target or a cycle is an error.                                                       |
+| Metadata         | A token may carry `type`, `description` and `deprecated`. `type` is validated against the value.                                                                                |
+| Contrast         | The config declares semantic foreground/background pairs. The generator computes WCAG contrast for every pair in every mode and fails below the declared minimum.               |
+| Interchange      | DTCG JSON is an import/export format, not the authoring format.                                                                                                                 |
 | Companions       | Extra generators are separate packages built on token-jet's public API. token-jet never depends on them.                                                                        |
 | Plugin readiness | No public plugin API yet. Every emitter, built-in or companion, shares one signature so a plugin hook can be added later without rewriting any of them.                         |
 
@@ -135,7 +139,7 @@ In CSS, the PostCSS plugin rewrites `token('space.x16')` to `var(--space-x16)`. 
 
 ## Phases
 
-Each phase is test-first: the tests in its list are written before the code that passes them. Phases 0 to 4 do not touch the site's source, so every commit in them is safe on `main`. Phase 5 onward changes the site and each commit is pixel-diffed.
+Each phase is test-first: the tests in its list are written before the code that passes them. Phases 0 to 7 do not touch the site's source, so every commit in them is safe on `main`. Phase 8 onward changes the site and each commit is pixel-diffed.
 
 ### Phase 0: workspace
 
@@ -159,7 +163,65 @@ Then implement `config.ts`, `flatten.ts`, `validate.ts`, `glob.ts`, `names.ts` a
 
 Type-level tests: `defineConfig` rejects an unknown mode key on a token.
 
-### Phase 2: emitters and CLI
+### Phase 2: token references
+
+A value may point at another token: `{ value: '{gray.50}' }`. The reference emits as `var(--gray-50)`, so a semantic token follows its primitive at runtime and a mode override on the primitive flows through. A reference resolves per mode: `{ value: '{gray.50}', dark: '{gray.900}' }` is allowed.
+
+Tests first:
+
+- A reference to a leaf emits `var(--…)`; a reference to a group is an error naming the group.
+- A missing target is an error naming the token and the path it points at.
+- A cycle (`a -> b -> a`) is an error listing the cycle.
+- `resolveValue(path, mode)` follows references to a literal, which contrast checking needs.
+- Generated types are unchanged: a reference token's type is still its own `var()` literal.
+
+### Phase 3: metadata
+
+A token may carry `type`, `description` and `deprecated`.
+
+```ts
+content: {
+  muted: {
+    default: {
+      value: '#666666',
+      dark: '#999999',
+      type: 'color',
+      description: 'Secondary text. Never for body copy.',
+    },
+  },
+},
+```
+
+- `type` is one of `color`, `dimension`, `fontFamily`, `fontWeight`, `number`, `duration`. The generator validates the value against it, and a reference must point at a token of the same type. A group may declare `type` once for all its leaves.
+- `description` is emitted as a JSDoc comment on the generated type, so it appears in editor hover in TypeScript. The language server shows it in CSS.
+- `deprecated` is covered in the next phase.
+
+Tests first:
+
+- A `color` token with the value `16px` is an error. A `dimension` token with the value `#fff` is an error.
+- A group-level `type` applies to every leaf and a leaf may not contradict it.
+- A reference from a `color` to a `dimension` token is an error.
+- The types emitter writes the description as a JSDoc comment above the alias.
+
+### Phase 4: deprecation and lifecycle
+
+`deprecated: true` or `deprecated: 'use content.regular.default'` marks a token on its way out. The generator keeps emitting it, and every surface warns:
+
+- TypeScript: the alias gets `@deprecated`, so editors strike it through and `oxlint` can flag uses.
+- CSS: the PostCSS plugin reports a warning with the replacement, not an error, so a deprecation never breaks a build.
+- Language server: a diagnostic of warning severity, with a code action to apply the replacement when one is given.
+- CLI: `token-jet usage` lists every `token()` call in a set of files by path, and flags deprecated ones. `token-jet rename <old> <new>` rewrites calls in CSS and TypeScript and moves the config entry.
+
+A token is removed by deleting it from the config, after `usage` shows no callers.
+
+Tests first:
+
+- The types emitter writes `@deprecated` with the message.
+- The PostCSS plugin emits a warning, not an error, for a deprecated path and includes the replacement.
+- `usage` finds `token('a.b')` in `.css`, `.ts`, `.tsx` and `.astro` fixtures and reports deprecated uses.
+- `rename` rewrites every occurrence in the fixtures and the config, and leaves an unrelated path alone.
+
+### Phase 5: emitters and CLI
 
 Tests first, as file snapshots against a fixture config:
 
@@ -170,7 +232,7 @@ Tests first, as file snapshots against a fixture config:
 
 Then implement the emitters and `token-jet generate`, which writes the three files to the configured output directory.
 
-### Phase 3: PostCSS plugin
+### Phase 6: PostCSS plugin
 
 Tests first:
 
@@ -178,7 +240,7 @@ Tests first:
 - An unknown path throws a PostCSS error carrying the source position and a suggestion.
 - A declaration without `token(` is returned untouched.
 
-### Phase 4: Vite adapter
+### Phase 7: Vite adapter
 
 - Generate on server start and on build start.
 - Watch the config file. On change, regenerate and trigger a reload.
@@ -186,7 +248,7 @@ Tests first:
 
 Tested with a small fixture project built through Vite's JavaScript API.
 
-### Phase 5: migrate the site, pipeline only
+### Phase 8: migrate the site, pipeline only
 
 Goal: the site reads generated tokens and not one pixel changes.
 
@@ -202,14 +264,68 @@ Goal: the site reads generated tokens and not one pixel changes.
 
 Done when the pixel diff is 0 at 390, 600, 800 and 1280px in light and dark, and `npm run verify` passes.
 
-### Phase 6: rename, then repaint
+### Phase 9: rename, then repaint
 
 Two commits, never combined:
 
-1. Rename to the new vocabulary (`bg.page`, `bg.base`, `bg.elevated`, `content.regular`, `content.muted`) keeping today's values. Pixel diff must be 0.
+1. Rename to the new vocabulary (`bg.page`, `bg.base`, `bg.elevated`, `content.regular`, `content.muted`) keeping today's values. Pixel diff must be 0. The rename uses `token-jet rename` from phase 4, which is its first real run: add the new token, deprecate the old one pointing at it, rewrite the callers, delete the old one.
 2. Change the values to the new palette. Pixels change on purpose and are reviewed by eye, in light and dark.
 
-### Phase 7: classnames companion
+### Phase 10: contrast checking
+
+The config declares which semantic tokens sit on which, and the minimum contrast:
+
+```ts
+contrast: {
+  minimum: 4.5,
+  pairs: [
+    ['content.regular.default', 'bg.page.default'],
+    ['content.muted.default', 'bg.page.default'],
+  ],
+},
+```
+
+`token-jet check` resolves both sides of every pair in every mode, computes the WCAG 2 contrast ratio, and fails listing each pair below the minimum with its ratio and mode. It runs as part of `generate`, so a palette that fails contrast never reaches the site. A pair may override the minimum for large text.
+
+Tests first:
+
+- The ratio for `#000` on `#fff` is 21 and for `#767676` on `#fff` is 4.54.
+- A pair that passes in light and fails in dark reports the dark mode only.
+- A pair naming a non-color token is an error.
+- References resolve before the ratio is computed.
+
+### Phase 11: DTCG import and export
+
+`token-jet export --dtcg` writes the token tree in the W3C Design Tokens Community Group JSON format: `$value`, `$type`, `$description`, `$deprecated`, and references as `{path}`. Modes go under `$extensions['token-jet'].modes`, because the format has no standard for them. `token-jet import --dtcg <file>` reads the same format into a `tokens.config.ts` skeleton.
+
+This is the bridge to Figma variables and Tokens Studio. It is not the authoring format: the config stays TypeScript so it can be type-checked.
+
+Tests first:
+
+- Export of the fixture config snapshots to a JSON file.
+- Import of that JSON reproduces the fixture config's token tree.
+- A DTCG file with a `$type` token-jet does not support is an error naming it.
+
+### Phase 12: specimen
+
+`token-jet specimen` emits a static HTML page showing every token in every mode: a swatch for colors, a bar for dimensions, a sample for type, with path, value, description and deprecation. Contrast pairs render as text on background with the ratio. The page has no dependencies and can be served from `public/` or captured by a visual-regression tool, so a palette change becomes a reviewable image diff.
+
+Tests first:
+
+- The page snapshots for the fixture config.
+- Every token path in the config appears in the page.
+- A deprecated token is marked.
+
+### Phase 13: agent manifest
+
+`token-jet generate` also writes `generated/tokens/manifest.json`: every token with its path, `var()` name, value per mode, type, description, deprecation and replacement, plus the type unions and contrast pairs. It is the file a coding agent reads to choose `space.x16` instead of typing `15px`. It is emitted last in the pipeline so it reflects everything the other phases add.
+
+Tests first:
+
+- The manifest snapshots for the fixture config.
+- A schema file is emitted beside it and the manifest validates against it.
+
+### Phase 14: classnames companion
 
 `packages/token-jet-classnames` generates typed functions that turn a token into a CSS Module class name. It replaces the per-token classes and lookup tables that `stack`, `spacer` and `area` write by hand.
 
@@ -249,13 +365,14 @@ Tests first:
 
 Then adopt it in the site: `stack`, `spacer` and `area` call the generated functions, and their hand-written per-token classes and lookup tables are deleted. Done when the pixel diff is 0 and `npm run verify` passes.
 
-### Phase 8: editor support
+### Phase 15: editor support
 
 `packages/token-jet-lsp`, a Node language server over stdio:
 
 - Finds `token('…')` calls in CSS documents.
 - Completion: token paths, filtered by what has been typed, with the value as detail.
-- Hover: the path, its value, and each mode's value.
+- Hover: the path, its value, each mode's value, and its description.
+- Deprecation: a warning diagnostic with a code action that applies the replacement.
 - Diagnostics: an unknown path, with the nearest valid path suggested.
 - Reloads when the config file changes.
 
@@ -266,7 +383,7 @@ Tested by driving the server with LSP messages against fixture documents.
 - Starts the server for CSS files in a workspace that contains a `tokens.config.ts`.
 - Packaged as a `.vsix` and installed locally. No marketplace publishing.
 
-### Phase 9: roll-off checklist
+### Phase 16: roll-off checklist
 
 Not executed as part of this plan. Recorded so the package stays ready.
 
@@ -285,5 +402,5 @@ Not executed as part of this plan. Recorded so the package stays ready.
 
 ## Open questions
 
-- `area()` accepts `x128` today, but the draft config's `size` group starts at `x192` and `x128` sits in `space`. Decide in phase 5 whether `area` drops `x128` or `size` gains it. Nothing on the site uses it.
+- `area()` accepts `x128` today, but the draft config's `size` group starts at `x192` and `x128` sits in `space`. Decide in phase 8 whether `area` drops `x128` or `size` gains it. Nothing on the site uses it.
 - Whether `token-jet generate --check` is worth adding. With generated files gitignored there is nothing to drift, so it is left out unless a need appears.
