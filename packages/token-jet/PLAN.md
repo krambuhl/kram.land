@@ -20,28 +20,31 @@ token-jet turns one typed config file into a design token system: CSS custom pro
 
 Each of these was settled with the repo owner before writing this plan.
 
-| Topic            | Decision                                                                                                                                                                        |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Location         | npm workspace at `packages/token-jet`. The site depends on it by package name.                                                                                                  |
-| Config format    | `export default defineConfig({ modes, tokens, types })`. The helper type-checks the config, so a mode key on a token must exist in `modes`.                                     |
-| `default` key    | No special meaning. Tokens are addressed by full path only. `token('bg.page')` is an error because `bg.page` is a group.                                                        |
-| Units            | Emitted as written. Space and size tokens are authored in `px`. Font-size tokens are authored in `rem` so text follows the user's font-size setting.                            |
-| Generated files  | Written to `generated/tokens/`, gitignored, rebuilt by npm pre-scripts.                                                                                                         |
-| TypeScript API   | `token('path')` function only. No `tokens` object.                                                                                                                              |
-| Globs            | Standard semantics: `*` matches one path segment, `**` matches any depth. A pattern that matches no token is an error.                                                          |
-| Type names       | A single token's type is its PascalCase path (`SpaceX16`). Every union ends in `Token` (`SpaceToken`, `BgPageToken`, `ColorToken`). A name produced by two sources is an error. |
-| Modes            | Each mode emits a media-query block and an attribute selector, so the OS setting is the default and `data-mode` can force a mode.                                               |
-| Integration      | Framework-agnostic core and CLI, plus a thin Vite adapter.                                                                                                                      |
-| Execution        | Run from TypeScript source on Node 22.18 or later. A compile step is added at roll-off.                                                                                         |
-| Tests            | Vitest inside the package, with file snapshots and type-level tests.                                                                                                            |
-| Site migration   | Pipeline first with a 0-pixel diff, then the rename, then the new palette, as separate commits.                                                                                 |
-| Editor support   | A language server plus a small VS Code extension. Version one does completion, hover and diagnostics.                                                                           |
-| References       | A value of the form `{path}` points at another token and emits as `var(--path)`. A missing target or a cycle is an error.                                                       |
-| Metadata         | A token may carry `type`, `description` and `deprecated`. `type` is validated against the value.                                                                                |
-| Contrast         | The config declares semantic foreground/background pairs. The generator computes WCAG contrast for every pair in every mode and fails below the declared minimum.               |
-| Interchange      | DTCG JSON is an import/export format, not the authoring format.                                                                                                                 |
-| Companions       | Extra generators are separate packages built on token-jet's public API. token-jet never depends on them.                                                                        |
-| Plugin readiness | No public plugin API yet. Every emitter, built-in or companion, shares one signature so a plugin hook can be added later without rewriting any of them.                         |
+| Topic             | Decision                                                                                                                                                                        |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Location          | npm workspace at `packages/token-jet`. The site depends on it by package name.                                                                                                  |
+| Config format     | `export default defineConfig({ modes, tokens, types })`. The helper type-checks the config, so a mode key on a token must exist in `modes`.                                     |
+| `default` key     | No special meaning. Tokens are addressed by full path only. `token('bg.page')` is an error because `bg.page` is a group.                                                        |
+| Units             | Emitted as written. Space and size tokens are authored in `px`. Font-size tokens are authored in `rem` so text follows the user's font-size setting.                            |
+| Generated files   | Written to `generated/tokens/`, gitignored, rebuilt by npm pre-scripts.                                                                                                         |
+| TypeScript API    | `token('path')` function only. No `tokens` object.                                                                                                                              |
+| Globs             | Standard semantics: `*` matches one path segment, `**` matches any depth. A pattern that matches no token is an error.                                                          |
+| Type names        | A single token's type is its PascalCase path (`SpaceX16`). Every union ends in `Token` (`SpaceToken`, `BgPageToken`, `ColorToken`). A name produced by two sources is an error. |
+| Modes             | Each mode emits a media-query block and an attribute selector, so the OS setting is the default and `data-mode` can force a mode.                                               |
+| Integration       | Framework-agnostic core and CLI, plus a thin Vite adapter.                                                                                                                      |
+| Execution         | Run from TypeScript source on Node 22.18 or later. A compile step is added at roll-off.                                                                                         |
+| Tests             | Vitest inside the package, with file snapshots and type-level tests.                                                                                                            |
+| Site migration    | Pipeline first with a 0-pixel diff, then the rename, then the new palette, as separate commits.                                                                                 |
+| Editor support    | A language server plus a small VS Code extension. Version one does completion, hover and diagnostics.                                                                           |
+| References        | A value of the form `{path}` points at another token and emits as `var(--path)`. A missing target or a cycle is an error.                                                       |
+| Metadata          | A token may carry `type`, `description` and `deprecated`. `type` is validated against the value.                                                                                |
+| Contrast          | The config declares semantic foreground/background pairs. The generator computes WCAG contrast for every pair in every mode and fails below the declared minimum.               |
+| Interchange       | DTCG JSON is an import/export format, not the authoring format.                                                                                                                 |
+| Typed properties  | Every token is also declared with `@property`, so the browser knows its syntax, whether it inherits, and its initial value.                                                     |
+| Literal arguments | `token()` takes a string literal only. A computed path is a lint error, so the set of used tokens is exact and pruning is safe.                                                 |
+| Figma             | The Variables REST API is Enterprise-only, so the exchange format is a plugin-exported DTCG file committed to the repo.                                                         |
+| Companions        | Extra generators are separate packages built on token-jet's public API. token-jet never depends on them.                                                                        |
+| Plugin readiness  | No public plugin API yet. Every emitter, built-in or companion, shares one signature so a plugin hook can be added later without rewriting any of them.                         |
 
 ## Architecture
 
@@ -167,6 +170,8 @@ Type-level tests: `defineConfig` rejects an unknown mode key on a token.
 
 A value may point at another token: `{ value: '{gray.50}' }`. The reference emits as `var(--gray-50)`, so a semantic token follows its primitive at runtime and a mode override on the primitive flows through. A reference resolves per mode: `{ value: '{gray.50}', dark: '{gray.900}' }` is allowed.
 
+Expressions such as `{space.base} * 2` are not supported. If they are added later they are typed nodes in the config, not strings the generator parses, and they emit `calc()` when an operand is a reference. String parsing is where every existing implementation's bugs live: mixed units, negatives, and references that emit invalid CSS.
+
 Tests first:
 
 - A reference to a leaf emits `var(--…)`; a reference to a group is an error naming the group.
@@ -192,7 +197,7 @@ content: {
 },
 ```
 
-- `type` is one of `color`, `dimension`, `fontFamily`, `fontWeight`, `number`, `duration`. The generator validates the value against it, and a reference must point at a token of the same type. A group may declare `type` once for all its leaves.
+- `type` is one of `color`, `dimension`, `fontFamily`, `fontWeight`, `number`, `duration`, and the composites `typography`, `shadow`, `border` and `transition`, whose sub-values follow the DTCG 2025.10 shapes. A composite emits one custom property per sub-value. The generator validates the value against it, and a reference must point at a token of the same type. A group may declare `type` once for all its leaves.
 - `description` is emitted as a JSDoc comment on the generated type, so it appears in editor hover in TypeScript. The language server shows it in CSS.
 - `deprecated` is covered in the next phase.
 
@@ -226,6 +231,8 @@ Tests first:
 Tests first, as file snapshots against a fixture config:
 
 - `emit-css`: base block, one media block per mode scoped to `:root:not([data-mode])`, one `[data-mode='x']` block per mode, only overriding tokens repeated.
+- `emit-css`: an `@property` rule per token before the `:root` block. `syntax` comes from the token's type (`<color>`, `<length>`, `<number>`, `*` for font families), `inherits` is `true`, and `initial-value` is the base value. A token may set `inherits: false` in the config. Terrazzo and Style Dictionary do not emit these. They make a token animatable and give it a real default when a mode block does not declare it.
+- `emit-css` with `prune: true`: only tokens in the used set, plus every token they reference, are emitted. The used set is the paths collected by the PostCSS plugin and the TypeScript reference walk. `prune` is off in development so the specimen and the editor see every token.
 - `emit-types`: leaf aliases, group unions at every depth, custom unions from `types`, `AnyToken`, `TokenPath`, `TokenMap`.
 - `emit-js`: the `token()` implementation.
 - Type-level: `token('space.x16')` has type `'var(--space-x16)'`. `token('space.x17')` and `token('bg.page')` do not compile.
@@ -239,6 +246,9 @@ Tests first:
 - `token('space.x16')` becomes `var(--space-x16)`, with single or double quotes, inside shorthand values, and more than once per declaration.
 - An unknown path throws a PostCSS error carrying the source position and a suggestion.
 - A declaration without `token(` is returned untouched.
+- The plugin records every path it rewrites into a used set that the CSS emitter reads when `prune` is on.
+
+The TypeScript side has the matching rule: `token()` accepts a string literal only. `token(flag ? 'a.b' : 'a.c')` is a lint error, written as `flag ? token('a.b') : token('a.c')`. The type signature enforces most of it (`P extends TokenPath` rejects a `string`), and an oxlint or ESLint rule catches the conditional-inside-the-call shape that still satisfies the type. With both in place the used set is exact, which is what makes pruning safe: nothing has to scan source text for candidates the way Tailwind does.
 
 ### Phase 7: Vite adapter
 
@@ -285,7 +295,12 @@ contrast: {
 },
 ```
 
-`token-jet check` resolves both sides of every pair in every mode, computes the WCAG 2 contrast ratio, and fails listing each pair below the minimum with its ratio and mode. It runs as part of `generate`, so a palette that fails contrast never reaches the site. A pair may override the minimum for large text.
+`token-jet check` resolves both sides of every pair in every mode, computes the WCAG 2.1 contrast ratio, and fails listing each pair below the minimum with its ratio and mode. It runs as part of `generate`, so a palette that fails contrast never reaches the site.
+
+- WCAG 2.1 is the only algorithm. WCAG 3 is a working draft whose contrast algorithm is undecided, and APCA was removed from it in 2023. Tools that ship APCA present it as guidance, never compliance.
+- Every mode is checked. Terrazzo's rule checks only the default context, which lets a dark-mode failure through.
+- A bad pair, such as a path that is not a colour, is reported with the other findings, not thrown, so one mistake does not hide the rest.
+- A pair may name a typography token as its third member, and `largeText` is derived from that token's size and weight instead of being a boolean the author has to keep in sync.
 
 Tests first:
 
@@ -296,15 +311,18 @@ Tests first:
 
 ### Phase 11: DTCG import and export
 
-`token-jet export --dtcg` writes the token tree in the W3C Design Tokens Community Group JSON format: `$value`, `$type`, `$description`, `$deprecated`, and references as `{path}`. Modes go under `$extensions['token-jet'].modes`, because the format has no standard for them. `token-jet import --dtcg <file>` reads the same format into a `tokens.config.ts` skeleton.
+`token-jet export --dtcg` writes the token tree in the DTCG format's first stable version, 2025.10. That version fixes the value shapes: a colour is an object, `{ colorSpace, components, alpha?, hex? }`, and a dimension is `{ value, unit }` with only `px` and `rem` allowed. `$type`, `$description` and `$deprecated` map directly. References are `{path}`. Modes go under `$extensions['token-jet'].modes`, using the resolver module's words, `modifiers` and `contexts`, so the file reads naturally to anyone who knows the spec. `token-jet import --dtcg <file>` reads the same format into a `tokens.config.ts` skeleton.
 
-This is the bridge to Figma variables and Tokens Studio. It is not the authoring format: the config stays TypeScript so it can be type-checked.
+Composite tokens (typography, shadow, border, transition) emit one custom property per sub-value, never the CSS `font` shorthand. The shorthand cannot carry `letter-spacing`, and Style Dictionary has an open bug where valid typography loses it silently.
+
+This is the bridge to Figma and Tokens Studio, and it is not the authoring format: the config stays TypeScript so it can be type-checked. The Figma side works through a committed export, not the REST API. The Variables REST API is available only to Enterprise plans, and every syncing tool either runs as a Figma plugin or is a paid service. So the workflow is: a plugin exports DTCG JSON, the file is committed, and `token-jet diff <export.json>` reports tokens missing on either side and value mismatches, exiting non-zero so it can gate CI. Figma's `codeSyntax` field on a variable is where the `token()` path is stored, so both sides agree on identity.
 
 Tests first:
 
-- Export of the fixture config snapshots to a JSON file.
+- Export of the fixture config snapshots to a JSON file, with colours as objects and dimensions as `{ value, unit }`.
 - Import of that JSON reproduces the fixture config's token tree.
 - A DTCG file with a `$type` token-jet does not support is an error naming it.
+- `diff` against an export with one missing token, one extra token and one changed value reports all three and exits 1; against an identical export it exits 0.
 
 ### Phase 12: specimen
 
@@ -392,6 +410,14 @@ Not executed as part of this plan. Recorded so the package stays ready.
 - Move the four packages to their own repo with history (`git subtree split`).
 - Write a README with the config reference. Publish. `token-jet` is unclaimed on npm as of 2026-09-21.
 - Replace the workspace dependency in kram.land with the published version.
+
+## Later
+
+Not scheduled. Recorded so they are not re-derived.
+
+- **Raw-value lint.** A stylelint rule that flags `padding: 16px` or `color: #666` where a token with that value exists, and suggests it. token-jet knows every value, so the suggestion is exact. The existing `declaration-strict-value` plugin cannot do this because it does not know which tokens exist, and its property-regex approach has a long list of false positives.
+- **Two consumers before roll-off.** token-jet is not published until a second real project uses it. Every API mistake found so far came from having one consumer. A second site in this account would do.
+- **Config schema versioning.** A `version` field in `defineConfig` and a migration path, added the day the second consumer exists. Cheap then, painful later.
 
 ## Risks
 
