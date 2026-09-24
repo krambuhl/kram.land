@@ -11,7 +11,7 @@ token-jet turns one typed config file into a design token system: CSS custom pro
 
 ## Non-goals
 
-- Generating utility classes inside token-jet. token-jet ends at tokens. Per-token class names are the job of a separate companion package, `token-jet-classnames`, described below. The site's `stack()`, `spacer()` and `area()` stay in the site.
+- Generating utility classes inside token-jet's core. token-jet ends at tokens. Per-token class names are one template in the token-indexed generation companion described below. The site's `stack()`, `spacer()` and `area()` stay in the site.
 - Responsive utilities. Spacing that changes at a breakpoint is written in a CSS Module.
 - Unit conversion. Values are emitted exactly as written in the config.
 - Go-to-definition and color swatches in the editor. These are deferred.
@@ -69,7 +69,7 @@ packages/
 │  │  ├─ postcss.ts       the token() function in CSS
 │  │  └─ vite.ts          generate on start, regenerate on config change, register postcss
 │  └─ test/
-├─ token-jet-classnames/  companion: classNameFor… generator
+├─ token-jet-generate/    companion: token-indexed generation (classes, tables, stories)
 ├─ token-jet-lsp/         language server, editor-agnostic
 └─ token-jet-vscode/      launches the server for CSS files
 ```
@@ -87,6 +87,8 @@ type Emitter = (tokens: ResolvedTokens, context: EmitContext) => OutputFile[];
 ```
 
 token-jet's CSS, types and JavaScript emitters are three functions of this type, run as a list. A companion package exports a function of the same type and, for now, calls it from its own CLI. If a `plugins` option is added to `defineConfig` later, built-in emitters and companions slot into it unchanged. The contract is internal until a second real companion exists to test it against.
+
+Most emitters are the same operation: select a set of tokens, map each through a template, and aggregate the fragments into a file. Phase 14 makes that operation a companion so that a new kind of output is a template, not a new emitter.
 
 ## Generated output
 
@@ -369,21 +371,29 @@ Tests first:
 - The manifest snapshots for the fixture config.
 - A schema file is emitted beside it and the manifest validates against it.
 
-### Phase 14: classnames companion
+### Phase 14: token-indexed generation
 
-`packages/token-jet-classnames` generates typed functions that turn a token into a CSS Module class name. It replaces the per-token classes and lookup tables that `stack`, `spacer` and `area` write by hand.
+`packages/token-jet-generate` turns a set of tokens into a family of artifacts. It is what the classnames idea was underneath: select tokens, map each through a template, aggregate the fragments into a file. The classnames output is its first template. A Storybook story per token is another, and it is the test that the design is generic, because a story is neither CSS nor JSON.
 
 ```ts
-// classnames.config.ts
-export default defineClassNames({
-  classNameForPadding: { property: 'padding', tokens: 'SpaceToken' },
-  classNameForGap: { property: 'gap', tokens: 'SpaceToken' },
-  classNameForMaxWidth: { property: 'max-width', tokens: 'SizeToken' },
+// generate.config.ts
+export default defineGenerate({
+  padding: {
+    select: 'SpaceToken',
+    template: cssModuleClass({ property: 'padding', fn: 'classNameForPadding' }),
+  },
+  spaceStories: {
+    select: 'SpaceToken',
+    template: storyPerToken({ title: 'Tokens/Space', render: (t) => `<div style="width:${t.value}" />` }),
+  },
+  spaceTable: { select: 'SpaceToken', template: tsRecord({ name: 'spaceClass' }) },
 });
 ```
 
+A template is a plain object with two functions, `fragment(token, context)` and `aggregate(fragments, context)`, returning `OutputFile[]`. Built-in templates ship for the outputs the plan already needs: `cssModuleClass` (a `.module.css` rule per token, a typed function, and a `.d.ts`), `tsRecord` (a `Record<Token, string>` table), and `storyPerToken` (a `.stories.tsx` with one story per token). Anything else is a user-written template of the same shape.
+
 ```ts
-// generated/classnames/padding.ts
+// generated/padding.ts, from the cssModuleClass template
 export function classNameForPadding(token: SpaceToken): string;
 export function classNameForPadding(token: SpaceToken | undefined): string | undefined;
 
@@ -393,21 +403,22 @@ classNameForPadding(token('size.x1024')); // type error
 
 Decisions:
 
-- Build-time generation. A class must exist in a `.module.css` file for the bundler to hash, so a runtime factory cannot work.
-- The config key is the function name. Each utility sets one CSS property.
-- `tokens` names a union token-jet already generates, from a group (`SpaceToken`) or from the `types` block (`ColorToken`). The `types` block stays the only place unions are defined. A narrower set is a new `types` entry, which accepts a list of paths. An unknown type name is an error that lists the valid names.
-- One `.ts` and one `.module.css` per utility, imported from its own path. There is no index file, because a bundler ships a CSS Module's whole stylesheet once anything imports it, and a barrel would ship every utility's classes to every page. A declared but unused utility ships nothing.
-- The companion writes a `.d.ts` beside each stylesheet. It knows every class name, so it does not depend on CSS Modules Kit.
-- `undefined` in gives `undefined` out, so a call drops into `classnames(...)` without a guard.
-- The options object is shaped as it would be for a plugin, so it can move into `plugins: [classNames({ ... })]` unchanged.
+- `select` names a union token-jet already generates, from a group (`SpaceToken`) or from the `types` block (`ColorToken`), or is a glob with the phase 1 rules. The `types` block stays the only place unions are named. An unknown name is an error that lists the valid names.
+- A template is plain TypeScript, not a DSL. Terrazzo's plugin API is this shape and works because there is nothing clever in it.
+- Build-time generation. A class must exist in a `.module.css` file for the bundler to hash, so a runtime factory cannot work, and the same is true of a story file.
+- One output file per config entry, imported from its own path, and no index file. A bundler ships a CSS Module's whole stylesheet once anything imports it, so a barrel would ship every entry's classes to every page. A declared but unused entry ships nothing.
+- `cssModuleClass` writes a `.d.ts` beside each stylesheet. It knows every class name, so it does not depend on CSS Modules Kit.
+- `cssModuleClass` functions map `undefined` to `undefined`, so a call drops into `classnames(...)` without a guard.
+- Each entry is one `Emitter` from the contract above, so a `plugins` option can take the whole config unchanged.
 
 Tests first:
 
-- Snapshot the emitted `.ts`, `.module.css` and `.d.ts` for a fixture config.
-- An unknown type name throws and lists the valid names.
-- Type-level: the function accepts every member of its union and rejects a token outside it.
+- Snapshot each built-in template's output for a fixture config: the `.ts`, `.module.css` and `.d.ts` from `cssModuleClass`; the record from `tsRecord`; the `.stories.tsx` from `storyPerToken`.
+- A user-written template with a two-line `fragment` and `aggregate` produces a file, to prove nothing built-in is special.
+- An unknown `select` name throws and lists the valid names.
+- Type-level: a `cssModuleClass` function accepts every member of its union and rejects a token outside it.
 
-Then adopt it in the site: `stack`, `spacer` and `area` call the generated functions, and their hand-written per-token classes and lookup tables are deleted. Done when the pixel diff is 0 and `npm run verify` passes.
+Then adopt it in the site: `stack`, `spacer` and `area` call generated functions, and their hand-written per-token classes and lookup tables are deleted. Done when the pixel diff is 0 and `npm run verify` passes.
 
 ### Phase 15: editor support
 
