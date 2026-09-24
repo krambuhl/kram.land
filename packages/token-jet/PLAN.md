@@ -20,31 +20,31 @@ token-jet turns one typed config file into a design token system: CSS custom pro
 
 Each of these was settled with the repo owner before writing this plan.
 
-| Topic             | Decision                                                                                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Location          | npm workspace at `packages/token-jet`. The site depends on it by package name.                                                                                                  |
-| Config format     | `export default defineConfig({ modes, tokens, types })`. The helper type-checks the config, so a mode key on a token must exist in `modes`.                                     |
-| `default` key     | No special meaning. Tokens are addressed by full path only. `token('bg.page')` is an error because `bg.page` is a group.                                                        |
-| Units             | Emitted as written. Space and size tokens are authored in `px`. Font-size tokens are authored in `rem` so text follows the user's font-size setting.                            |
-| Generated files   | Written to `generated/tokens/`, gitignored, rebuilt by npm pre-scripts.                                                                                                         |
-| TypeScript API    | `token('path')` function only. No `tokens` object.                                                                                                                              |
-| Globs             | Standard semantics: `*` matches one path segment, `**` matches any depth. A pattern that matches no token is an error.                                                          |
-| Type names        | A single token's type is its PascalCase path (`SpaceX16`). Every union ends in `Token` (`SpaceToken`, `BgPageToken`, `ColorToken`). A name produced by two sources is an error. |
-| Modes             | Each mode emits a media-query block and an attribute selector, so the OS setting is the default and `data-mode` can force a mode.                                               |
-| Integration       | Framework-agnostic core and CLI, plus a thin Vite adapter.                                                                                                                      |
-| Execution         | Run from TypeScript source on Node 22.18 or later. A compile step is added at roll-off.                                                                                         |
-| Tests             | Vitest inside the package, with file snapshots and type-level tests.                                                                                                            |
-| Site migration    | Pipeline first with a 0-pixel diff, then the rename, then the new palette, as separate commits.                                                                                 |
-| Editor support    | A language server plus a small VS Code extension. Version one does completion, hover and diagnostics.                                                                           |
-| References        | A value of the form `{path}` points at another token and emits as `var(--path)`. A missing target or a cycle is an error.                                                       |
-| Metadata          | A token may carry `type`, `description` and `deprecated`. `type` is validated against the value.                                                                                |
-| Contrast          | The config declares semantic foreground/background pairs. The generator computes WCAG contrast for every pair in every mode and fails below the declared minimum.               |
-| Interchange       | DTCG JSON is an import/export format, not the authoring format.                                                                                                                 |
-| Typed properties  | Every token is also declared with `@property`, so the browser knows its syntax, whether it inherits, and its initial value.                                                     |
-| Literal arguments | `token()` takes a string literal only. A computed path is a lint error, so the set of used tokens is exact and pruning is safe.                                                 |
-| Figma             | The Variables REST API is Enterprise-only, so the exchange format is a plugin-exported DTCG file committed to the repo.                                                         |
-| Companions        | Extra generators are separate packages built on token-jet's public API. token-jet never depends on them.                                                                        |
-| Plugin readiness  | No public plugin API yet. Every emitter, built-in or companion, shares one signature so a plugin hook can be added later without rewriting any of them.                         |
+| Topic             | Decision                                                                                                                                                                                                                                                                                                    |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Location          | npm workspace at `packages/token-jet`. The site depends on it by package name.                                                                                                                                                                                                                              |
+| Config format     | `export default defineConfig({ modes, tokens, types })`. The helper type-checks the config, so a mode key on a token must exist in `modes`.                                                                                                                                                                 |
+| `default` key     | No special meaning. Tokens are addressed by full path only. `token('bg.page')` is an error because `bg.page` is a group.                                                                                                                                                                                    |
+| Units             | Emitted as written. Space and size tokens are authored in `px`. Font-size tokens are authored in `rem` so text follows the user's font-size setting.                                                                                                                                                        |
+| Generated files   | Written to `generated/tokens/`, gitignored, rebuilt by npm pre-scripts.                                                                                                                                                                                                                                     |
+| TypeScript API    | `token('path')` function only. No `tokens` object.                                                                                                                                                                                                                                                          |
+| Globs             | Standard semantics: `*` matches one path segment, `**` matches any depth. A pattern that matches no token is an error.                                                                                                                                                                                      |
+| Type names        | A single token's type is its PascalCase path (`SpaceX16`). Every union ends in `Token` (`SpaceToken`, `BgPageToken`, `ColorToken`). A name produced by two sources is an error.                                                                                                                             |
+| Modes             | A mode token has a base value and a slot per mode. A scope fills the slot or unsets it to IACVT, and the published token is a `var()` chain that falls through. Defaults sit on `:where(html)`, never `:root`. `inverted` is resolved by React except under `auto`, where two media-query rules express it. |
+| Integration       | Framework-agnostic core and CLI, plus a thin Vite adapter.                                                                                                                                                                                                                                                  |
+| Execution         | Run from TypeScript source on Node 22.18 or later. A compile step is added at roll-off.                                                                                                                                                                                                                     |
+| Tests             | Vitest inside the package, with file snapshots and type-level tests.                                                                                                                                                                                                                                        |
+| Site migration    | Pipeline first with a 0-pixel diff, then the rename, then the new palette, as separate commits.                                                                                                                                                                                                             |
+| Editor support    | A language server plus a small VS Code extension. Version one does completion, hover and diagnostics.                                                                                                                                                                                                       |
+| References        | A value of the form `{path}` points at another token and emits as `var(--path)`. A missing target or a cycle is an error.                                                                                                                                                                                   |
+| Metadata          | A token may carry `type`, `description` and `deprecated`. `type` is validated against the value.                                                                                                                                                                                                            |
+| Contrast          | The config declares semantic foreground/background pairs. The generator computes WCAG contrast for every pair in every mode and fails below the declared minimum.                                                                                                                                           |
+| Interchange       | DTCG JSON is an import/export format, not the authoring format.                                                                                                                                                                                                                                             |
+| Typed properties  | Every token is also declared with `@property`, so the browser knows its syntax, whether it inherits, and its initial value.                                                                                                                                                                                 |
+| Literal arguments | `token()` takes a string literal only. A computed path is a lint error, so the set of used tokens is exact and pruning is safe.                                                                                                                                                                             |
+| Figma             | The Variables REST API is Enterprise-only, so the exchange format is a plugin-exported DTCG file committed to the repo.                                                                                                                                                                                     |
+| Companions        | Extra generators are separate packages built on token-jet's public API. token-jet never depends on them.                                                                                                                                                                                                    |
+| Plugin readiness  | No public plugin API yet. Every emitter, built-in or companion, shares one signature so a plugin hook can be added later without rewriting any of them.                                                                                                                                                     |
 
 ## Architecture
 
@@ -95,23 +95,47 @@ For a token at path `space.x16` with value `16px`:
 `generated/tokens/tokens.css`
 
 ```css
-:root {
+:where(html) {
   --space-x16: 16px;
-  --bg-page-default: #ffffff;
+  --bg-page-default--light: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root:not([data-mode]) {
-    --bg-page-default: #040404;
+  :where(html) {
+    --bg-page-default--dark: #040404;
+  }
+}
+[data-mode='dark'] {
+  --bg-page-default--dark: #040404;
+}
+[data-mode='light'] {
+  --bg-page-default--dark: initial;
+}
+[data-mode='auto'] {
+  --bg-page-default--dark: initial;
+}
+[data-mode='inverted'] {
+  --bg-page-default--dark: #040404;
+}
+@media (prefers-color-scheme: dark) {
+  [data-mode='auto'] {
+    --bg-page-default--dark: #040404;
+  }
+  [data-mode='inverted'] {
+    --bg-page-default--dark: initial;
   }
 }
 
-[data-mode='dark'] {
-  --bg-page-default: #040404;
+* {
+  --bg-page-default: var(--bg-page-default--dark, var(--bg-page-default--light));
 }
 ```
 
-Setting `data-mode="light"` forces light with no extra rule, because any `data-mode` value disables the media-query block and leaves the base values in effect. `data-mode` works on any element, so a subtree can be themed.
+A token with mode values is emitted as a base value, one slot per mode, and a chain. A scope fills the slot or sets it to `initial`, which makes it invalid at computed-value time, so the chain falls through to the base. Because every scope only sets or unsets slots, scopes nest to any depth and the `*` chain re-resolves on each element. A token with no mode values is a single declaration.
+
+The four scopes are all absolute. `light` and `dark` set the slot. `auto` resets it to the OS state and exists because a nested scope cannot mean "follow the OS" by omitting the attribute: it would inherit its parent's slot. `inverted` is "the opposite of the OS", which is two media-query cases. Every other inversion is resolved before CSS sees it: a `<Mode value="inverted">` React provider reads the resolved scheme from context and emits the opposite absolute value, and `inverted` inside `inverted`-of-`auto` emits `auto`. CSS keeps only the one piece of state it must, the OS scheme.
+
+Defaults sit on `:where(html)` at zero specificity, so any scope rule wins without fighting a `:root` block. The mechanism needs nothing newer than custom properties. Tested in Chrome 153 across eight nestings of the four scopes under both OS schemes; Safari and Firefox are untested and are checked in phase 5, because the design depends on `initial` producing an invalid value rather than an empty one.
 
 `generated/tokens/types.ts`
 
@@ -230,8 +254,9 @@ Tests first:
 
 Tests first, as file snapshots against a fixture config:
 
-- `emit-css`: base block, one media block per mode scoped to `:root:not([data-mode])`, one `[data-mode='x']` block per mode, only overriding tokens repeated.
-- `emit-css`: an `@property` rule per token before the `:root` block. `syntax` comes from the token's type (`<color>`, `<length>`, `<number>`, `*` for font families), `inherits` is `true`, and `initial-value` is the base value. A token may set `inherits: false` in the config. Terrazzo and Style Dictionary do not emit these. They make a token animatable and give it a real default when a mode block does not declare it.
+- `emit-css`: a `:where(html)` base block; for each mode token a slot per mode, filled or set to `initial` under each of the four scopes and the OS media query as in the Generated output section; a `*` chain per mode token; a single declaration for tokens with no mode values.
+- `emit-css`: the four scope rules are emitted once per mode token, so a palette of n mode tokens produces 4n scope lines. The snapshot fixture has enough tokens to show this.
+- `emit-css`: an `@property` rule per token before the `:where(html)` block. `syntax` comes from the token's type (`<color>`, `<length>`, `<number>`, `*` for font families), `inherits` is `true`, and `initial-value` is the base value. A token may set `inherits: false` in the config. Terrazzo and Style Dictionary do not emit these. They make a token animatable and give it a real default when a mode block does not declare it.
 - `emit-css` with `prune: true`: only tokens in the used set, plus every token they reference, are emitted. The used set is the paths collected by the PostCSS plugin and the TypeScript reference walk. `prune` is off in development so the specimen and the editor see every token.
 - `emit-types`: leaf aliases, group unions at every depth, custom unions from `types`, `AnyToken`, `TokenPath`, `TokenMap`.
 - `emit-js`: the `token()` implementation.
@@ -270,6 +295,7 @@ Goal: the site reads generated tokens and not one pixel changes.
 - Remove `tokens.config.ts` from knip's `ignore` list. It is exempt only while nothing reads it.
 - Update the usage comments at the bottom of `tokens.config.ts`, or delete them in favour of this plan. They show `token('bg.page')`, which is an error under the full-paths decision.
 - stylelint: point `importFrom` at the generated file, and allow the `token` function in `function-no-unknown` and `declaration-property-value-no-unknown`.
+- Add a `<Mode>` provider to the site: `value` is `light | dark | auto | inverted`. It reads the resolved scheme from context, resolves `inverted` against a resolved parent to the opposite absolute value, resolves `inverted` under `auto` to the `inverted` attribute, and `inverted` under that to `auto`. It renders `data-mode` on its element. Nothing on the site uses it yet beyond the root, so it lands with a test of the resolution table rather than a visual change.
 - Retype the utilities against the generated unions. Lookup tables become `Record<SpaceToken, string>` keyed by the token literal, which removes the reverse lookup and deletes `src/utilities/space.ts`.
 
 Done when the pixel diff is 0 at 390, 600, 800 and 1280px in light and dark, and `npm run verify` passes.
