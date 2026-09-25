@@ -18,10 +18,23 @@ export interface TokenJetPostcssPlugin extends Plugin {
 const CALL = /\btoken\(\s*(['"])([^'"\n]+)\1\s*\)/y;
 const STRING = /(['"])(?:\\.|(?!\1)[^\\])*\1/y;
 
+export type DeclarationHandler = (decl: Declaration, helpers: Helpers) => void;
+
 // Rewrites token('path') to var(--path) in every declaration, records the
 // path, warns on a deprecated path and fails on an unknown one.
 export default function tokenJet(options: TokenJetPostcssOptions): TokenJetPostcssPlugin {
-  const { tokens } = options.tokens;
+  const { handler, used } = createHandler(options.tokens);
+  return {
+    postcssPlugin: 'token-jet',
+    used,
+    Declaration: handler,
+  };
+}
+
+// The declaration visitor and its used set, for a caller that wants to run
+// the rewrite over a model that changes, such as the vite adapter.
+export function createHandler(resolved: ResolvedTokens): { handler: DeclarationHandler; used: Set<string> } {
+  const { tokens } = resolved;
   const byPath = new Map(tokens.map((t) => [t.path, t]));
   const paths = tokens.map((t) => t.path);
   const groups = new Set(
@@ -80,11 +93,7 @@ export default function tokenJet(options: TokenJetPostcssOptions): TokenJetPostc
     return near === undefined ? '' : `Did you mean "${near}"?`;
   };
 
-  return {
-    postcssPlugin: 'token-jet',
-    used,
-    Declaration: rewrite,
-  };
+  return { handler: rewrite, used };
 }
 
 export const postcss = true;

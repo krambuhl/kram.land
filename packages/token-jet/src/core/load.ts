@@ -62,7 +62,11 @@ export async function loadConfigFile(dir: string): Promise<{ file: string; confi
   if (!existsSync(file)) {
     throw new Error(`No ${CONFIG_FILE} found in ${dir}.`);
   }
-  const module = (await import(pathToFileURL(file).href)) as { default?: Config<Modes> };
+  // Node caches a module by its url for the life of the process. A version
+  // query makes every load a fresh import, so a long-running caller such as
+  // the vite adapter sees the config as it is on disk now.
+  const url = `${pathToFileURL(file).href}?v=${Date.now()}`;
+  const module = (await import(url)) as { default?: Config<Modes> };
   if (module.default === undefined) {
     throw new Error(`${CONFIG_FILE} must export the config as its default export.`);
   }
