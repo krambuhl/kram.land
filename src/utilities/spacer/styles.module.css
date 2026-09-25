@@ -1,143 +1,143 @@
 .pX0 {
-  padding: var(--size-0);
+  padding: token('size.x0');
 }
 
 .pX4 {
-  padding: var(--size-4);
+  padding: token('size.x4');
 }
 
 .pX8 {
-  padding: var(--size-8);
+  padding: token('size.x8');
 }
 
 .pX12 {
-  padding: var(--size-12);
+  padding: token('size.x12');
 }
 
 .pX16 {
-  padding: var(--size-16);
+  padding: token('size.x16');
 }
 
 .pX24 {
-  padding: var(--size-24);
+  padding: token('size.x24');
 }
 
 .pX32 {
-  padding: var(--size-32);
+  padding: token('size.x32');
 }
 
 .pX48 {
-  padding: var(--size-48);
+  padding: token('size.x48');
 }
 
 .pX64 {
-  padding: var(--size-64);
+  padding: token('size.x64');
 }
 
 .pX80 {
-  padding: var(--size-80);
+  padding: token('size.x80');
 }
 
 .pX96 {
-  padding: var(--size-96);
+  padding: token('size.x96');
 }
 
 .pX128 {
-  padding: var(--size-128);
+  padding: token('size.x128');
 }
 
 .phX0 {
-  padding-inline: var(--size-0);
+  padding-inline: token('size.x0');
 }
 
 .phX4 {
-  padding-inline: var(--size-4);
+  padding-inline: token('size.x4');
 }
 
 .phX8 {
-  padding-inline: var(--size-8);
+  padding-inline: token('size.x8');
 }
 
 .phX12 {
-  padding-inline: var(--size-12);
+  padding-inline: token('size.x12');
 }
 
 .phX16 {
-  padding-inline: var(--size-16);
+  padding-inline: token('size.x16');
 }
 
 .phX24 {
-  padding-inline: var(--size-24);
+  padding-inline: token('size.x24');
 }
 
 .phX32 {
-  padding-inline: var(--size-32);
+  padding-inline: token('size.x32');
 }
 
 .phX48 {
-  padding-inline: var(--size-48);
+  padding-inline: token('size.x48');
 }
 
 .phX64 {
-  padding-inline: var(--size-64);
+  padding-inline: token('size.x64');
 }
 
 .phX80 {
-  padding-inline: var(--size-80);
+  padding-inline: token('size.x80');
 }
 
 .phX96 {
-  padding-inline: var(--size-96);
+  padding-inline: token('size.x96');
 }
 
 .phX128 {
-  padding-inline: var(--size-128);
+  padding-inline: token('size.x128');
 }
 
 .pvX0 {
-  padding-block: var(--size-0);
+  padding-block: token('size.x0');
 }
 
 .pvX4 {
-  padding-block: var(--size-4);
+  padding-block: token('size.x4');
 }
 
 .pvX8 {
-  padding-block: var(--size-8);
+  padding-block: token('size.x8');
 }
 
 .pvX12 {
-  padding-block: var(--size-12);
+  padding-block: token('size.x12');
 }
 
 .pvX16 {
-  padding-block: var(--size-16);
+  padding-block: token('size.x16');
 }
 
 .pvX24 {
-  padding-block: var(--size-24);
+  padding-block: token('size.x24');
 }
 
 .pvX32 {
-  padding-block: var(--size-32);
+  padding-block: token('size.x32');
 }
 
 .pvX48 {
-  padding-block: var(--size-48);
+  padding-block: token('size.x48');
 }
 
 .pvX64 {
-  padding-block: var(--size-64);
+  padding-block: token('size.x64');
 }
 
 .pvX80 {
-  padding-block: var(--size-80);
+  padding-block: token('size.x80');
 }
 
 .pvX96 {
-  padding-block: var(--size-96);
+  padding-block: token('size.x96');
 }
 
 .pvX128 {
-  padding-block: var(--size-128);
+  padding-block: token('size.x128');
 }

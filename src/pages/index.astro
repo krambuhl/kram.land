@@ -3,7 +3,7 @@ import { Image } from 'astro:assets';
 
 import { Rule } from 'components/rule';
 import Layout from 'layouts/Layout.astro';
-import { tokens } from 'tokens';
+import { token } from 'generated/tokens';
 import { area } from 'utilities/area';
 import { stack } from 'utilities/stack';
 import { superellipse } from 'utilities/superellipse';
@@ -12,10 +12,10 @@ import ikea from '../assets/ikea.png';
 ---
 
 <Layout>
-  <div class:list={[area({ width: tokens.size.x384 }), stack({ gap: tokens.size.x48, align: 'center' })]}>
+  <div class:list={[area({ width: token('size.x384') }), stack({ gap: token('size.x48'), align: 'center' })]}>
     <Image src={ikea} alt="" width={192} height={192} densities={[1, 2, 3]} priority class={superellipse()} />
 
-    <div class={stack({ gap: tokens.size.x24, align: 'center' })}>
+    <div class={stack({ gap: token('size.x24'), align: 'center' })}>
       <h1 class={headingText({ size: 'xl' })}>oh hi. hello!</h1>
 
       <p class={bodyText()}>

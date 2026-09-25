@@ -9,15 +9,17 @@
     "dev": "astro dev",
     "build": "astro build",
     "lint": "oxlint",
-    "check": "cmk && astro check && npm run check --workspaces --if-present",
+    "check": "npm run tokens && cmk && astro check && npm run check --workspaces --if-present",
     "preview": "astro preview",
     "knip": "knip",
     "format": "prettier --check .",
     "verify": "npm run format && npm run lint && npm run lint:css && npm run check && npm run knip && npm test && npm run build",
-    "lint:css": "stylelint \"src/**/*.css\"",
-    "tokens": "token-jet --version",
+    "lint:css": "npm run tokens && stylelint \"src/**/*.css\"",
+    "tokens": "token-jet generate",
     "prebuild": "npm run tokens",
-    "test": "npm test --workspaces --if-present"
+    "test": "npm test --workspaces --if-present",
+    "predev": "npm run tokens",
+    "prepare": "npm run tokens"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.6",
@@ -45,5 +47,6 @@
   },
   "engines": {
     "node": ">=22.18.0"
-  }
+  },
+  "type": "module"
 }

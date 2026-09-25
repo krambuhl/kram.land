@@ -2,9 +2,38 @@
   "extends": ["stylelint-config-standard"],
   "plugins": ["stylelint-value-no-unknown-custom-properties"],
   "rules": {
-    "csstools/value-no-unknown-custom-properties": [true, { "importFrom": ["src/styles/tokens.css"] }],
-    "selector-class-pattern": ["^[a-z][a-zA-Z0-9]*$", { "message": "Expected class selector to be camelCase" }],
-    "value-keyword-case": ["lower", { "ignoreProperties": ["/^--font-family/"] }],
-    "import-notation": "string"
+    "csstools/value-no-unknown-custom-properties": [
+      true,
+      {
+        "importFrom": ["generated/tokens/tokens.css"]
+      }
+    ],
+    "selector-class-pattern": [
+      "^[a-z][a-zA-Z0-9]*$",
+      {
+        "message": "Expected class selector to be camelCase"
+      }
+    ],
+    "value-keyword-case": [
+      "lower",
+      {
+        "ignoreProperties": ["/^--font-family/"]
+      }
+    ],
+    "import-notation": "string",
+    "function-no-unknown": [
+      true,
+      {
+        "ignoreFunctions": ["token"]
+      }
+    ],
+    "declaration-property-value-no-unknown": [
+      true,
+      {
+        "ignoreProperties": {
+          "/.+/": ["/token\\(/"]
+        }
+      }
+    ]
   }
 }

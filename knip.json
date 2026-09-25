@@ -2,8 +2,9 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
-      "ignore": ["src/utilities/spacer/**", "tokens.config.ts"],
-      "ignoreDependencies": ["the-new-css-reset"]
+      "ignore": ["src/utilities/spacer/**"],
+      "ignoreDependencies": ["the-new-css-reset"],
+      "entry": ["tokens.config.ts"]
     },
     "packages/token-jet": {
       "ignore": ["test/__snapshots__/**", "test/fixtures/usage/**"]

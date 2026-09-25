@@ -6,9 +6,9 @@
     "paths": {
       "components/*": ["./src/components/*"],
       "layouts/*": ["./src/layouts/*"],
-      "tokens": ["./src/tokens"],
       "types/*": ["./src/types/*"],
-      "utilities/*": ["./src/utilities/*"]
+      "utilities/*": ["./src/utilities/*"],
+      "generated/*": ["./generated/*"]
     },
     "rootDirs": [".", "generated"]
   },

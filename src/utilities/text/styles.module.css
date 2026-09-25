@@ -7,51 +7,51 @@
 }
 
 .body {
-  font-weight: var(--font-weight-body);
-  line-height: var(--line-height-body);
+  font-weight: token('font.weight.body');
+  line-height: token('lineHeight.body');
 }
 
 .heading {
-  font-weight: var(--font-weight-header);
-  line-height: var(--line-height-header);
+  font-weight: token('font.weight.header');
+  line-height: token('lineHeight.header');
 }
 
 .bodyXs {
-  font-size: var(--font-size-body-xs);
+  font-size: token('font.size.body.xs');
 }
 
 .bodySm {
-  font-size: var(--font-size-body-sm);
+  font-size: token('font.size.body.sm');
 }
 
 .bodyMd {
-  font-size: var(--font-size-body-md);
+  font-size: token('font.size.body.md');
 }
 
 .bodyLg {
-  font-size: var(--font-size-body-lg);
+  font-size: token('font.size.body.lg');
 }
 
 .bodyXl {
-  font-size: var(--font-size-body-xl);
+  font-size: token('font.size.body.xl');
 }
 
 .headingXs {
-  font-size: var(--font-size-header-xs);
+  font-size: token('font.size.header.xs');
 }
 
 .headingSm {
-  font-size: var(--font-size-header-sm);
+  font-size: token('font.size.header.sm');
 }
 
 .headingMd {
-  font-size: var(--font-size-header-md);
+  font-size: token('font.size.header.md');
 }
 
 .headingLg {
-  font-size: var(--font-size-header-lg);
+  font-size: token('font.size.header.lg');
 }
 
 .headingXl {
-  font-size: var(--font-size-header-xl);
+  font-size: token('font.size.header.xl');
 }

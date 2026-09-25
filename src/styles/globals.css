@@ -1,17 +1,17 @@
 @import 'the-new-css-reset';
-@import './tokens.css';
+@import '../../generated/tokens/tokens.css';
 
 * {
   box-sizing: border-box;
 }
 
 html {
-  line-height: var(--line-height-body);
+  line-height: token('lineHeight.body');
   tab-size: 4;
-  font-family: var(--font-family);
-  font-size: var(--font-size);
-  background-color: var(--bg-base);
-  color: var(--content-default);
+  font-family: token('font.family.base');
+  font-size: token('font.size.base');
+  background-color: token('bg.base');
+  color: token('content.default');
 }
 
 body {

@@ -13,49 +13,49 @@
 }
 
 .gapX0 {
-  gap: var(--size-0);
+  gap: token('size.x0');
 }
 
 .gapX4 {
-  gap: var(--size-4);
+  gap: token('size.x4');
 }
 
 .gapX8 {
-  gap: var(--size-8);
+  gap: token('size.x8');
 }
 
 .gapX12 {
-  gap: var(--size-12);
+  gap: token('size.x12');
 }
 
 .gapX16 {
-  gap: var(--size-16);
+  gap: token('size.x16');
 }
 
 .gapX24 {
-  gap: var(--size-24);
+  gap: token('size.x24');
 }
 
 .gapX32 {
-  gap: var(--size-32);
+  gap: token('size.x32');
 }
 
 .gapX48 {
-  gap: var(--size-48);
+  gap: token('size.x48');
 }
 
 .gapX64 {
-  gap: var(--size-64);
+  gap: token('size.x64');
 }
 
 .gapX80 {
-  gap: var(--size-80);
+  gap: token('size.x80');
 }
 
 .gapX96 {
-  gap: var(--size-96);
+  gap: token('size.x96');
 }
 
 .gapX128 {
-  gap: var(--size-128);
+  gap: token('size.x128');
 }

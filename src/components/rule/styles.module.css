@@ -1,6 +1,6 @@
 .root {
-  margin: var(--size-12) 0;
+  margin: token('size.x12') 0;
   height: 1px;
-  width: var(--size-32);
-  background: var(--content-default);
+  width: token('size.x32');
+  background: token('content.default');
 }

@@ -1,12 +1,19 @@
-import { tokens } from 'tokens';
+import type {
+  SizeX0,
+  SizeX4,
+  SizeX8,
+  SizeX12,
+  SizeX16,
+  SizeX24,
+  SizeX32,
+  SizeX48,
+  SizeX64,
+  SizeX80,
+  SizeX96,
+  SizeX128,
+} from 'generated/tokens';
 
-const spaceKeys = ['x0', 'x4', 'x8', 'x12', 'x16', 'x24', 'x32', 'x48', 'x64', 'x80', 'x96', 'x128'] as const;
-
-export type SpaceKey = (typeof spaceKeys)[number];
-export type SpaceToken = (typeof tokens.size)[SpaceKey];
-
-const keyByToken = Object.fromEntries(spaceKeys.map((key) => [tokens.size[key], key])) as Record<SpaceToken, SpaceKey>;
-
-export function toSpaceKey(token: SpaceToken): SpaceKey {
-  return keyByToken[token];
-}
+// The spacing subset of the size scale, shared by the utilities that take a
+// gap or a padding. A width-sized token is not spacing.
+export type SpaceToken =
+  SizeX0 | SizeX4 | SizeX8 | SizeX12 | SizeX16 | SizeX24 | SizeX32 | SizeX48 | SizeX64 | SizeX80 | SizeX96 | SizeX128;

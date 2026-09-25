@@ -4,65 +4,65 @@
 }
 
 .widthX128 {
-  max-width: var(--size-128);
+  max-width: token('size.x128');
 }
 
 .widthX192 {
-  max-width: var(--size-192);
+  max-width: token('size.x192');
 }
 
 .widthX256 {
-  max-width: var(--size-256);
+  max-width: token('size.x256');
 }
 
 .widthX384 {
-  max-width: var(--size-384);
+  max-width: token('size.x384');
 }
 
 .widthX512 {
-  max-width: var(--size-512);
+  max-width: token('size.x512');
 }
 
 .widthX640 {
-  max-width: var(--size-640);
+  max-width: token('size.x640');
 }
 
 .widthX768 {
-  max-width: var(--size-768);
+  max-width: token('size.x768');
 }
 
 .widthX896 {
-  max-width: var(--size-896);
+  max-width: token('size.x896');
 }
 
 .widthX1024 {
-  max-width: var(--size-1024);
+  max-width: token('size.x1024');
 }
 
 .widthX1152 {
-  max-width: var(--size-1152);
+  max-width: token('size.x1152');
 }
 
 .widthX1280 {
-  max-width: var(--size-1280);
+  max-width: token('size.x1280');
 }
 
 .widthX1408 {
-  max-width: var(--size-1408);
+  max-width: token('size.x1408');
 }
 
 .widthX1536 {
-  max-width: var(--size-1536);
+  max-width: token('size.x1536');
 }
 
 .widthX1664 {
-  max-width: var(--size-1664);
+  max-width: token('size.x1664');
 }
 
 .widthX1792 {
-  max-width: var(--size-1792);
+  max-width: token('size.x1792');
 }
 
 .widthX1920 {
-  max-width: var(--size-1920);
+  max-width: token('size.x1920');
 }
