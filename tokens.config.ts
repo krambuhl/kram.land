@@ -98,13 +98,32 @@ export default defineConfig({
     bg: {
       $group: { type: 'color' },
       page: {
-        default: { value: 'hsl(215deg 0% 100%)', dark: 'hsl(215deg 0% 0%)' },
+        default: { value: '#ffffff', dark: '#040404' },
+        hover: { value: '#f0f0f0', dark: '#1a1a1a' },
+        pressed: { value: '#e0e0e0', dark: '#2a2a2a' },
+      },
+      base: {
+        default: { value: '#f0f0f0', dark: '#1a1a1a' },
+        hover: { value: '#e0e0e0', dark: '#2a2a2a' },
+        pressed: { value: '#d0d0d0', dark: '#3a3a3a' },
+      },
+      elevated: {
+        default: { value: '#ffffff', dark: '#2a2a2a' },
+        hover: { value: '#f0f0f0', dark: '#3a3a3a' },
+        pressed: { value: '#e0e0e0', dark: '#4a4a4a' },
       },
     },
     content: {
       $group: { type: 'color' },
       regular: {
-        default: { value: 'hsl(215deg 70% 0%)', dark: 'hsl(215deg 0% 100%)' },
+        default: { value: '#000000', dark: '#ffffff' },
+        hover: { value: '#111111', dark: '#e0e0e0' },
+        pressed: { value: '#222222', dark: '#d0d0d0' },
+      },
+      muted: {
+        default: { value: '#666666', dark: '#999999' },
+        hover: { value: '#777777', dark: '#888888' },
+        pressed: { value: '#888888', dark: '#777777' },
       },
     },
   },
