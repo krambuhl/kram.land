@@ -101,6 +101,21 @@ describe('token-jet export', () => {
   test('without --dtcg it is an error', () => {
     expect(() => run(project(), 'export')).toThrow(/exit 1.*--dtcg/s);
   });
+
+  test('import --dtcg turns the exported file back into a config that generates the same css', () => {
+    const dir = project();
+    run(dir, 'export', '--dtcg', '--out', 'tokens.dtcg.json');
+    const css = () => {
+      run(dir, 'generate');
+      return readFileSync(join(dir, 'generated/tokens/tokens.css'), 'utf8');
+    };
+    const before = css();
+    expect(run(dir, 'import', '--dtcg', 'tokens.dtcg.json', '--out', 'tokens.config.ts')).toMatch(
+      /wrote tokens\.config\.ts/
+    );
+    expect(readFileSync(join(dir, 'tokens.config.ts'), 'utf8')).toMatch(/^import \{ defineConfig \} from 'token-jet';/);
+    expect(css()).toBe(before);
+  });
 });
 
 describe('token-jet usage and rename', () => {

@@ -3,13 +3,15 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 
 import { toDtcg } from './core/dtcg.ts';
+import { fromDtcg, renderConfig } from './core/dtcg-import.ts';
+import type { DtcgNode } from './core/dtcg.ts';
 import { DEFAULT_OUT_DIR, generateFiles, writeFiles } from './core/generate.ts';
 import { loadConfigFile, loadTokens } from './core/load.ts';
 import { renameConfigKey } from './core/rename-config.ts';
 import { findUsages, renameUsages } from './core/usage.ts';
 import { version } from './version.ts';
 
-const COMMANDS = ['generate', 'check', 'export', 'usage', 'rename'] as const;
+const COMMANDS = ['generate', 'check', 'export', 'import', 'usage', 'rename'] as const;
 
 function usageText(): string {
   return [
@@ -18,6 +20,7 @@ function usageText(): string {
     '  generate [--out <dir>]        write tokens.css, types.ts and index.ts',
     '  check                         print the contrast ratio of every pair in every mode',
     '  export --dtcg [--out <file>]  write the tokens as DTCG 2025.10 json, to stdout by default',
+    '  import --dtcg <file> [--out <file>]  read DTCG json into tokens.config.ts text, to stdout by default',
     '  usage <files...>              list every token() call by path',
     '  rename <from> <to> <files...> rename a token in the files, and in the config unless <to> exists',
     '  --version',
@@ -59,6 +62,20 @@ async function exportTokens(args: readonly string[]): Promise<string> {
   const out = args[outFlag + 1];
   if (out === undefined) throw new Error('--out needs a file.');
   writeFileSync(resolve(out), json);
+  return `wrote ${relative(process.cwd(), resolve(out))}`;
+}
+
+function importTokens(args: readonly string[]): string {
+  const dtcgFlag = args.indexOf('--dtcg');
+  const file = dtcgFlag >= 0 ? args[dtcgFlag + 1] : undefined;
+  if (file === undefined) throw new Error('import needs --dtcg <file>; it is the only format.');
+  const parsed = JSON.parse(readFileSync(resolve(file), 'utf8')) as DtcgNode;
+  const text = renderConfig(fromDtcg(parsed));
+  const outFlag = args.indexOf('--out');
+  if (outFlag < 0) return text.trimEnd();
+  const out = args[outFlag + 1];
+  if (out === undefined) throw new Error('--out needs a file.');
+  writeFileSync(resolve(out), text);
   return `wrote ${relative(process.cwd(), resolve(out))}`;
 }
 
@@ -112,6 +129,9 @@ async function main(argv: readonly string[]): Promise<void> {
       return;
     case 'export':
       console.log(await exportTokens(rest));
+      return;
+    case 'import':
+      console.log(importTokens(rest));
       return;
     case 'usage':
       console.log(await usage(rest));
