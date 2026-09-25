@@ -89,6 +89,20 @@ describe('token-jet check', () => {
   });
 });
 
+describe('token-jet export', () => {
+  test('--dtcg prints the json, and --out writes it', () => {
+    const dir = project();
+    const out = run(dir, 'export', '--dtcg');
+    expect(JSON.parse(out)).toMatchObject({ space: { $type: 'dimension', x4: { $value: { value: 4, unit: 'px' } } } });
+    expect(run(dir, 'export', '--dtcg', '--out', 'tokens.dtcg.json')).toMatch(/wrote tokens\.dtcg\.json/);
+    expect(JSON.parse(readFileSync(join(dir, 'tokens.dtcg.json'), 'utf8'))).toEqual(JSON.parse(out));
+  });
+
+  test('without --dtcg it is an error', () => {
+    expect(() => run(project(), 'export')).toThrow(/exit 1.*--dtcg/s);
+  });
+});
+
 describe('token-jet usage and rename', () => {
   let dir: string;
   beforeAll(() => {

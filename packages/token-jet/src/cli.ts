@@ -2,13 +2,14 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 
+import { toDtcg } from './core/dtcg.ts';
 import { DEFAULT_OUT_DIR, generateFiles, writeFiles } from './core/generate.ts';
 import { loadConfigFile, loadTokens } from './core/load.ts';
 import { renameConfigKey } from './core/rename-config.ts';
 import { findUsages, renameUsages } from './core/usage.ts';
 import { version } from './version.ts';
 
-const COMMANDS = ['generate', 'check', 'usage', 'rename'] as const;
+const COMMANDS = ['generate', 'check', 'export', 'usage', 'rename'] as const;
 
 function usageText(): string {
   return [
@@ -16,6 +17,7 @@ function usageText(): string {
     '',
     '  generate [--out <dir>]        write tokens.css, types.ts and index.ts',
     '  check                         print the contrast ratio of every pair in every mode',
+    '  export --dtcg [--out <file>]  write the tokens as DTCG 2025.10 json, to stdout by default',
     '  usage <files...>              list every token() call by path',
     '  rename <from> <to> <files...> rename a token in the files, and in the config unless <to> exists',
     '  --version',
@@ -46,6 +48,18 @@ async function check(): Promise<string> {
   );
   if (contrast.some((r) => !r.pass)) throw new Error(lines.join('\n'));
   return lines.join('\n');
+}
+
+async function exportTokens(args: readonly string[]): Promise<string> {
+  if (!args.includes('--dtcg')) throw new Error('export needs --dtcg; it is the only format.');
+  const outFlag = args.indexOf('--out');
+  const { config } = await loadConfigFile(process.cwd());
+  const json = `${JSON.stringify(toDtcg(loadTokens(config)), null, 2)}\n`;
+  if (outFlag < 0) return json.trimEnd();
+  const out = args[outFlag + 1];
+  if (out === undefined) throw new Error('--out needs a file.');
+  writeFileSync(resolve(out), json);
+  return `wrote ${relative(process.cwd(), resolve(out))}`;
 }
 
 async function usage(files: readonly string[]): Promise<string> {
@@ -95,6 +109,9 @@ async function main(argv: readonly string[]): Promise<void> {
       return;
     case 'check':
       console.log(await check());
+      return;
+    case 'export':
+      console.log(await exportTokens(rest));
       return;
     case 'usage':
       console.log(await usage(rest));

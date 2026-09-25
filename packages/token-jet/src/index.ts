@@ -13,6 +13,8 @@ export type {
 } from './core/config.ts';
 export { checkContrast, contrastRatio, formatContrastFailures, parseColor } from './core/contrast.ts';
 export type { ContrastResult, Rgba } from './core/contrast.ts';
+export { DTCG_EXTENSION, toDtcg, toDtcgValue } from './core/dtcg.ts';
+export type { DtcgColor, DtcgFile, DtcgNode, DtcgUnitValue, DtcgValue } from './core/dtcg.ts';
 export { flatten } from './core/flatten.ts';
 export type { Token } from './core/flatten.ts';
 export { matchGlob } from './core/glob.ts';

@@ -1,0 +1,158 @@
+{
+  "$extensions": {
+    "token-jet": {
+      "modes": {
+        "dark": "(prefers-color-scheme: dark)",
+        "contrast": "(prefers-contrast: more)"
+      }
+    }
+  },
+  "space": {
+    "$type": "dimension",
+    "x4": {
+      "$value": {
+        "value": 4,
+        "unit": "px"
+      }
+    },
+    "x16": {
+      "$value": {
+        "value": 16,
+        "unit": "px"
+      },
+      "$description": "The default gap."
+    }
+  },
+  "weight": {
+    "bold": {
+      "$type": "fontWeight",
+      "$value": 700
+    }
+  },
+  "family": {
+    "body": {
+      "$type": "fontFamily",
+      "$value": [
+        "Inter",
+        "sans-serif"
+      ]
+    }
+  },
+  "ratio": {
+    "golden": {
+      "$type": "number",
+      "$value": 1.618,
+      "$extensions": {
+        "token-jet": {
+          "inherits": false
+        }
+      }
+    }
+  },
+  "gray": {
+    "50": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.9804,
+          0.9804,
+          0.9804
+        ],
+        "hex": "#fafafa"
+      }
+    },
+    "900": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.0902,
+          0.0902,
+          0.0902
+        ],
+        "hex": "#171717"
+      }
+    },
+    "$type": "color"
+  },
+  "bg": {
+    "$type": "color",
+    "page": {
+      "$value": "{gray.50}",
+      "$extensions": {
+        "token-jet": {
+          "modes": {
+            "dark": "{gray.900}"
+          }
+        }
+      }
+    },
+    "card": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          1,
+          1,
+          1
+        ],
+        "hex": "#ffffff"
+      },
+      "$extensions": {
+        "token-jet": {
+          "modes": {
+            "dark": {
+              "colorSpace": "srgb",
+              "components": [
+                0.102,
+                0.102,
+                0.102
+              ],
+              "hex": "#1a1a1a"
+            },
+            "contrast": {
+              "colorSpace": "srgb",
+              "components": [
+                0,
+                0,
+                0
+              ],
+              "hex": "#000000"
+            }
+          }
+        }
+      }
+    }
+  },
+  "content": {
+    "$type": "color",
+    "regular": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [
+          0.0667,
+          0.0667,
+          0.0667
+        ],
+        "hex": "#111111"
+      },
+      "$deprecated": "use content.body",
+      "$extensions": {
+        "token-jet": {
+          "modes": {
+            "dark": {
+              "colorSpace": "srgb",
+              "components": [
+                0.9333,
+                0.9333,
+                0.9333
+              ],
+              "hex": "#eeeeee"
+            }
+          }
+        }
+      }
+    },
+    "body": {
+      "$value": "{content.regular}"
+    }
+  }
+}
