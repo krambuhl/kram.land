@@ -212,18 +212,18 @@ A token may carry `type`, `description` and `deprecated`.
 
 ```ts
 content: {
+  $group: { type: 'color' },
   muted: {
     default: {
       value: '#666666',
       dark: '#999999',
-      type: 'color',
       description: 'Secondary text. Never for body copy.',
     },
   },
 },
 ```
 
-- `type` is one of `color`, `dimension`, `fontFamily`, `fontWeight`, `number`, `duration`, and the composites `typography`, `shadow`, `border` and `transition`, whose sub-values follow the DTCG 2025.10 shapes. A composite emits one custom property per sub-value. The generator validates the value against it, and a reference must point at a token of the same type. A group may declare `type` once for all its leaves.
+- `type` is one of `color`, `dimension`, `fontFamily`, `fontWeight`, `number`, `duration`, and the composites `typography`, `shadow`, `border` and `transition`, whose sub-values follow the DTCG 2025.10 shapes. A composite emits one custom property per sub-value. The generator validates the value against it, and a reference must point at a token of the same type. A group declares `type` once for all its leaves under a `$group` key. The key is reserved, so it cannot collide with a child, and it lets TypeScript give the metadata a narrower type than the index signature gives children; a loose `type` key beside children cannot be typed that way.
 - `description` is emitted as a JSDoc comment on the generated type, so it appears in editor hover in TypeScript. The language server shows it in CSS.
 - `deprecated` is covered in the next phase.
 

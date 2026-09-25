@@ -1,8 +1,9 @@
+import { GROUP_KEY, METADATA_KEYS } from './config.ts';
 import type { Config, Modes } from './config.ts';
 import type { Token } from './flatten.ts';
 import { isLeaf } from './flatten.ts';
 
-const RESERVED = new Set(['value']);
+const RESERVED = new Set(['value', GROUP_KEY, ...METADATA_KEYS]);
 
 // Checks what the types cannot: no token or group is named after a reserved
 // key, every mode key on a leaf exists in modes, and no group is empty.
@@ -24,7 +25,11 @@ export function validate(config: Config<Modes>, tokens: readonly Token[]): void 
 }
 
 function checkTree(tree: object, parent: string[], reserved: ReadonlySet<string>): void {
-  const entries = Object.entries(tree);
+  // Only children are tokens or groups; the group's own metadata under
+  // `$group` does not make it non-empty.
+  const entries = Object.entries(tree).filter(
+    ([key, node]) => key !== GROUP_KEY && typeof node === 'object' && node !== null
+  );
   if (entries.length === 0) {
     throw new Error(`Group "${parent.join('.')}" has no tokens.`);
   }

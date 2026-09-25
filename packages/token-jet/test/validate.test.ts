@@ -26,3 +26,23 @@ describe('validate', () => {
     expect(() => validate(empty, flatten(empty.tokens))).toThrow(/space.*no tokens/);
   });
 });
+
+describe('validate with metadata', () => {
+  test('metadata keys on a leaf are not mistaken for mode values', () => {
+    const c = {
+      ...config,
+      tokens: { a: { value: '#fff', type: 'color' as const, description: 'x', deprecated: true } },
+    };
+    expect(() => validate(c, flatten(c.tokens))).not.toThrow();
+  });
+
+  test("a group's type is not mistaken for a child", () => {
+    const c = { ...config, tokens: { bg: { $group: { type: 'color' as const }, page: { value: '#fff' } } } };
+    expect(() => validate(c, flatten(c.tokens))).not.toThrow();
+  });
+
+  test('a group with only metadata has no tokens', () => {
+    const c = { ...config, tokens: { bg: { $group: { type: 'color' as const } } } };
+    expect(() => validate(c, flatten(c.tokens))).toThrow(/bg.*no tokens/);
+  });
+});
