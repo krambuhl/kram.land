@@ -1,3 +1,7 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
 import type { Config, Modes } from './config.ts';
 import { flatten } from './flatten.ts';
 import type { Token } from './flatten.ts';
@@ -6,6 +10,8 @@ import { checkTypes } from './metadata.ts';
 import { checkTypeNameCollisions, unionName } from './names.ts';
 import { checkReferences } from './references.ts';
 import { validate } from './validate.ts';
+
+const CONFIG_FILE = 'tokens.config.ts';
 
 export interface Union {
   name: string;
@@ -47,4 +53,18 @@ export function loadTokens(config: Config<Modes>): ResolvedTokens {
   checkTypeNameCollisions(unions);
 
   return { config, tokens, unions };
+}
+
+// Imports tokens.config.ts from a directory. Node runs the TypeScript
+// directly, so no build step sits between the config and the generator.
+export async function loadConfigFile(dir: string): Promise<{ file: string; config: Config<Modes> }> {
+  const file = resolve(dir, CONFIG_FILE);
+  if (!existsSync(file)) {
+    throw new Error(`No ${CONFIG_FILE} found in ${dir}.`);
+  }
+  const module = (await import(pathToFileURL(file).href)) as { default?: Config<Modes> };
+  if (module.default === undefined) {
+    throw new Error(`${CONFIG_FILE} must export the config as its default export.`);
+  }
+  return { file, config: module.default };
 }

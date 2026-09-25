@@ -291,7 +291,7 @@ Tested with a small fixture project built through Vite's JavaScript API.
 
 Goal: the site reads generated tokens and not one pixel changes.
 
-- Rewrite `tokens.config.ts` with `defineConfig`. Fill it with the values the site uses today, including the groups the draft config lacks: font family, font size, font weight, line height and radius. The site's stylesheets use two color tokens and eighteen typography tokens, so typography is most of this work.
+- Rewrite `tokens.config.ts` with `defineConfig` as its default export, which is what `loadConfigFile` imports. Add `"type": "module"` to the root `package.json`, or node reparses the config on every run and warns. Fill it with the values the site uses today, including the groups the draft config lacks: font family, font size, font weight, line height and radius. The site's stylesheets use two color tokens and eighteen typography tokens, so typography is most of this work.
 - Space and size values are written in `px`. At the default browser font size this renders identically to today's `rem` values, so the pixel diff stays at zero. Users who have changed their browser's font-size setting will see spacing stop scaling with it. This is the accepted consequence of the units decision and it lands in this commit.
 - Add pre-scripts so `dev`, `build`, `check` and `lint:css` regenerate first. Add `prepare` so a fresh install has tokens.
 - Register the Vite adapter in `astro.config.mjs`. Import `generated/tokens/tokens.css` in `globals.css`.
