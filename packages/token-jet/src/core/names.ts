@@ -6,6 +6,11 @@ export function cssVariableName(path: string): string {
   return `--${path.split('.').join('-')}`;
 }
 
+// What a token resolves to in css and typescript alike: the var() reference.
+export function cssVariableReference(path: string): string {
+  return `var(${cssVariableName(path)})`;
+}
+
 // A single token's type is its PascalCase path.
 export function typeName(path: string): string {
   return path.split('.').map(pascal).join('');

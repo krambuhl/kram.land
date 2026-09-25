@@ -6,7 +6,7 @@
       "ignoreDependencies": ["the-new-css-reset"]
     },
     "packages/token-jet": {
-      "ignore": ["test/fixtures/usage/**"]
+      "ignore": ["test/__snapshots__/**", "test/fixtures/usage/**"]
     }
   }
 }

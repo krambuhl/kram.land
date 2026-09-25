@@ -1,6 +1,6 @@
 import type { TokenValue } from './config.ts';
 import type { Token } from './flatten.ts';
-import { cssVariableName } from './names.ts';
+import { cssVariableReference } from './names.ts';
 
 const REFERENCE = /^\{([^{}\s]+)\}$/;
 
@@ -15,7 +15,7 @@ export function parseReference(value: TokenValue): string | null {
 // semantic token follows its target at runtime, or the literal as written.
 export function emitValue(value: TokenValue): string {
   const target = parseReference(value);
-  return target === null ? String(value) : `var(${cssVariableName(target)})`;
+  return target === null ? String(value) : cssVariableReference(target);
 }
 
 // Every value on a token, base and per mode, that is a reference.
