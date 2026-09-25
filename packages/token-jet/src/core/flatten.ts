@@ -9,6 +9,7 @@ export interface Token {
   type?: TokenType;
   description?: string;
   deprecated?: boolean | string;
+  inherits?: boolean;
   // The type declared on the nearest enclosing group, if any.
   groupType?: TokenType;
 }
@@ -41,6 +42,7 @@ export function flatten(tree: TokenTree<Modes>, parent: string[] = [], groupType
         ...(node.type !== undefined && { type: node.type }),
         ...(node.description !== undefined && { description: node.description }),
         ...(node.deprecated !== undefined && { deprecated: node.deprecated }),
+        ...(node.inherits !== undefined && { inherits: node.inherits }),
         ...(ownType !== undefined && { groupType: ownType }),
       });
     } else {

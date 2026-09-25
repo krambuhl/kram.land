@@ -6,7 +6,7 @@ export const TOKEN_TYPES = ['color', 'dimension', 'fontFamily', 'fontWeight', 'n
 export type TokenType = (typeof TOKEN_TYPES)[number];
 
 // Keys on a leaf that are not its value or a mode value.
-export const METADATA_KEYS = ['type', 'description', 'deprecated'] as const;
+export const METADATA_KEYS = ['type', 'description', 'deprecated', 'inherits'] as const;
 // The key a group's metadata lives under.
 export const GROUP_KEY = '$group';
 
@@ -14,6 +14,8 @@ export interface TokenMetadata {
   type?: TokenType;
   description?: string;
   deprecated?: boolean | string;
+  // Whether the custom property inherits. Defaults to true.
+  inherits?: boolean;
 }
 
 // A leaf: a value plus an optional override per mode. The mode keys are the
