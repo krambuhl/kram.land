@@ -15,6 +15,8 @@ export { checkContrast, contrastRatio, formatContrastFailures, parseColor } from
 export type { ContrastResult, Rgba } from './core/contrast.ts';
 export { DTCG_EXTENSION, toDtcg, toDtcgValue } from './core/dtcg.ts';
 export type { DtcgColor, DtcgFile, DtcgNode, DtcgUnitValue, DtcgValue } from './core/dtcg.ts';
+export { diffDtcg, formatDiff } from './core/dtcg-diff.ts';
+export type { DiffFinding } from './core/dtcg-diff.ts';
 export { fromDtcg, fromDtcgValue, renderConfig } from './core/dtcg-import.ts';
 export type { ImportedConfig } from './core/dtcg-import.ts';
 export { flatten } from './core/flatten.ts';

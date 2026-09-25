@@ -118,6 +118,22 @@ describe('token-jet export', () => {
   });
 });
 
+describe('token-jet diff', () => {
+  test('an identical export exits 0, and one with a missing, an extra and a changed token exits 1 listing all three', () => {
+    const dir = project();
+    run(dir, 'export', '--dtcg', '--out', 'export.json');
+    expect(run(dir, 'diff', 'export.json')).toMatch(/export\.json matches the config/);
+    const file = JSON.parse(readFileSync(join(dir, 'export.json'), 'utf8')) as Record<string, Record<string, unknown>>;
+    delete file.space.x4;
+    file.space.x24 = { $value: { value: 24, unit: 'px' } };
+    file.gray[900] = { $value: { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000000' } };
+    writeFileSync(join(dir, 'export.json'), JSON.stringify(file));
+    expect(() => run(dir, 'diff', 'export.json')).toThrow(
+      /exit 1.*space\.x4: missing from the export\n.*space\.x24: in the export only\n.*gray\.900 in base: #171717 here, #000000 in the export/s
+    );
+  });
+});
+
 describe('token-jet usage and rename', () => {
   let dir: string;
   beforeAll(() => {

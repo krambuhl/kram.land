@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 
 import { toDtcg } from './core/dtcg.ts';
+import { diffDtcg, formatDiff } from './core/dtcg-diff.ts';
 import { fromDtcg, renderConfig } from './core/dtcg-import.ts';
 import type { DtcgNode } from './core/dtcg.ts';
 import { DEFAULT_OUT_DIR, generateFiles, writeFiles } from './core/generate.ts';
@@ -11,7 +12,7 @@ import { renameConfigKey } from './core/rename-config.ts';
 import { findUsages, renameUsages } from './core/usage.ts';
 import { version } from './version.ts';
 
-const COMMANDS = ['generate', 'check', 'export', 'import', 'usage', 'rename'] as const;
+const COMMANDS = ['generate', 'check', 'export', 'import', 'diff', 'usage', 'rename'] as const;
 
 function usageText(): string {
   return [
@@ -21,6 +22,7 @@ function usageText(): string {
     '  check                         print the contrast ratio of every pair in every mode',
     '  export --dtcg [--out <file>]  write the tokens as DTCG 2025.10 json, to stdout by default',
     '  import --dtcg <file> [--out <file>]  read DTCG json into tokens.config.ts text, to stdout by default',
+    '  diff <export.json>            compare the config with a DTCG export; exit 1 on any difference',
     '  usage <files...>              list every token() call by path',
     '  rename <from> <to> <files...> rename a token in the files, and in the config unless <to> exists',
     '  --version',
@@ -79,6 +81,16 @@ function importTokens(args: readonly string[]): string {
   return `wrote ${relative(process.cwd(), resolve(out))}`;
 }
 
+async function diff(args: readonly string[]): Promise<string> {
+  const [file] = args;
+  if (file === undefined) throw new Error('diff needs a DTCG export file.');
+  const { config } = await loadConfigFile(process.cwd());
+  const theirs = JSON.parse(readFileSync(resolve(file), 'utf8')) as DtcgNode;
+  const findings = diffDtcg(toDtcg(loadTokens(config)), theirs);
+  if (findings.length > 0) throw new Error(formatDiff(findings).join('\n'));
+  return `${relative(process.cwd(), resolve(file))} matches the config`;
+}
+
 async function usage(files: readonly string[]): Promise<string> {
   if (files.length === 0) throw new Error('usage needs at least one file.');
   const { config } = await loadConfigFile(process.cwd());
@@ -132,6 +144,9 @@ async function main(argv: readonly string[]): Promise<void> {
       return;
     case 'import':
       console.log(importTokens(rest));
+      return;
+    case 'diff':
+      console.log(await diff(rest));
       return;
     case 'usage':
       console.log(await usage(rest));
