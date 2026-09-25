@@ -14,7 +14,7 @@ A one-page personal site. Components are React, and [Astro](https://astro.build)
 | `npm run lint:css` | Run stylelint on the stylesheets                |
 | `npm run format`   | Check formatting with Prettier                  |
 | `npm run knip`     | Find unused files, dependencies and exports     |
-| `npm test`         | Run the tests in every workspace package        |
+| `npm test`         | Run the site tests, then every workspace's      |
 | `npm run verify`   | Run every check above, then build. CI runs this |
 
 Requires Node 22.12 or later.
@@ -26,8 +26,8 @@ The repo is an npm workspace. The site is the root package, and `packages/` hold
 ## Layout
 
 - `src/pages/` holds the routes, `index.astro` and `404.astro`. Each one composes the React components into a page, and uses Astro's `<Image>` for build-time image resizing.
-- `src/layouts/Layout.astro` holds the document `<html>` and `<head>` and wraps each page in `PageContainer`. It stays in Astro: a `<head>` rendered by React gets no stylesheet links, so the page comes out unstyled.
-- `src/components/` holds each component as `name/index.tsx` beside `name/styles.module.css`.
+- `src/layouts/Layout.astro` holds the document `<html>` and `<head>` and wraps each page in `Mode` and `PageContainer`. It stays in Astro: a `<head>` rendered by React gets no stylesheet links, so the page comes out unstyled.
+- `src/components/` holds each component as `name/index.tsx` beside `name/styles.module.css`. A component's tests sit beside it as `name/index.test.tsx`, run by Vitest with `react-dom/server`.
 - `src/utilities/` holds style utilities: functions that return CSS Module class names to put on any element, such as `stack({ gap: token('size.x16') })`.
 - `tokens.config.ts` defines the design tokens. `token-jet` generates `generated/tokens/` from it before every dev, build and check: `tokens.css` (custom properties, with an `@property` per token and a slot per colour mode), `types.ts` and `index.ts` (a typed `token()`). The folder is gitignored; `npm install` generates it.
 - `src/assets/` holds images Astro resizes at build time. `public/` holds files served as-is.
@@ -44,6 +44,10 @@ Layout behaviour that applies to any element is a utility function, not a compon
 - `area({ width })` centers an element and caps its width. `stack({ gap, align })` makes an element a vertical flex stack. `spacer({ p, ph, pv })` sets padding on all sides, horizontally and vertically. `superellipse()` gives an element the site's curved shape and clips its children to it. `headingText({ size })` and `bodyText({ size })` set the type style; the caller chooses the element.
 - Token arguments take `token('…')` values. Spacing accepts `x0` to `x128` and widths accept `x128` to `x1920`; the types reject anything outside those ranges.
 - Utilities are not responsive. Spacing that changes at a breakpoint is written in a CSS Module, as `PageContainer` does.
+
+## Colour modes
+
+Every colour token has a light and a dark value. `<Mode value>` sets which one applies to its subtree by rendering `data-mode` on a wrapper, and the generated CSS keys its colour-mode scopes off that attribute. `light` and `dark` are absolute. `auto` follows the OS scheme and `inverted` opposes it; nested under `light` or `dark`, `inverted` resolves to the opposite absolute value, and `inverted` inside `inverted` is `auto` again. `Layout.astro` wraps every page in `auto`, which is also what an element with no `data-mode` ancestor gets.
 
 ## Typed CSS Modules
 

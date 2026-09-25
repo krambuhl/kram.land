@@ -17,7 +17,7 @@
     "lint:css": "npm run tokens && stylelint \"src/**/*.css\"",
     "tokens": "token-jet generate",
     "prebuild": "npm run tokens",
-    "test": "npm test --workspaces --if-present",
+    "test": "vitest run && npm test --workspaces --if-present",
     "predev": "npm run tokens",
     "prepare": "npm run tokens"
   },
@@ -43,7 +43,8 @@
     "stylelint-config-standard": "^40.0.0",
     "stylelint-value-no-unknown-custom-properties": "^6.1.1",
     "token-jet": "*",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "vitest": "^5.0.1"
   },
   "engines": {
     "node": ">=22.18.0"

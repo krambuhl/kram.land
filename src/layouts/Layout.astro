@@ -1,6 +1,7 @@
 ---
 import { getImage } from 'astro:assets';
 
+import { Mode } from 'components/mode';
 import { PageContainer } from 'components/page-container';
 import ikea from '../assets/ikea.png';
 
@@ -36,8 +37,10 @@ const image = new URL(social.src, Astro.site).href;
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
-    <PageContainer>
-      <slot />
-    </PageContainer>
+    <Mode value="auto">
+      <PageContainer>
+        <slot />
+      </PageContainer>
+    </Mode>
   </body>
 </html>
