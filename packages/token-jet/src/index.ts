@@ -2,6 +2,7 @@ export { defineConfig } from './core/config.ts';
 export { TOKEN_TYPES } from './core/config.ts';
 export type {
   Config,
+  ContrastConfig,
   Modes,
   TokenLeaf,
   TokenMetadata,
@@ -10,6 +11,8 @@ export type {
   TokenValue,
   TypePattern,
 } from './core/config.ts';
+export { checkContrast, contrastRatio, formatContrastFailures, parseColor } from './core/contrast.ts';
+export type { ContrastResult, Rgba } from './core/contrast.ts';
 export { flatten } from './core/flatten.ts';
 export type { Token } from './core/flatten.ts';
 export { matchGlob } from './core/glob.ts';

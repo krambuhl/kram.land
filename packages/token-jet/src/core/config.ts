@@ -41,10 +41,16 @@ export interface TokenTree<M extends Modes> {
 // A union in the types block: one glob or a list of globs.
 export type TypePattern = string | string[];
 
+export interface ContrastConfig {
+  minimum: number;
+  pairs: readonly (readonly [foreground: string, background: string])[];
+}
+
 export interface Config<M extends Modes = Modes> {
   modes: M;
   tokens: TokenTree<M>;
   types?: Record<string, TypePattern>;
+  contrast?: ContrastConfig;
 }
 
 export function defineConfig<const M extends Modes>(config: Config<M>): Config<M> {

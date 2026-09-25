@@ -66,6 +66,29 @@ describe('token-jet generate', () => {
   });
 });
 
+describe('token-jet check', () => {
+  const withPairs = (pairs: string) =>
+    fixture.replace('  types: {', `  contrast: { minimum: 4.5, pairs: [${pairs}] },\n  types: {`);
+
+  test('prints every pair in every mode with its ratio', () => {
+    const out = run(project(withPairs("['content.body', 'bg.page']")), 'check');
+    expect(out).toMatch(/content\.body on bg\.page in base: 18\.09 ok/);
+    expect(out).toMatch(/content\.body on bg\.page in dark: 15\.45 ok/);
+    expect(out).toMatch(/content\.body on bg\.page in contrast: 18\.09 ok/);
+  });
+
+  test('a failing pair exits 1 with the mode and ratio, and generate refuses too', () => {
+    const dir = project(withPairs("['content.body', 'bg.page'], ['gray.900', 'bg.card']"));
+    expect(() => run(dir, 'check')).toThrow(/exit 1.*gray\.900 on bg\.card in dark: 1\.03 below 4\.5/s);
+    expect(() => run(dir, 'generate')).toThrow(/exit 1.*Contrast check failed for 2 of 6 checks/s);
+    expect(existsSync(join(dir, 'generated'))).toBe(false);
+  });
+
+  test('says so when the config has no pairs', () => {
+    expect(run(project(), 'check')).toMatch(/no contrast pairs/);
+  });
+});
+
 describe('token-jet usage and rename', () => {
   let dir: string;
   beforeAll(() => {

@@ -330,7 +330,9 @@ contrast: {
 - WCAG 2.1 is the only algorithm. WCAG 3 is a working draft whose contrast algorithm is undecided, and APCA was removed from it in 2023. Tools that ship APCA present it as guidance, never compliance.
 - Every mode is checked. Terrazzo's rule checks only the default context, which lets a dark-mode failure through.
 - A bad pair, such as a path that is not a colour, is reported with the other findings, not thrown, so one mistake does not hide the rest.
-- A pair may name a typography token as its third member, and `largeText` is derived from that token's size and weight instead of being a boolean the author has to keep in sync.
+- A pair may name a typography token as its third member, and `largeText` is derived from that token's size and weight instead of being a boolean the author has to keep in sync. This waits for composite types: until a typography token exists there is nothing to name, so every pair is held to the one `minimum`.
+- Colours are read as hex, `rgb()` or `hsl()`, in modern or legacy syntax. A translucent foreground is composited over the background before the ratio is taken. A named colour or an `oklch()` value in a pair is reported as unreadable rather than guessed at.
+- `loadTokens` computes every result without throwing, so `token-jet check` can print the passing ratios too. `generateFiles` is the gate: it refuses when any result fails, which covers the CLI and the Vite adapter alike.
 
 Tests first:
 

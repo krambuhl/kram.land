@@ -8,13 +8,14 @@ import { renameConfigKey } from './core/rename-config.ts';
 import { findUsages, renameUsages } from './core/usage.ts';
 import { version } from './version.ts';
 
-const COMMANDS = ['generate', 'usage', 'rename'] as const;
+const COMMANDS = ['generate', 'check', 'usage', 'rename'] as const;
 
 function usageText(): string {
   return [
     'token-jet <command>',
     '',
     '  generate [--out <dir>]        write tokens.css, types.ts and index.ts',
+    '  check                         print the contrast ratio of every pair in every mode',
     '  usage <files...>              list every token() call by path',
     '  rename <from> <to> <files...> rename a token in the files, and in the config unless <to> exists',
     '  --version',
@@ -32,6 +33,19 @@ async function generate(args: readonly string[]): Promise<string> {
   const { config } = await loadConfigFile(process.cwd());
   const written = writeFiles(resolve(outDir), generateFiles(loadTokens(config)));
   return `wrote ${written.length} files to ${relative(process.cwd(), resolve(outDir))}`;
+}
+
+async function check(): Promise<string> {
+  const { config } = await loadConfigFile(process.cwd());
+  const { contrast } = loadTokens(config);
+  if (contrast.length === 0) return 'no contrast pairs in the config';
+  const lines = contrast.map((r) =>
+    r.error !== undefined
+      ? `${r.foreground} on ${r.background} in ${r.mode}: ${r.error}`
+      : `${r.foreground} on ${r.background} in ${r.mode}: ${r.ratio} ${r.pass ? 'ok' : `below ${config.contrast?.minimum}`}`
+  );
+  if (contrast.some((r) => !r.pass)) throw new Error(lines.join('\n'));
+  return lines.join('\n');
 }
 
 async function usage(files: readonly string[]): Promise<string> {
@@ -78,6 +92,9 @@ async function main(argv: readonly string[]): Promise<void> {
   switch (command) {
     case 'generate':
       console.log(await generate(rest));
+      return;
+    case 'check':
+      console.log(await check());
       return;
     case 'usage':
       console.log(await usage(rest));

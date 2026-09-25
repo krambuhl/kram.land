@@ -3,6 +3,8 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import type { Config, Modes } from './config.ts';
+import { checkContrast } from './contrast.ts';
+import type { ContrastResult } from './contrast.ts';
 import { flatten } from './flatten.ts';
 import type { Token } from './flatten.ts';
 import { matchGlob } from './glob.ts';
@@ -25,6 +27,7 @@ export interface ResolvedTokens {
   // Every group at every depth, and every entry in the types block, as a
   // named union of token paths.
   unions: Union[];
+  contrast: ContrastResult[];
 }
 
 // The one entry point every emitter and tool reads tokens through, so they
@@ -52,7 +55,7 @@ export function loadTokens(config: Config<Modes>): ResolvedTokens {
   }
   checkTypeNameCollisions(unions);
 
-  return { config, tokens, unions };
+  return { config, tokens, unions, contrast: checkContrast(config, tokens) };
 }
 
 // Imports tokens.config.ts from a directory. Node runs the TypeScript
