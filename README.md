@@ -14,9 +14,14 @@ A one-page personal site. Components are React, and [Astro](https://astro.build)
 | `npm run lint:css` | Run stylelint on the stylesheets                |
 | `npm run format`   | Check formatting with Prettier                  |
 | `npm run knip`     | Find unused files, dependencies and exports     |
+| `npm test`         | Run the tests in every workspace package        |
 | `npm run verify`   | Run every check above, then build. CI runs this |
 
 Requires Node 22.12 or later.
+
+## Workspace
+
+The repo is an npm workspace. The site is the root package, and `packages/` holds packages it depends on. `packages/token-jet` is the design token generator; its plan is in `packages/token-jet/PLAN.md`. Its TypeScript runs from source, which needs Node 22.18 or later.
 
 ## Layout
 

@@ -2,16 +2,22 @@
   "name": "kram.land",
   "version": "1.0.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
     "lint": "oxlint",
-    "check": "cmk && astro check",
+    "check": "cmk && astro check && npm run check --workspaces --if-present",
     "preview": "astro preview",
     "knip": "knip",
     "format": "prettier --check .",
-    "verify": "npm run format && npm run lint && npm run lint:css && npm run check && npm run knip && npm run build",
-    "lint:css": "stylelint \"src/**/*.css\""
+    "verify": "npm run format && npm run lint && npm run lint:css && npm run check && npm run knip && npm test && npm run build",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "tokens": "token-jet --version",
+    "prebuild": "npm run tokens",
+    "test": "npm test --workspaces --if-present"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.6",
@@ -34,9 +40,10 @@
     "stylelint": "^17.15.0",
     "stylelint-config-standard": "^40.0.0",
     "stylelint-value-no-unknown-custom-properties": "^6.1.1",
+    "token-jet": "*",
     "typescript": "6.0.3"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.18.0"
   }
 }
