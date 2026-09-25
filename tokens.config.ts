@@ -7,7 +7,7 @@ export default defineConfig({
     dark: '(prefers-color-scheme: dark)',
   },
   tokens: {
-    size: {
+    space: {
       $group: { type: 'dimension' },
       x0: { value: '0px' },
       x4: { value: '4px' },
@@ -21,6 +21,9 @@ export default defineConfig({
       x80: { value: '80px' },
       x96: { value: '96px' },
       x128: { value: '128px' },
+    },
+    size: {
+      $group: { type: 'dimension' },
       x192: { value: '192px' },
       x256: { value: '256px' },
       x384: { value: '384px' },
@@ -94,37 +97,18 @@ export default defineConfig({
     },
     bg: {
       $group: { type: 'color' },
-      base: { value: 'hsl(215deg 0% 100%)', dark: 'hsl(215deg 0% 0%)' },
-      low: { value: 'hsl(215deg 10% 94%)', dark: 'hsl(215deg 30% 8%)' },
-      mid: { value: 'hsl(215deg 12% 86%)', dark: 'hsl(215deg 25% 12%)' },
-      high: { value: 'hsl(215deg 18% 78%)', dark: 'hsl(215deg 20% 18%)' },
+      page: {
+        default: { value: 'hsl(215deg 0% 100%)', dark: 'hsl(215deg 0% 0%)' },
+      },
     },
     content: {
       $group: { type: 'color' },
-      default: { value: 'hsl(215deg 70% 0%)', dark: 'hsl(215deg 0% 100%)' },
-      hover: { value: 'hsl(215deg 70% 2.5%)', dark: 'hsl(215deg 0% 92.5%)' },
-      pressed: { value: 'hsl(215deg 70% 5%)', dark: 'hsl(215deg 0% 85%)' },
-    },
-    action: {
-      $group: { type: 'color' },
-      default: { value: 'hsl(215deg 70% 5%)', dark: 'hsl(215deg 5% 100%)' },
-      hover: { value: 'hsl(215deg 70% 8%)', dark: 'hsl(215deg 5% 95%)' },
-      pressed: { value: 'hsl(215deg 70% 11%)', dark: 'hsl(215deg 5% 90%)' },
-    },
-    muted: {
-      $group: { type: 'color' },
-      default: { value: 'hsl(215deg 10% 30%)', dark: 'hsl(215deg 5% 75%)' },
-      hover: { value: 'hsl(215deg 10% 37.5%)', dark: 'hsl(215deg 5% 70%)' },
-      pressed: { value: 'hsl(215deg 10% 35%)', dark: 'hsl(215deg 5% 65%)' },
-    },
-    inverted: {
-      $group: { type: 'color' },
-      default: { value: 'hsl(215deg 0% 0%)', dark: 'hsl(215deg 0% 100%)' },
-      hover: { value: 'hsl(215deg 0% 5%)', dark: 'hsl(215deg 0% 95%)' },
-      pressed: { value: 'hsl(215deg 0% 10%)', dark: 'hsl(215deg 0% 90%)' },
+      regular: {
+        default: { value: 'hsl(215deg 70% 0%)', dark: 'hsl(215deg 0% 100%)' },
+      },
     },
   },
   types: {
-    color: ['bg.**', 'content.**', 'action.**', 'muted.**', 'inverted.**'],
+    color: ['bg.**', 'content.**'],
   },
 });

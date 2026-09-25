@@ -12,10 +12,10 @@ import ikea from '../assets/ikea.png';
 ---
 
 <Layout>
-  <div class:list={[area({ width: token('size.x384') }), stack({ gap: token('size.x48'), align: 'center' })]}>
+  <div class:list={[area({ width: token('size.x384') }), stack({ gap: token('space.x48'), align: 'center' })]}>
     <Image src={ikea} alt="" width={192} height={192} densities={[1, 2, 3]} priority class={superellipse()} />
 
-    <div class={stack({ gap: token('size.x24'), align: 'center' })}>
+    <div class={stack({ gap: token('space.x24'), align: 'center' })}>
       <h1 class={headingText({ size: 'xl' })}>oh hi. hello!</h1>
 
       <p class={bodyText()}>

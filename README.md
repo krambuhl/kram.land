@@ -28,21 +28,21 @@ The repo is an npm workspace. The site is the root package, and `packages/` hold
 - `src/pages/` holds the routes, `index.astro` and `404.astro`. Each one composes the React components into a page, and uses Astro's `<Image>` for build-time image resizing.
 - `src/layouts/Layout.astro` holds the document `<html>` and `<head>` and wraps each page in `Mode` and `PageContainer`. It stays in Astro: a `<head>` rendered by React gets no stylesheet links, so the page comes out unstyled.
 - `src/components/` holds each component as `name/index.tsx` beside `name/styles.module.css`. A component's tests sit beside it as `name/index.test.tsx`, run by Vitest with `react-dom/server`.
-- `src/utilities/` holds style utilities: functions that return CSS Module class names to put on any element, such as `stack({ gap: token('size.x16') })`.
+- `src/utilities/` holds style utilities: functions that return CSS Module class names to put on any element, such as `stack({ gap: token('space.x16') })`.
 - `tokens.config.ts` defines the design tokens. `token-jet` generates `generated/tokens/` from it before every dev, build and check: `tokens.css` (custom properties, with an `@property` per token and a slot per colour mode), `types.ts` and `index.ts` (a typed `token()`). The folder is gitignored; `npm install` generates it.
 - `src/assets/` holds images Astro resizes at build time. `public/` holds files served as-is.
 
 ## Styling conventions
 
 - A variant is a class named prop + value, such as `.alignCenter`, applied with `classnames`. Variant rules sit below `.root` in the file, because they tie it on specificity.
-- In CSS a token is `token('size.x16')`, rewritten to `var(--size-x16)` at build time; an unknown path fails the build. In TypeScript `token('size.x16')` has the type `'var(--size-x16)'`, so a prop typed as a token union accepts it and a plain string does not.
+- In CSS a token is `token('space.x16')`, rewritten to `var(--space-x16)` at build time; an unknown path fails the build. In TypeScript `token('space.x16')` has the type `'var(--space-x16)'`, so a prop typed as a token union accepts it and a plain string does not.
 
 ## Style utilities
 
 Layout behaviour that applies to any element is a utility function, not a component. A utility returns a class string, so it composes with `classnames` in `.tsx` and `class:list` in `.astro`.
 
 - `area({ width })` centers an element and caps its width. `stack({ gap, align })` makes an element a vertical flex stack. `spacer({ p, ph, pv })` sets padding on all sides, horizontally and vertically. `superellipse()` gives an element the site's curved shape and clips its children to it. `headingText({ size })` and `bodyText({ size })` set the type style; the caller chooses the element.
-- Token arguments take `token('…')` values. Spacing accepts `x0` to `x128` and widths accept `x128` to `x1920`; the types reject anything outside those ranges.
+- Token arguments take `token('…')` values. Spacing takes a `space` token (`x0` to `x128`) and widths take a `size` token (`x192` to `x1920`); the generated unions reject the other group.
 - Utilities are not responsive. Spacing that changes at a breakpoint is written in a CSS Module, as `PageContainer` does.
 
 ## Colour modes

@@ -1,48 +1,11 @@
 import cx from 'classnames';
 
-import type {
-  SizeX128,
-  SizeX192,
-  SizeX256,
-  SizeX384,
-  SizeX512,
-  SizeX640,
-  SizeX768,
-  SizeX896,
-  SizeX1024,
-  SizeX1152,
-  SizeX1280,
-  SizeX1408,
-  SizeX1536,
-  SizeX1664,
-  SizeX1792,
-  SizeX1920,
-} from 'generated/tokens';
+import type { SizeToken } from 'generated/tokens';
 import { token } from 'generated/tokens';
 
 import styles from './styles.module.css';
 
-// The width subset of the size scale. A spacing-sized token is not a width.
-type WidthToken =
-  | SizeX128
-  | SizeX192
-  | SizeX256
-  | SizeX384
-  | SizeX512
-  | SizeX640
-  | SizeX768
-  | SizeX896
-  | SizeX1024
-  | SizeX1152
-  | SizeX1280
-  | SizeX1408
-  | SizeX1536
-  | SizeX1664
-  | SizeX1792
-  | SizeX1920;
-
-const widthClass: Record<WidthToken, string> = {
-  'var(--size-x128)': styles.widthX128,
+const widthClass: Record<SizeToken, string> = {
   'var(--size-x192)': styles.widthX192,
   'var(--size-x256)': styles.widthX256,
   'var(--size-x384)': styles.widthX384,
@@ -61,7 +24,7 @@ const widthClass: Record<WidthToken, string> = {
 };
 
 export interface AreaOptions {
-  width?: WidthToken;
+  width?: SizeToken;
 }
 
 export function area({ width = token('size.x1280') }: AreaOptions = {}) {

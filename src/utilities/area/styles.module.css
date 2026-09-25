@@ -3,10 +3,6 @@
   margin-inline: auto;
 }
 
-.widthX128 {
-  max-width: token('size.x128');
-}
-
 .widthX192 {
   max-width: token('size.x192');
 }

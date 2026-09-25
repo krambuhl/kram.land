@@ -10,8 +10,8 @@ html {
   tab-size: 4;
   font-family: token('font.family.base');
   font-size: token('font.size.base');
-  background-color: token('bg.base');
-  color: token('content.default');
+  background-color: token('bg.page.default');
+  color: token('content.regular.default');
 }
 
 body {
