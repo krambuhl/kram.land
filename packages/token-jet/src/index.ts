@@ -14,6 +14,8 @@ export { flatten } from './core/flatten.ts';
 export type { Token } from './core/flatten.ts';
 export { matchGlob } from './core/glob.ts';
 export { cssVariableName, typeName, unionName } from './core/names.ts';
+export { findUsages, renameUsages } from './core/usage.ts';
+export type { RenamedFile, SourceFile, Usage } from './core/usage.ts';
 export { checkTypes, inferType, validateValue } from './core/metadata.ts';
 export { checkReferences, emitValue, parseReference, resolveValue } from './core/references.ts';
 export { validate } from './core/validate.ts';

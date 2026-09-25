@@ -5,6 +5,8 @@
       "ignore": ["src/utilities/spacer/**", "tokens.config.ts"],
       "ignoreDependencies": ["the-new-css-reset"]
     },
-    "packages/token-jet": {}
+    "packages/token-jet": {
+      "ignore": ["test/fixtures/usage/**"]
+    }
   }
 }

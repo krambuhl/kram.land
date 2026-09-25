@@ -1,0 +1,5 @@
+.root {
+  padding: token('space.x16');
+  color: token('content.regular.default');
+  gap: token('space.x16') token('space.x4');
+}
