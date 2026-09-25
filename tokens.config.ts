@@ -130,4 +130,11 @@ export default defineConfig({
   types: {
     color: ['bg.**', 'content.**'],
   },
+  contrast: {
+    minimum: 4.5,
+    pairs: [
+      ['content.regular.default', 'bg.page.default'],
+      ['content.muted.default', 'bg.page.default'],
+    ],
+  },
 });
