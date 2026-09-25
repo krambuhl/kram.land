@@ -94,8 +94,17 @@ describe('token-jet usage and rename', () => {
     expect(() => run(dir, 'generate')).not.toThrow();
   });
 
-  test('rename to an existing path is an error', () => {
-    expect(() => run(dir, 'rename', 'bg.page', 'bg.card')).toThrow(/exit 1.*bg\.card.*exists/s);
+  test('rename to a path already in the config rewrites the calls and leaves the config alone', () => {
+    writeFileSync(join(dir, 'c.css'), ".c { background: token('bg.page'); }\n");
+    const before = readFileSync(join(dir, 'tokens.config.ts'), 'utf8');
+    const out = run(dir, 'rename', 'bg.page', 'bg.card', 'c.css');
+    expect(out).toMatch(/1 files.*bg\.card is already in the config.*bg\.page is left/);
+    expect(readFileSync(join(dir, 'c.css'), 'utf8')).toContain("token('bg.card')");
+    expect(readFileSync(join(dir, 'tokens.config.ts'), 'utf8')).toBe(before);
+  });
+
+  test('rename from a path not in the config is an error', () => {
+    expect(() => run(dir, 'rename', 'bg.nope', 'bg.card')).toThrow(/exit 1.*bg\.nope.*does not exist/s);
   });
 
   test('an unknown command exits 1 with the command list', () => {

@@ -16,7 +16,7 @@ function usageText(): string {
     '',
     '  generate [--out <dir>]        write tokens.css, types.ts and index.ts',
     '  usage <files...>              list every token() call by path',
-    '  rename <from> <to> <files...> rename a token in the config and the files',
+    '  rename <from> <to> <files...> rename a token in the files, and in the config unless <to> exists',
     '  --version',
   ].join('\n');
 }
@@ -58,16 +58,15 @@ async function rename(args: readonly string[]): Promise<string> {
   const { file: configFile, config } = await loadConfigFile(process.cwd());
   const { tokens } = loadTokens(config);
   if (!tokens.some((t) => t.path === from)) throw new Error(`Token "${from}" does not exist.`);
-  if (tokens.some((t) => t.path === to)) throw new Error(`Token "${to}" already exists.`);
+  const toExists = tokens.some((t) => t.path === to);
 
-  const configText = readFileSync(configFile, 'utf8');
-  const nextConfig = renameConfigKey(configText, from, to);
   const renamed = renameUsages(readFiles(files), from, to);
-
-  writeFileSync(configFile, nextConfig);
+  if (!toExists) writeFileSync(configFile, renameConfigKey(readFileSync(configFile, 'utf8'), from, to));
   for (const f of renamed) if (f.changed) writeFileSync(resolve(f.file), f.text);
   const changed = renamed.filter((f) => f.changed).length;
-  return `renamed ${from} to ${to} in the config and ${changed} files`;
+  return toExists
+    ? `renamed ${from} to ${to} in ${changed} files; ${to} is already in the config, so ${from} is left for you to delete`
+    : `renamed ${from} to ${to} in the config and ${changed} files`;
 }
 
 async function main(argv: readonly string[]): Promise<void> {

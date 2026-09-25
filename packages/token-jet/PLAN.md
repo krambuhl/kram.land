@@ -243,7 +243,7 @@ Tests first:
 - TypeScript: the alias gets `@deprecated`, so editors strike it through and `oxlint` can flag uses.
 - CSS: the PostCSS plugin reports a warning with the replacement, not an error, so a deprecation never breaks a build.
 - Language server: a diagnostic of warning severity, with a code action to apply the replacement when one is given.
-- CLI: `token-jet usage` lists every `token()` call in a set of files by path, and flags deprecated ones. `token-jet rename <old> <new>` rewrites calls in CSS and TypeScript and moves the config entry.
+- CLI: `token-jet usage` lists every `token()` call in a set of files by path, and flags deprecated ones. `token-jet rename <old> <new>` rewrites calls in CSS and TypeScript and moves the config entry. The config edit is textual and only renames a key within its group; a move across groups is written in the config by hand, new token first, and `rename` then rewrites the calls and leaves the config alone because `<new>` already exists.
 
 A token is removed by deleting it from the config, after `usage` shows no callers.
 
