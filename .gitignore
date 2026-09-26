@@ -49,3 +49,6 @@ lerna-debug.log*
 
 # css modules kit
 /generated/
+
+# package builds
+packages/*/dist/

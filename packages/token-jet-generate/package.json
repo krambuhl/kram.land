@@ -5,12 +5,17 @@
   "description": "Token-indexed generation: select tokens, map each through a template, aggregate the fragments into files.",
   "type": "module",
   "bin": {
-    "token-jet-generate": "./src/cli.ts"
+    "token-jet-generate": "./dist/cli.js"
   },
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
   },
   "scripts": {
+    "build": "tsdown",
+    "pretest": "tsdown",
     "test": "vitest run --typecheck",
     "check": "tsc --noEmit"
   },
@@ -24,5 +29,8 @@
   },
   "dependencies": {
     "token-jet": "*"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }

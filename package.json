@@ -19,7 +19,7 @@
     "prebuild": "npm run tokens",
     "test": "vitest run && npm test --workspaces --if-present",
     "predev": "npm run tokens",
-    "prepare": "npm run tokens"
+    "prepare": "npm run build --workspaces --if-present && npm run tokens"
   },
   "dependencies": {
     "@astrojs/react": "^6.0.6",
@@ -45,6 +45,7 @@
     "token-jet": "*",
     "token-jet-generate": "*",
     "token-jet-lsp": "*",
+    "tsdown": "^0.23.0",
     "typescript": "6.0.3",
     "vitest": "^5.0.1"
   },

@@ -5,14 +5,25 @@
   "description": "Design tokens from one typed config: CSS custom properties, TypeScript types, and a token() function for both.",
   "type": "module",
   "bin": {
-    "token-jet": "./src/cli.ts"
+    "token-jet": "./dist/cli.js"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./postcss": "./src/postcss.ts",
-    "./vite": "./src/vite.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./postcss": {
+      "types": "./dist/postcss.d.ts",
+      "default": "./dist/postcss.js"
+    },
+    "./vite": {
+      "types": "./dist/vite.d.ts",
+      "default": "./dist/vite.js"
+    }
   },
   "scripts": {
+    "build": "tsdown",
+    "pretest": "tsdown",
     "test": "vitest run --typecheck",
     "check": "tsc --noEmit"
   },
@@ -28,5 +39,16 @@
   },
   "dependencies": {
     "postcss": "^8.5.28"
-  }
+  },
+  "peerDependencies": {
+    "vite": ">=6"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
+  },
+  "files": [
+    "dist"
+  ]
 }
