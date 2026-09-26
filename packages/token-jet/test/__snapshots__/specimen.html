@@ -162,6 +162,7 @@
   --specimen-warn: light-dark(#a15c07, #f0b34a);
   --specimen-fail: light-dark(#c62828, #ff8080);
   --specimen-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --specimen-gutter: 32px;
 }
 :root[data-mode='dark'] { color-scheme: dark; }
 :root[data-mode='light'] { color-scheme: light; }
@@ -175,7 +176,7 @@ nav .title { font: 600 15px/1.4 system-ui, sans-serif; padding: 0 8px 12px; }
 nav a { display: flex; justify-content: space-between; gap: 8px; padding: 4px 8px; border-radius: 6px; color: inherit; text-decoration: none; font: 13px/1.5 var(--specimen-mono); }
 nav a:hover { background: var(--specimen-panel); }
 nav a span { color: var(--specimen-muted); }
-header { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 32px; background: var(--specimen-bg); border-bottom: 1px solid var(--specimen-line); }
+header { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px var(--specimen-gutter); background: var(--specimen-bg); border-bottom: 1px solid var(--specimen-line); }
 header h1 { font-size: 15px; margin: 0; font-weight: 600; }
 header .count { color: var(--specimen-muted); }
 .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-left: auto; }
@@ -184,7 +185,8 @@ header .count { color: var(--specimen-muted); }
 .mode-control > span { padding: 0 6px; color: var(--specimen-muted); font: 12px/1.5 var(--specimen-mono); }
 .mode-control button { font: 12px/1.5 system-ui, sans-serif; padding: 3px 8px; color: var(--specimen-muted); background: none; border: 0; border-radius: 4px; cursor: pointer; }
 .mode-control button[aria-pressed='true'] { color: var(--specimen-text); background: var(--specimen-panel); box-shadow: 0 0 0 1px var(--specimen-line); }
-main { padding: 24px 32px 96px; max-width: 1120px; }
+main { padding: 24px var(--specimen-gutter) 96px; }
+.group > h2, .subgroup > h3, .rows, .swatches, .pairs { max-width: 1056px; }
 .group { margin-bottom: 48px; scroll-margin-top: 72px; }
 .group > h2 { margin: 0 0 16px; font: 600 20px/1.3 var(--specimen-mono); }
 .group > h2 span { color: var(--specimen-muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
@@ -210,7 +212,7 @@ main { padding: 24px 32px 96px; max-width: 1120px; }
 .spacing i { width: 16px; height: 16px; background: var(--specimen-accent); border-radius: 3px; }
 .radius { display: block; width: 96px; height: 56px; border: 2px solid var(--specimen-accent); }
 .bar { display: block; height: 8px; max-width: 100%; background: var(--specimen-accent); border-radius: 4px; }
-.canvas { overflow-x: auto; padding: 16px; background: var(--specimen-panel); border: 1px solid var(--specimen-line); border-radius: 10px; }
+.canvas { overflow-x: auto; margin-right: calc(-1 * var(--specimen-gutter)); padding: 16px; background: var(--specimen-panel); border: 1px solid var(--specimen-line); border-right: 0; border-radius: 10px 0 0 10px; }
 .canvas-inner { position: relative; width: max-content; min-width: 100%; }
 .canvas .token { padding: 6px 0; }
 .canvas .token + .token { border-top: 1px solid var(--specimen-line); }
@@ -240,7 +242,7 @@ main { padding: 24px 32px 96px; max-width: 1120px; }
 @media (width < 760px) {
   .layout { grid-template-columns: minmax(0, 1fr); }
   nav { display: none; }
-  header, main { padding-inline: 16px; }
+  :root { --specimen-gutter: 16px; }
   .rows .token { grid-template-columns: minmax(0, 1fr); gap: 8px; }
 }
 </style>
