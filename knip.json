@@ -3,7 +3,7 @@
   "workspaces": {
     ".": {
       "ignore": ["src/utilities/spacer/**"],
-      "ignoreDependencies": ["the-new-css-reset"],
+      "ignoreDependencies": ["the-new-css-reset", "token-jet-lsp"],
       "entry": ["tokens.config.ts", "generate.config.ts"]
     },
     "packages/token-jet": {

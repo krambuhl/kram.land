@@ -21,7 +21,7 @@ Requires Node 22.12 or later.
 
 ## Workspace
 
-The repo is an npm workspace. The site is the root package, and `packages/` holds packages it depends on. `packages/token-jet` is the design token generator and `packages/token-jet-generate` turns selected tokens into files through templates; the plan for both is in `packages/token-jet/PLAN.md`. Their TypeScript runs from source, which needs Node 22.18 or later.
+The repo is an npm workspace. The site is the root package, and `packages/` holds packages it depends on. `packages/token-jet` is the design token generator, `packages/token-jet-generate` turns selected tokens into files through templates, `packages/token-jet-lsp` is the language server behind editor support, and `packages/token-jet-zed` is the Zed extension that launches it; the plan for all of them is in `packages/token-jet/PLAN.md`. The TypeScript runs from source, which needs Node 22.18 or later.
 
 ## Layout
 
@@ -50,6 +50,12 @@ Layout behaviour that applies to any element is a utility function, not a compon
 ## Colour modes
 
 Every colour token has a light and a dark value. `<Mode value>` sets which one applies to its subtree by rendering `data-mode` on a wrapper, and the generated CSS keys its colour-mode scopes off that attribute. `light` and `dark` are absolute. `auto` follows the OS scheme and `inverted` opposes it; nested under `light` or `dark`, `inverted` resolves to the opposite absolute value, and `inverted` inside `inverted` is `auto` again. `Layout.astro` wraps every page in `auto`, which is also what an element with no `data-mode` ancestor gets.
+
+## Editor support
+
+`token-jet-lsp` gives CSS buffers completion, hover and diagnostics for `token('…')`: every path with its value per mode, an error with the nearest path for an unknown one, a warning with a quick fix for a deprecated one, and a re-check of open files when `tokens.config.ts` changes.
+
+In Zed, install `packages/token-jet-zed` once with `zed: install dev extension` (it needs `rustup` and `cargo` on the machine; Zed compiles the extension to wasm). The extension runs `node node_modules/token-jet-lsp/src/server.ts --stdio` from the workspace root, so it works in any checkout that has installed this repo's packages. Zed's own CSS language server keeps running beside it.
 
 ## Typed CSS Modules
 
