@@ -8,7 +8,7 @@ export default defineConfig({
   },
   tokens: {
     space: {
-      $group: { type: 'dimension' },
+      $group: { type: 'dimension', role: 'spacing' },
       x0: { value: '0px' },
       x4: { value: '4px' },
       x8: { value: '8px' },
@@ -23,7 +23,7 @@ export default defineConfig({
       x128: { value: '128px' },
     },
     size: {
-      $group: { type: 'dimension' },
+      $group: { type: 'dimension', role: 'sizing' },
       x192: { value: '192px' },
       x256: { value: '256px' },
       x384: { value: '384px' },
@@ -51,7 +51,7 @@ export default defineConfig({
         data: { value: '{font.family.base}' },
       },
       size: {
-        $group: { type: 'dimension' },
+        $group: { type: 'dimension', role: 'fontSize' },
         base: { value: '1rem' },
         header: {
           xl: { value: '1.5rem' },
@@ -83,13 +83,13 @@ export default defineConfig({
       },
     },
     lineHeight: {
-      $group: { type: 'number' },
+      $group: { type: 'number', role: 'lineHeight' },
       header: { value: 1.4 },
       body: { value: 1.5 },
       data: { value: 1.5 },
     },
     radius: {
-      $group: { type: 'dimension' },
+      $group: { type: 'dimension', role: 'radius' },
       container: { value: '3rem' },
       lg: { value: '1rem' },
       md: { value: '0.5rem' },
