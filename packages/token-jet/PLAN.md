@@ -435,12 +435,13 @@ Then adopt it in the site: `stack`, `spacer` and `area` call generated functions
 - Diagnostics: an unknown path, with the nearest valid path suggested.
 - Reloads when the config file changes.
 
-Tested by driving the server with LSP messages against fixture documents.
+Tested by driving the server with LSP messages against fixture documents. The protocol is `vscode-languageserver`, the Node LSP library every editor's servers use; its name is historical and it knows nothing about VS Code.
 
-`packages/token-jet-vscode`, a launcher extension:
+`packages/token-jet-zed`, a Zed extension:
 
-- Starts the server for CSS files in a workspace that contains a `tokens.config.ts`.
-- Packaged as a `.vsix` and installed locally. No marketplace publishing.
+- A Rust crate compiled to wasm by Zed, whose one job is `language_server_command`: run `node <worktree>/node_modules/token-jet-lsp/src/server.ts --stdio` for CSS buffers, with Node from the worktree's PATH. The server is repo-local, so a workspace that installs `token-jet-lsp` gets it with no publishing; fetching a published package through Zed's `npm_install_package` waits for the roll-off.
+- Installed with `zed: install dev extension` pointing at the package directory. Zed builds it with the machine's `cargo` and `rustup`. No registry submission.
+- The deprecation code action replaces the path only when the deprecation text names a token that exists, since the text is free-form.
 
 ### Phase 16: roll-off checklist
 

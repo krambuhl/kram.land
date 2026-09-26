@@ -38,5 +38,6 @@ export { findUsages, renameUsages } from './core/usage.ts';
 export type { RenamedFile, SourceFile, Usage } from './core/usage.ts';
 export { checkTypes, inferType, validateValue } from './core/metadata.ts';
 export { checkReferences, emitValue, parseReference, resolveValue } from './core/references.ts';
+export { nearest } from './core/suggest.ts';
 export { validate } from './core/validate.ts';
 export { version } from './version.ts';
