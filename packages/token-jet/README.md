@@ -60,7 +60,7 @@ A tree of groups and leaves. A leaf is any object with a `value` key:
 
 A group may carry `$group: { type, role, description }`. `type` applies to every leaf below it, and a leaf may not contradict it.
 
-`role` says what a group's tokens are for when the type alone does not: space, size and radius are all dimensions. `spacing`, `sizing`, `radius` and `fontSize` suit `dimension`; `lineHeight` suits `number`. It applies to every leaf below the group, a role that does not suit the token's type is an error, and the DTCG export carries it on the group under the `token-jet` extension.
+`role` says what a group's tokens are for when the type alone does not: space, size and radius are all dimensions. `spacing`, `sizing`, `radius` and `fontSize` suit `dimension`; `lineHeight` suits `number`. It applies to every leaf below the group, a role that does not suit the token's type is an error, the DTCG export carries it on the group under the `token-jet` extension, and the specimen picks each token's preview by it.
 
 A token is addressed by its full path, `space.x16`. The custom property is `--space-x16`, the TypeScript literal type is `SpaceX16`, and every group gets a union named after it (`SpaceToken`). A group key that is not a valid identifier is quoted in the config as usual.
 
@@ -96,16 +96,16 @@ A scope is an attribute on any element: `data-mode="light"`, `"dark"`, `"auto"` 
 
 ## CLI
 
-| command                               | does                                                                                                      |
-| ------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `generate [--out <dir>]`              | Write the generated files. Fails on a config error or a contrast failure.                                 |
-| `check`                               | Print the contrast ratio of every pair in every mode; exit 1 if any is below the minimum.                 |
-| `specimen [--out <file>]`             | Write a self-contained HTML page showing every token in every mode and every contrast pair.               |
-| `export --dtcg [--out <file>]`        | Write the tokens as DTCG 2025.10 JSON; modes go under `$extensions['token-jet']`.                         |
-| `import --dtcg <file> [--out <file>]` | Read DTCG JSON into `tokens.config.ts` text (modes and tokens; `types` and `contrast` are added by hand). |
-| `diff <export.json>`                  | Compare the config with a DTCG export; list missing, extra and changed tokens; exit 1 on any.             |
-| `usage <files…>`                      | List every `token()` call in the files by path, flagging deprecated ones.                                 |
-| `rename <from> <to> <files…>`         | Rename a token in the files, and in the config unless `<to>` already exists there.                        |
+| command                               | does                                                                                                                |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `generate [--out <dir>]`              | Write the generated files. Fails on a config error or a contrast failure.                                           |
+| `check`                               | Print the contrast ratio of every pair in every mode; exit 1 if any is below the minimum.                           |
+| `specimen [--out <file>]`             | Write a self-contained HTML page of every token by group, with a preview per role or type, and every contrast pair. |
+| `export --dtcg [--out <file>]`        | Write the tokens as DTCG 2025.10 JSON; modes go under `$extensions['token-jet']`.                                   |
+| `import --dtcg <file> [--out <file>]` | Read DTCG JSON into `tokens.config.ts` text (modes and tokens; `types` and `contrast` are added by hand).           |
+| `diff <export.json>`                  | Compare the config with a DTCG export; list missing, extra and changed tokens; exit 1 on any.                       |
+| `usage <files…>`                      | List every `token()` call in the files by path, flagging deprecated ones.                                           |
+| `rename <from> <to> <files…>`         | Rename a token in the files, and in the config unless `<to>` already exists there.                                  |
 
 ## PostCSS plugin
 

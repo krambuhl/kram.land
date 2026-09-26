@@ -151,84 +151,203 @@
 
 </style>
 <style>
-body { margin: 0; padding: 24px; font: 14px/1.5 system-ui, sans-serif; color: #222; background: #f4f4f4; }
-h1 { font-size: 20px; margin: 0 0 16px; }
-h2 { font-size: 16px; margin: 32px 0 8px; }
-.mode { padding: 16px; border: 1px solid #ccc; border-radius: 8px; background: #fff; margin-bottom: 24px; }
-table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-top: 1px solid #e6e6e6; overflow: hidden; }
-th { font-weight: 600; border-top: 0; }
-code { font: 13px/1.5 ui-monospace, monospace; }
-.swatch { display: inline-block; width: 48px; height: 24px; border: 1px solid #0003; border-radius: 4px; vertical-align: middle; }
-.bar { display: block; height: 8px; background: #3b82f6; border-radius: 2px; }
-.sample { font-size: 18px; }
-.deprecated code { text-decoration: line-through; }
-.deprecated .note { color: #b45309; }
-.pair { padding: 12px; border-radius: 4px; margin: 8px 0; }
-.pair.fail { outline: 2px solid #dc2626; }
+:root {
+  color-scheme: light dark;
+  --specimen-bg: light-dark(#f6f6f4, #121212);
+  --specimen-panel: light-dark(#ffffff, #1b1b1b);
+  --specimen-text: light-dark(#1d1d1b, #ececea);
+  --specimen-muted: light-dark(#6b6b66, #9b9b96);
+  --specimen-line: light-dark(#e4e4df, #2d2d2b);
+  --specimen-accent: light-dark(#2f5bea, #86a2ff);
+  --specimen-warn: light-dark(#a15c07, #f0b34a);
+  --specimen-fail: light-dark(#c62828, #ff8080);
+  --specimen-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+:root[data-mode='dark'] { color-scheme: dark; }
+:root[data-mode='light'] { color-scheme: light; }
+[hidden] { display: none !important; }
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.5 system-ui, sans-serif; color: var(--specimen-text); background: var(--specimen-bg); }
+code { font: 12px/1.5 var(--specimen-mono); }
+.layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); min-height: 100vh; }
+nav { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow: auto; padding: 20px 12px; border-right: 1px solid var(--specimen-line); }
+nav .title { font: 600 15px/1.4 system-ui, sans-serif; padding: 0 8px 12px; }
+nav a { display: flex; justify-content: space-between; gap: 8px; padding: 4px 8px; border-radius: 6px; color: inherit; text-decoration: none; font: 13px/1.5 var(--specimen-mono); }
+nav a:hover { background: var(--specimen-panel); }
+nav a span { color: var(--specimen-muted); }
+header { position: sticky; top: 0; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 32px; background: var(--specimen-bg); border-bottom: 1px solid var(--specimen-line); }
+header h1 { font-size: 15px; margin: 0; font-weight: 600; }
+header .count { color: var(--specimen-muted); }
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-left: auto; }
+.filter { font: inherit; width: 200px; padding: 5px 10px; color: inherit; background: var(--specimen-panel); border: 1px solid var(--specimen-line); border-radius: 6px; }
+.mode-control { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border: 1px solid var(--specimen-line); border-radius: 6px; }
+.mode-control > span { padding: 0 6px; color: var(--specimen-muted); font: 12px/1.5 var(--specimen-mono); }
+.mode-control button { font: 12px/1.5 system-ui, sans-serif; padding: 3px 8px; color: var(--specimen-muted); background: none; border: 0; border-radius: 4px; cursor: pointer; }
+.mode-control button[aria-pressed='true'] { color: var(--specimen-text); background: var(--specimen-panel); box-shadow: 0 0 0 1px var(--specimen-line); }
+main { padding: 24px 32px 96px; max-width: 1120px; }
+.group { margin-bottom: 48px; scroll-margin-top: 72px; }
+.group > h2 { margin: 0 0 16px; font: 600 20px/1.3 var(--specimen-mono); }
+.group > h2 span { color: var(--specimen-muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
+.subgroup { margin-bottom: 24px; }
+.subgroup > h3 { margin: 0 0 8px; font: 600 12px/1.5 var(--specimen-mono); color: var(--specimen-muted); }
+.rows { background: var(--specimen-panel); border: 1px solid var(--specimen-line); border-radius: 10px; }
+.rows .token { display: grid; grid-template-columns: minmax(180px, 1fr) minmax(0, 2fr) minmax(160px, 1fr); gap: 16px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--specimen-line); }
+.rows .token:first-child { border-top: 0; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.swatches .token { overflow: hidden; background: var(--specimen-panel); border: 1px solid var(--specimen-line); border-radius: 10px; }
+.swatches .swatch { display: block; height: 72px; border-bottom: 1px solid var(--specimen-line); }
+.swatches .meta { padding: 10px 12px; }
+.path { padding: 0; font: 13px/1.4 var(--specimen-mono); color: inherit; text-align: left; background: none; border: 0; cursor: copy; }
+.path:hover { color: var(--specimen-accent); text-decoration: underline; }
+.description { margin-top: 2px; font-size: 12px; color: var(--specimen-muted); }
+.deprecated .path { text-decoration: line-through; }
+.note { margin-top: 2px; font-size: 12px; color: var(--specimen-warn); }
+.values { font-size: 12px; color: var(--specimen-muted); }
+.values > div { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.values .mode { margin-right: 4px; }
+.values .literal { color: var(--specimen-text); }
+.spacing { display: inline-flex; }
+.spacing i { width: 16px; height: 16px; background: var(--specimen-accent); border-radius: 3px; }
+.radius { display: block; width: 96px; height: 56px; border: 2px solid var(--specimen-accent); }
+.track { display: block; height: 8px; overflow: hidden; background: var(--specimen-line); border-radius: 4px; }
+.bar { display: block; height: 100%; background: var(--specimen-accent); }
+.sample { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.leading { display: block; max-width: 30ch; font-size: 13px; }
+.duration { position: relative; display: block; height: 16px; }
+.duration i { position: absolute; left: 0; width: 16px; height: 16px; background: var(--specimen-accent); border-radius: 50%; transition-property: left; transition-timing-function: ease-in-out; }
+.token:hover .duration i { left: calc(100% - 16px); }
+.pairs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.pair { overflow: hidden; background: var(--specimen-panel); border: 1px solid var(--specimen-line); border-radius: 10px; }
+.pair.fail { border-color: var(--specimen-fail); }
+.pair p { margin: 0; padding: 20px 16px; font-size: 16px; }
+.pair ul { margin: 0; padding: 8px 16px; list-style: none; font-size: 12px; color: var(--specimen-muted); border-top: 1px solid var(--specimen-line); }
+.pair li.fail { color: var(--specimen-fail); }
+.toast { position: fixed; bottom: 16px; left: 50%; padding: 6px 12px; font: 12px/1.5 var(--specimen-mono); color: var(--specimen-bg); background: var(--specimen-text); border-radius: 6px; transform: translateX(-50%); }
+@media (width < 760px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  nav { display: none; }
+  header, main { padding-inline: 16px; }
+  .rows .token { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+}
 </style>
 </head>
 <body>
-<h1>tokens</h1>
-<section class="mode">
-<h2>base</h2>
-<table>
-<colgroup><col style="width: 24%"><col style="width: 28%"><col style="width: 28%"><col></colgroup>
-<thead><tr><th>token</th><th>preview</th><th>value</th><th>description</th></tr></thead>
-<tbody>
-<tr><td><code>space.x4</code></td><td><span class="bar" style="width: var(--space-x4)"></span></td><td><code>4px</code></td><td></td></tr>
-<tr><td><code>space.x16</code></td><td><span class="bar" style="width: var(--space-x16)"></span></td><td><code>16px</code></td><td>The default gap.</td></tr>
-<tr><td><code>weight.bold</code></td><td><span class="sample" style="font-weight: var(--weight-bold)">Aa Bb Cc 123</span></td><td><code>700</code></td><td></td></tr>
-<tr><td><code>family.body</code></td><td><span class="sample" style="font-family: var(--family-body)">Aa Bb Cc 123</span></td><td><code>Inter, sans-serif</code></td><td></td></tr>
-<tr><td><code>ratio.golden</code></td><td></td><td><code>1.618</code></td><td></td></tr>
-<tr><td><code>gray.50</code></td><td><span class="swatch" style="background: var(--gray-50)"></span></td><td><code>#fafafa</code></td><td></td></tr>
-<tr><td><code>gray.900</code></td><td><span class="swatch" style="background: var(--gray-900)"></span></td><td><code>#171717</code></td><td></td></tr>
-<tr><td><code>bg.page</code></td><td><span class="swatch" style="background: var(--bg-page)"></span></td><td><code>{gray.50}</code> → <code>#fafafa</code></td><td></td></tr>
-<tr><td><code>bg.card</code></td><td><span class="swatch" style="background: var(--bg-card)"></span></td><td><code>#ffffff</code></td><td></td></tr>
-<tr class="deprecated"><td><code>content.regular</code><div class="note">deprecated: use content.body</div></td><td><span class="swatch" style="background: var(--content-regular)"></span></td><td><code>#111111</code></td><td></td></tr>
-<tr><td><code>content.body</code></td><td><span class="swatch" style="background: var(--content-body)"></span></td><td><code>{content.regular}</code> → <code>#111111</code></td><td></td></tr>
-</tbody>
-</table>
+<div class="layout">
+<nav><div class="title">tokens</div>
+<a href="#group-space">space<span>2</span></a>
+<a href="#group-weight">weight<span>1</span></a>
+<a href="#group-family">family<span>1</span></a>
+<a href="#group-ratio">ratio<span>1</span></a>
+<a href="#group-gray">gray<span>2</span></a>
+<a href="#group-bg">bg<span>2</span></a>
+<a href="#group-content">content<span>2</span></a>
+</nav>
+<div>
+<header>
+<h1>tokens</h1><span class="count">11</span>
+<div class="controls" hidden>
+<input class="filter" type="search" placeholder="filter by path" aria-label="filter tokens by path">
+<div class="mode-control" role="group" aria-label="scheme" data-attribute="mode"><span>scheme</span><button type="button" data-value="auto" aria-pressed="true">auto</button><button type="button" data-value="light" aria-pressed="false">light</button><button type="button" data-value="dark" aria-pressed="false">dark</button></div>
+<div class="mode-control" role="group" aria-label="contrast" data-attribute="contrast"><span>contrast</span><button type="button" data-value="auto" aria-pressed="true">auto</button><button type="button" data-value="on" aria-pressed="false">on</button><button type="button" data-value="off" aria-pressed="false">off</button></div>
+</div>
+</header>
+<main>
+<section class="group" id="group-space">
+<h2>space<span>2</span></h2>
+<div class="subgroup"><div class="rows">
+<div class="token" data-path="space.x4"><div><button type="button" class="path" data-copy="space.x4" title="copy token('space.x4')">space.x4</button></div><div class="preview"><span class="spacing" style="gap: var(--space-x4)"><i></i><i></i></span></div><div class="values"><div title="4px"><code class="literal">4px</code></div></div></div>
+<div class="token" data-path="space.x16"><div><button type="button" class="path" data-copy="space.x16" title="copy token('space.x16')">space.x16</button><div class="description">The default gap.</div></div><div class="preview"><span class="spacing" style="gap: var(--space-x16)"><i></i><i></i></span></div><div class="values"><div title="16px"><code class="literal">16px</code></div></div></div>
+</div></div>
 </section>
-<section class="mode" data-mode="dark">
-<h2>dark <code>(prefers-color-scheme: dark)</code></h2>
-<table>
-<colgroup><col style="width: 24%"><col style="width: 28%"><col style="width: 28%"><col></colgroup>
-<thead><tr><th>token</th><th>preview</th><th>value</th><th>description</th></tr></thead>
-<tbody>
-<tr><td><code>space.x4</code></td><td><span class="bar" style="width: var(--space-x4)"></span></td><td><code>4px</code></td><td></td></tr>
-<tr><td><code>space.x16</code></td><td><span class="bar" style="width: var(--space-x16)"></span></td><td><code>16px</code></td><td>The default gap.</td></tr>
-<tr><td><code>weight.bold</code></td><td><span class="sample" style="font-weight: var(--weight-bold)">Aa Bb Cc 123</span></td><td><code>700</code></td><td></td></tr>
-<tr><td><code>family.body</code></td><td><span class="sample" style="font-family: var(--family-body)">Aa Bb Cc 123</span></td><td><code>Inter, sans-serif</code></td><td></td></tr>
-<tr><td><code>ratio.golden</code></td><td></td><td><code>1.618</code></td><td></td></tr>
-<tr><td><code>gray.50</code></td><td><span class="swatch" style="background: var(--gray-50)"></span></td><td><code>#fafafa</code></td><td></td></tr>
-<tr><td><code>gray.900</code></td><td><span class="swatch" style="background: var(--gray-900)"></span></td><td><code>#171717</code></td><td></td></tr>
-<tr><td><code>bg.page</code></td><td><span class="swatch" style="background: var(--bg-page)"></span></td><td><code>{gray.900}</code> → <code>#171717</code></td><td></td></tr>
-<tr><td><code>bg.card</code></td><td><span class="swatch" style="background: var(--bg-card)"></span></td><td><code>#1a1a1a</code></td><td></td></tr>
-<tr class="deprecated"><td><code>content.regular</code><div class="note">deprecated: use content.body</div></td><td><span class="swatch" style="background: var(--content-regular)"></span></td><td><code>#eeeeee</code></td><td></td></tr>
-<tr><td><code>content.body</code></td><td><span class="swatch" style="background: var(--content-body)"></span></td><td><code>{content.regular}</code> → <code>#eeeeee</code></td><td></td></tr>
-</tbody>
-</table>
+<section class="group" id="group-weight">
+<h2>weight<span>1</span></h2>
+<div class="subgroup"><div class="rows">
+<div class="token" data-path="weight.bold"><div><button type="button" class="path" data-copy="weight.bold" title="copy token('weight.bold')">weight.bold</button></div><div class="preview"><span class="sample" style="font-weight: var(--weight-bold)">Sphinx of black quartz, judge my vow</span></div><div class="values"><div title="700"><code class="literal">700</code></div></div></div>
+</div></div>
 </section>
-<section class="mode" data-contrast="on">
-<h2>contrast <code>(prefers-contrast: more)</code></h2>
-<table>
-<colgroup><col style="width: 24%"><col style="width: 28%"><col style="width: 28%"><col></colgroup>
-<thead><tr><th>token</th><th>preview</th><th>value</th><th>description</th></tr></thead>
-<tbody>
-<tr><td><code>space.x4</code></td><td><span class="bar" style="width: var(--space-x4)"></span></td><td><code>4px</code></td><td></td></tr>
-<tr><td><code>space.x16</code></td><td><span class="bar" style="width: var(--space-x16)"></span></td><td><code>16px</code></td><td>The default gap.</td></tr>
-<tr><td><code>weight.bold</code></td><td><span class="sample" style="font-weight: var(--weight-bold)">Aa Bb Cc 123</span></td><td><code>700</code></td><td></td></tr>
-<tr><td><code>family.body</code></td><td><span class="sample" style="font-family: var(--family-body)">Aa Bb Cc 123</span></td><td><code>Inter, sans-serif</code></td><td></td></tr>
-<tr><td><code>ratio.golden</code></td><td></td><td><code>1.618</code></td><td></td></tr>
-<tr><td><code>gray.50</code></td><td><span class="swatch" style="background: var(--gray-50)"></span></td><td><code>#fafafa</code></td><td></td></tr>
-<tr><td><code>gray.900</code></td><td><span class="swatch" style="background: var(--gray-900)"></span></td><td><code>#171717</code></td><td></td></tr>
-<tr><td><code>bg.page</code></td><td><span class="swatch" style="background: var(--bg-page)"></span></td><td><code>{gray.50}</code> → <code>#fafafa</code></td><td></td></tr>
-<tr><td><code>bg.card</code></td><td><span class="swatch" style="background: var(--bg-card)"></span></td><td><code>#000000</code></td><td></td></tr>
-<tr class="deprecated"><td><code>content.regular</code><div class="note">deprecated: use content.body</div></td><td><span class="swatch" style="background: var(--content-regular)"></span></td><td><code>#111111</code></td><td></td></tr>
-<tr><td><code>content.body</code></td><td><span class="swatch" style="background: var(--content-body)"></span></td><td><code>{content.regular}</code> → <code>#111111</code></td><td></td></tr>
-</tbody>
-</table>
+<section class="group" id="group-family">
+<h2>family<span>1</span></h2>
+<div class="subgroup"><div class="rows">
+<div class="token" data-path="family.body"><div><button type="button" class="path" data-copy="family.body" title="copy token('family.body')">family.body</button></div><div class="preview"><span class="sample" style="font-family: var(--family-body)">Sphinx of black quartz, judge my vow</span></div><div class="values"><div title="Inter, sans-serif"><code class="literal">Inter, sans-serif</code></div></div></div>
+</div></div>
 </section>
+<section class="group" id="group-ratio">
+<h2>ratio<span>1</span></h2>
+<div class="subgroup"><div class="rows">
+<div class="token" data-path="ratio.golden"><div><button type="button" class="path" data-copy="ratio.golden" title="copy token('ratio.golden')">ratio.golden</button></div><div class="preview"></div><div class="values"><div title="1.618"><code class="literal">1.618</code></div></div></div>
+</div></div>
+</section>
+<section class="group" id="group-gray">
+<h2>gray<span>2</span></h2>
+<div class="subgroup"><div class="swatches">
+<div class="token" data-path="gray.50"><span class="swatch" style="background: var(--gray-50)"></span><div class="meta"><button type="button" class="path" data-copy="gray.50" title="copy token('gray.50')">gray.50</button><div class="values"><div title="#fafafa"><code class="literal">#fafafa</code></div></div></div></div>
+<div class="token" data-path="gray.900"><span class="swatch" style="background: var(--gray-900)"></span><div class="meta"><button type="button" class="path" data-copy="gray.900" title="copy token('gray.900')">gray.900</button><div class="values"><div title="#171717"><code class="literal">#171717</code></div></div></div></div>
+</div></div>
+</section>
+<section class="group" id="group-bg">
+<h2>bg<span>2</span></h2>
+<div class="subgroup"><div class="swatches">
+<div class="token" data-path="bg.page"><span class="swatch" style="background: var(--bg-page)"></span><div class="meta"><button type="button" class="path" data-copy="bg.page" title="copy token('bg.page')">bg.page</button><div class="values"><div title="{gray.50} → #fafafa"><code>{gray.50}</code> → <code class="literal">#fafafa</code></div><div title="dark {gray.900} → #171717"><span class="mode">dark</span><code>{gray.900}</code> → <code class="literal">#171717</code></div></div></div></div>
+<div class="token" data-path="bg.card"><span class="swatch" style="background: var(--bg-card)"></span><div class="meta"><button type="button" class="path" data-copy="bg.card" title="copy token('bg.card')">bg.card</button><div class="values"><div title="#ffffff"><code class="literal">#ffffff</code></div><div title="dark #1a1a1a"><span class="mode">dark</span><code class="literal">#1a1a1a</code></div><div title="contrast #000000"><span class="mode">contrast</span><code class="literal">#000000</code></div></div></div></div>
+</div></div>
+</section>
+<section class="group" id="group-content">
+<h2>content<span>2</span></h2>
+<div class="subgroup"><div class="swatches">
+<div class="token deprecated" data-path="content.regular"><span class="swatch" style="background: var(--content-regular)"></span><div class="meta"><button type="button" class="path" data-copy="content.regular" title="copy token('content.regular')">content.regular</button><div class="note">deprecated: use content.body</div><div class="values"><div title="#111111"><code class="literal">#111111</code></div><div title="dark #eeeeee"><span class="mode">dark</span><code class="literal">#eeeeee</code></div></div></div></div>
+<div class="token" data-path="content.body"><span class="swatch" style="background: var(--content-body)"></span><div class="meta"><button type="button" class="path" data-copy="content.body" title="copy token('content.body')">content.body</button><div class="values"><div title="{content.regular} → #111111"><code>{content.regular}</code> → <code class="literal">#111111</code></div><div title="dark {content.regular} → #eeeeee"><span class="mode">dark</span><code>{content.regular}</code> → <code class="literal">#eeeeee</code></div></div></div></div>
+</div></div>
+</section>
+</main>
+</div>
+</div>
+<div class="toast" role="status" hidden></div>
+<script>
+const root = document.documentElement;
+document.querySelector('.controls').hidden = false;
+
+for (const control of document.querySelectorAll('.mode-control')) {
+  const attribute = 'data-' + control.dataset.attribute;
+  control.addEventListener('click', (event) => {
+    const button = event.target.closest('button');
+    if (button === null) return;
+    const value = button.dataset.value;
+    if (value === 'auto') root.removeAttribute(attribute);
+    else root.setAttribute(attribute, value);
+    for (const b of control.querySelectorAll('button')) b.setAttribute('aria-pressed', String(b === button));
+  });
+}
+
+const toast = document.querySelector('.toast');
+let toastTimer;
+document.addEventListener('click', async (event) => {
+  const button = event.target.closest('[data-copy]');
+  if (button === null) return;
+  const text = "token('" + button.dataset.copy + "')";
+  try {
+    await navigator.clipboard.writeText(text);
+    toast.textContent = 'copied ' + text;
+  } catch {
+    toast.textContent = text;
+  }
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.hidden = true; }, 1600);
+});
+
+const filter = document.querySelector('.filter');
+filter.addEventListener('input', () => {
+  const query = filter.value.trim().toLowerCase();
+  for (const token of document.querySelectorAll('.token')) {
+    token.hidden = query !== '' && !token.dataset.path.toLowerCase().includes(query);
+  }
+  for (const block of document.querySelectorAll('.subgroup, .group')) {
+    block.hidden = block.querySelector('.token:not([hidden])') === null;
+  }
+  for (const link of document.querySelectorAll('nav a')) {
+    link.hidden = document.getElementById(link.hash.slice(1))?.hidden ?? false;
+  }
+});
+</script>
 </body>
 </html>
