@@ -102,10 +102,15 @@ connection.onCompletion((params): CompletionItem[] | null => {
   const call = callAt(document.getText(), document.offsetAt(params.position));
   if (call === undefined) return null;
   const range = { start: document.positionAt(call.start), end: document.positionAt(call.end) };
-  return complete(resolved).map((item) => ({
+  // Editors sort by sortText as a string, so the zero-padded index keeps the
+  // config's order instead of the label's (space.x4 before space.x16).
+  const items = complete(resolved);
+  const width = String(items.length).length;
+  return items.map((item, index) => ({
     label: item.label,
     kind: CompletionItemKind.Value,
     detail: item.detail,
+    sortText: String(index).padStart(width, '0'),
     ...(item.documentation !== undefined && { documentation: item.documentation }),
     ...(item.deprecated && { tags: [CompletionItemTag.Deprecated] }),
     filterText: item.label,

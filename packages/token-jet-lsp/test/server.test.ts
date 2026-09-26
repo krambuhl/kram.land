@@ -158,6 +158,18 @@ describe('token-jet-lsp over stdio', () => {
     expect(items.some((i) => i.label === 'content.body')).toBe(true);
   });
 
+  test('completion sorts in config order, not alphabetically', async () => {
+    const reply = await client.request('textDocument/completion', {
+      textDocument: { uri },
+      position: { line: 1, character: 16 },
+    });
+    const items = reply.result as { label: string; sortText: string }[];
+    expect(items.every((i) => typeof i.sortText === 'string')).toBe(true);
+    const sorted = [...items].sort((a, b) => a.sortText.localeCompare(b.sortText)).map((i) => i.label);
+    expect(sorted.indexOf('space.x4')).toBeLessThan(sorted.indexOf('space.x16'));
+    expect(sorted).toEqual(items.map((i) => i.label));
+  });
+
   test('gives no completion outside a call', async () => {
     const reply = await client.request('textDocument/completion', {
       textDocument: { uri },
