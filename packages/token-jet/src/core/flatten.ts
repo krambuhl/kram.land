@@ -1,5 +1,5 @@
 import { GROUP_KEY, METADATA_KEYS } from './config.ts';
-import type { Modes, TokenLeaf, TokenTree, TokenType, TokenValue } from './config.ts';
+import type { Modes, TokenLeaf, TokenRole, TokenTree, TokenType, TokenValue } from './config.ts';
 
 export interface Token {
   path: string;
@@ -12,6 +12,8 @@ export interface Token {
   inherits?: boolean;
   // The type declared on the nearest enclosing group, if any.
   groupType?: TokenType;
+  // The role declared on the nearest enclosing group, if any.
+  role?: TokenRole;
 }
 
 const metadataKeys: ReadonlySet<string> = new Set(METADATA_KEYS);
@@ -22,10 +24,17 @@ export function isLeaf(node: unknown): node is TokenLeaf<Modes> {
 
 // Walks the tree in source order and returns one entry per leaf. A leaf is any
 // object with a value key; on it, metadata keys are metadata and every other
-// key is a mode override. A group's `$group.type` is inherited by the leaves below.
-export function flatten(tree: TokenTree<Modes>, parent: string[] = [], groupType?: TokenType): Token[] {
+// key is a mode override. A group's `$group.type` and `$group.role` are
+// inherited by the leaves below.
+export function flatten(
+  tree: TokenTree<Modes>,
+  parent: string[] = [],
+  groupType?: TokenType,
+  groupRole?: TokenRole
+): Token[] {
   const out: Token[] = [];
   const ownType = tree.$group?.type ?? groupType;
+  const ownRole = tree.$group?.role ?? groupRole;
   for (const [key, node] of Object.entries(tree)) {
     if (key === GROUP_KEY || typeof node !== 'object' || node === null) continue;
     const segments = [...parent, key];
@@ -44,9 +53,10 @@ export function flatten(tree: TokenTree<Modes>, parent: string[] = [], groupType
         ...(node.deprecated !== undefined && { deprecated: node.deprecated }),
         ...(node.inherits !== undefined && { inherits: node.inherits }),
         ...(ownType !== undefined && { groupType: ownType }),
+        ...(ownRole !== undefined && { role: ownRole }),
       });
     } else {
-      out.push(...flatten(node as TokenTree<Modes>, segments, ownType));
+      out.push(...flatten(node as TokenTree<Modes>, segments, ownType, ownRole));
     }
   }
   return out;

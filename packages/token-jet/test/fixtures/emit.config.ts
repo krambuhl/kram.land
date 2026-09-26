@@ -10,7 +10,7 @@ export default defineConfig({
   },
   tokens: {
     space: {
-      $group: { type: 'dimension' },
+      $group: { type: 'dimension', role: 'spacing' },
       x4: { value: '4px' },
       x16: { value: '16px', description: 'The default gap.' },
     },

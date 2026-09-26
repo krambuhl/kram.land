@@ -9,6 +9,11 @@
   },
   "space": {
     "$type": "dimension",
+    "$extensions": {
+      "token-jet": {
+        "role": "spacing"
+      }
+    },
     "x4": {
       "$value": {
         "value": 4,

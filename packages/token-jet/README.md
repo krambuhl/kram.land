@@ -58,7 +58,9 @@ A tree of groups and leaves. A leaf is any object with a `value` key:
 | `deprecated`  | `boolean \| string` | Marks the token on its way out. The generator keeps emitting it; every surface warns.                   |
 | `inherits`    | `boolean`           | Whether the custom property inherits. Default `true`.                                                   |
 
-A group may carry `$group: { type, description }`. `type` applies to every leaf below it, and a leaf may not contradict it.
+A group may carry `$group: { type, role, description }`. `type` applies to every leaf below it, and a leaf may not contradict it.
+
+`role` says what a group's tokens are for when the type alone does not: space, size and radius are all dimensions. `spacing`, `sizing`, `radius` and `fontSize` suit `dimension`; `lineHeight` suits `number`. It applies to every leaf below the group, a role that does not suit the token's type is an error, and the DTCG export carries it on the group under the `token-jet` extension.
 
 A token is addressed by its full path, `space.x16`. The custom property is `--space-x16`, the TypeScript literal type is `SpaceX16`, and every group gets a union named after it (`SpaceToken`). A group key that is not a valid identifier is quoted in the config as usual.
 

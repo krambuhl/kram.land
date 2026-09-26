@@ -22,6 +22,20 @@ test("flatten records a group's type on each leaf as groupType, nearest group fi
   expect(tokens.find((t) => t.path === 'bg.page')?.groupType).toBe('color');
 });
 
+test("flatten records the nearest group's role on each leaf", () => {
+  const tokens = flatten({
+    font: {
+      $group: { type: 'dimension' as const, role: 'fontSize' as const },
+      body: { md: { value: '1rem' } },
+      corner: { $group: { role: 'radius' as const }, sm: { value: '4px' } },
+    },
+    ratio: { value: 1.5, type: 'number' as const },
+  });
+  expect(tokens.find((t) => t.path === 'font.body.md')?.role).toBe('fontSize');
+  expect(tokens.find((t) => t.path === 'font.corner.sm')?.role).toBe('radius');
+  expect(tokens.find((t) => t.path === 'ratio')?.role).toBeUndefined();
+});
+
 test('a group whose only keys are metadata is still empty', () => {
   expect(flatten({ bg: { $group: { type: 'color' as const, description: 'nothing here' } } })).toEqual([]);
 });

@@ -107,6 +107,7 @@ function group(tree: TokenTree<Modes>, parent: string[], inherited: TokenType | 
   const ownType = meta?.type ?? inherited;
   if (meta?.type !== undefined) out.$type = meta.type;
   if (meta?.description !== undefined) out.$description = meta.description;
+  if (meta?.role !== undefined) out.$extensions = { [DTCG_EXTENSION]: { role: meta.role } };
   for (const [key, node] of Object.entries(tree)) {
     if (key === GROUP_KEY || typeof node !== 'object' || node === null) continue;
     const segments = [...parent, key];

@@ -5,6 +5,17 @@ export type TokenValue = string | number;
 export const TOKEN_TYPES = ['color', 'dimension', 'fontFamily', 'fontWeight', 'number', 'duration'] as const;
 export type TokenType = (typeof TOKEN_TYPES)[number];
 
+// What a group's tokens are for when the type alone does not say. spacing,
+// sizing and radius are all dimensions. Each role suits one type.
+export const TOKEN_ROLES = {
+  spacing: 'dimension',
+  sizing: 'dimension',
+  radius: 'dimension',
+  fontSize: 'dimension',
+  lineHeight: 'number',
+} as const satisfies Record<string, TokenType>;
+export type TokenRole = keyof typeof TOKEN_ROLES;
+
 // Keys on a leaf that are not its value or a mode value.
 export const METADATA_KEYS = ['type', 'description', 'deprecated', 'inherits'] as const;
 // The key a group's metadata lives under.
@@ -22,9 +33,11 @@ export interface TokenMetadata {
 // keys of the config's modes, so an unknown one fails to type-check.
 export type TokenLeaf<M extends Modes> = { value: TokenValue } & { [K in keyof M]?: TokenValue } & TokenMetadata;
 
-// Metadata a group may carry. `type` is inherited by every leaf below it.
+// Metadata a group may carry. `type` and `role` are inherited by every leaf
+// below it.
 interface GroupMetadata {
   type?: TokenType;
+  role?: TokenRole;
   description?: string;
 }
 

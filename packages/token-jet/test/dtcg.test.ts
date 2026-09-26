@@ -67,6 +67,11 @@ describe('toDtcg', () => {
     expect(space.x4).toEqual({ $value: { value: 4, unit: 'px' } });
   });
 
+  test('a group role goes under the token-jet extension on the group', () => {
+    const space = file.space as Record<string, unknown>;
+    expect(space.$extensions).toEqual({ 'token-jet': { role: 'spacing' } });
+  });
+
   test('a mode value goes under the token-jet extension on the token, references kept', () => {
     const bg = file.bg as Record<string, Record<string, unknown>>;
     expect(bg.page).toEqual({

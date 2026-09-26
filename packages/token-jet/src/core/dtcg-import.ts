@@ -1,5 +1,5 @@
 import { GROUP_KEY, TOKEN_TYPES } from './config.ts';
-import type { Modes, TokenLeaf, TokenTree, TokenType, TokenValue } from './config.ts';
+import type { Modes, TokenLeaf, TokenRole, TokenTree, TokenType, TokenValue } from './config.ts';
 import { DTCG_EXTENSION } from './dtcg.ts';
 import type { DtcgNode } from './dtcg.ts';
 import { parseReference } from './references.ts';
@@ -94,9 +94,13 @@ function group(
     );
   }
   const ownType = node.$type ?? inherited;
-  if (node.$type !== undefined || typeof node.$description === 'string') {
+  const extension =
+    isObject(node.$extensions) && isObject(node.$extensions[DTCG_EXTENSION]) ? node.$extensions[DTCG_EXTENSION] : {};
+  const role = typeof extension.role === 'string' ? (extension.role as TokenRole) : undefined;
+  if (node.$type !== undefined || typeof node.$description === 'string' || role !== undefined) {
     out[GROUP_KEY] = {
       ...(node.$type !== undefined && { type: node.$type }),
+      ...(role !== undefined && { role }),
       ...(typeof node.$description === 'string' && { description: node.$description }),
     };
   }

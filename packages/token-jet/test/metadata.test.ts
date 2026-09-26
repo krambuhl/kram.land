@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { flatten } from '../src/core/flatten.ts';
-import { checkTypes, inferType, validateValue } from '../src/core/metadata.ts';
+import { checkRoles, checkTypes, inferType, validateValue } from '../src/core/metadata.ts';
 
 describe('validateValue', () => {
   test('color accepts hex, rgb(), hsl(), oklch() and named colors', () => {
@@ -109,5 +109,34 @@ describe('checkTypes', () => {
 
   test('untyped tokens are not validated', () => {
     expect(() => checkTypes(flatten({ a: { value: 'anything at all' } }))).not.toThrow();
+  });
+});
+
+describe('checkRoles', () => {
+  test('a role that suits the type passes', () => {
+    const tokens = flatten({
+      space: { $group: { type: 'dimension', role: 'spacing' }, x4: { value: '4px' } },
+      lineHeight: { $group: { type: 'number', role: 'lineHeight' }, body: { value: 1.5 } },
+    });
+    expect(() => checkRoles(tokens)).not.toThrow();
+  });
+
+  test('a role that does not suit the type is an error naming the token, the role and both types', () => {
+    const tokens = flatten({ bg: { $group: { type: 'color', role: 'radius' }, page: { value: '#fff' } } });
+    expect(() => checkRoles(tokens)).toThrow(
+      'Token "bg.page" has the role "radius", which needs the type dimension, not color.'
+    );
+  });
+
+  test('a role on an untyped token is an error, since there is no type to check it against', () => {
+    const tokens = flatten({ space: { $group: { role: 'spacing' }, x4: { value: '4px' } } });
+    expect(() => checkRoles(tokens)).toThrow(
+      'Token "space.x4" has the role "spacing", which needs the type dimension.'
+    );
+  });
+
+  test('an unknown role is an error listing the valid ones', () => {
+    const tree = { space: { $group: { type: 'dimension', role: 'gutter' }, x4: { value: '4px' } } };
+    expect(() => checkRoles(flatten(tree as never))).toThrow(/"space.x4" has the role "gutter".*spacing, sizing/);
   });
 });
