@@ -35,7 +35,7 @@ Each of these was settled with the repo owner before writing this plan.
 | Execution         | Each package builds to `dist/` with tsdown and its `bin` and `exports` point there; the workspace's `prepare` builds before generating tokens, and each package builds before its tests. Node 22.18 or later.                                                                                               |
 | Tests             | Vitest inside the package, with file snapshots and type-level tests.                                                                                                                                                                                                                                        |
 | Site migration    | Pipeline first with a 0-pixel diff, then the rename, then the new palette, as separate commits.                                                                                                                                                                                                             |
-| Editor support    | A language server plus a small VS Code extension. Version one does completion, hover and diagnostics.                                                                                                                                                                                                       |
+| Editor support    | A language server plus a small Zed extension. Version one does completion, hover and diagnostics.                                                                                                                                                                                                           |
 | References        | A value of the form `{path}` points at another token and emits as `var(--path)`. A missing target or a cycle is an error.                                                                                                                                                                                   |
 | Metadata          | A token may carry `type`, `description` and `deprecated`. `type` is validated against the value.                                                                                                                                                                                                            |
 | Contrast          | The config declares semantic foreground/background pairs. The generator computes WCAG contrast for every pair in every mode and fails below the declared minimum.                                                                                                                                           |
@@ -445,13 +445,12 @@ Tested by driving the server with LSP messages against fixture documents. The pr
 
 ### Phase 16: roll-off checklist
 
-Not executed as part of this plan. Recorded so the package stays ready.
+The in-repo half is done; the packages stay here and private until a second consumer exists (see Later).
 
-- Add a compile step (tsdown) producing `dist/`, and point `bin` and `exports` at it. A published package must ship JavaScript, because Node does not strip types inside `node_modules`.
-- Confirm no import reaches outside `packages/token-jet`.
-- Move the four packages to their own repo with history (`git subtree split`).
-- Write a README with the config reference. Publish. `token-jet` is unclaimed on npm as of 2026-09-21.
-- Replace the workspace dependency in kram.land with the published version.
+- Done: each Node package compiles with tsdown to `dist/` (ESM plus `.d.ts`) and its `bin` and `exports` point there. A published package must ship JavaScript, because Node does not strip types inside `node_modules`. `vite` is an optional peer of token-jet so its types stay external.
+- Done: a test in token-jet walks every package's `src/` and fails on a relative import that leaves the package or a bare import the package does not declare as a dependency or peer.
+- Done: a README per package with the config reference, and `npm pack --dry-run` shows only `dist/`, the README and `package.json`.
+- Left: move the four packages to their own repo with history (`git subtree split`), drop `private`, publish, and replace the workspace dependency in kram.land with the published versions. `token-jet`, `token-jet-generate` and `token-jet-lsp` were unclaimed on npm as of 2026-09-26. The Zed extension then fetches the server with `npm_install_package` instead of the worktree path and can go to the extension registry.
 
 ## Later
 
