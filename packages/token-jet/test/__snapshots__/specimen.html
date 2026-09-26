@@ -209,8 +209,22 @@ main { padding: 24px 32px 96px; max-width: 1120px; }
 .spacing { display: inline-flex; }
 .spacing i { width: 16px; height: 16px; background: var(--specimen-accent); border-radius: 3px; }
 .radius { display: block; width: 96px; height: 56px; border: 2px solid var(--specimen-accent); }
-.track { display: block; height: 8px; overflow: hidden; background: var(--specimen-line); border-radius: 4px; }
-.bar { display: block; height: 100%; background: var(--specimen-accent); }
+.bar { display: block; height: 8px; max-width: 100%; background: var(--specimen-accent); border-radius: 4px; }
+.canvas { overflow-x: auto; padding: 16px; background: var(--specimen-panel); border: 1px solid var(--specimen-line); border-radius: 10px; }
+.canvas-inner { position: relative; width: max-content; min-width: 100%; }
+.canvas .token { padding: 6px 0; }
+.canvas .token + .token { border-top: 1px solid var(--specimen-line); }
+.canvas .label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; position: sticky; left: 0; width: max-content; }
+.canvas .values > div { display: inline; }
+.canvas .bar {
+  max-width: none;
+  background:
+    linear-gradient(to right, var(--specimen-accent) 0 var(--specimen-viewport, 100%), transparent 0),
+    repeating-linear-gradient(135deg, var(--specimen-accent) 0 2px, transparent 2px 5px);
+}
+.wider { font: 11px/1.5 var(--specimen-mono); color: var(--specimen-fail); }
+.viewport { position: absolute; top: 0; bottom: 0; left: var(--specimen-viewport); border-left: 1px dashed var(--specimen-fail); pointer-events: none; }
+.viewport span { position: absolute; top: 0; left: 6px; font: 11px/1.5 var(--specimen-mono); color: var(--specimen-fail); white-space: nowrap; }
 .sample { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .leading { display: block; max-width: 30ch; font-size: 13px; }
 .duration { position: relative; display: block; height: 16px; }
@@ -335,6 +349,18 @@ document.addEventListener('click', async (event) => {
   toastTimer = setTimeout(() => { toast.hidden = true; }, 1600);
 });
 
+const viewportLabels = document.querySelectorAll('.viewport span');
+function markViewport() {
+  root.style.setProperty('--specimen-viewport', window.innerWidth + 'px');
+  for (const label of viewportLabels) label.textContent = 'viewport ' + window.innerWidth + 'px';
+  for (const token of document.querySelectorAll('.canvas .token')) {
+    token.querySelector('.wider').hidden = token.querySelector('.bar').offsetWidth <= window.innerWidth;
+  }
+}
+markViewport();
+window.addEventListener('resize', markViewport);
+for (const line of document.querySelectorAll('.viewport')) line.hidden = false;
+
 const filter = document.querySelector('.filter');
 filter.addEventListener('input', () => {
   const query = filter.value.trim().toLowerCase();
@@ -347,6 +373,7 @@ filter.addEventListener('input', () => {
   for (const link of document.querySelectorAll('nav a')) {
     link.hidden = document.getElementById(link.hash.slice(1))?.hidden ?? false;
   }
+  markViewport();
 });
 </script>
 </body>

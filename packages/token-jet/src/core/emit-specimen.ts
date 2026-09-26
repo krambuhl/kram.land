@@ -7,7 +7,6 @@ import { inferType } from './metadata.ts';
 import { cssVariableReference } from './names.ts';
 import { parseReference, resolveValue } from './references.ts';
 
-const REM_PX = 16;
 const SAMPLE = 'Sphinx of black quartz, judge my vow';
 const PARAGRAPH = 'Line height sets the space between the lines of a paragraph, like the lines of this one.';
 
@@ -70,8 +69,22 @@ main { padding: 24px 32px 96px; max-width: 1120px; }
 .spacing { display: inline-flex; }
 .spacing i { width: 16px; height: 16px; background: var(--specimen-accent); border-radius: 3px; }
 .radius { display: block; width: 96px; height: 56px; border: 2px solid var(--specimen-accent); }
-.track { display: block; height: 8px; overflow: hidden; background: var(--specimen-line); border-radius: 4px; }
-.bar { display: block; height: 100%; background: var(--specimen-accent); }
+.bar { display: block; height: 8px; max-width: 100%; background: var(--specimen-accent); border-radius: 4px; }
+.canvas { overflow-x: auto; padding: 16px; background: var(--specimen-panel); border: 1px solid var(--specimen-line); border-radius: 10px; }
+.canvas-inner { position: relative; width: max-content; min-width: 100%; }
+.canvas .token { padding: 6px 0; }
+.canvas .token + .token { border-top: 1px solid var(--specimen-line); }
+.canvas .label { display: flex; align-items: baseline; gap: 12px; margin-bottom: 6px; position: sticky; left: 0; width: max-content; }
+.canvas .values > div { display: inline; }
+.canvas .bar {
+  max-width: none;
+  background:
+    linear-gradient(to right, var(--specimen-accent) 0 var(--specimen-viewport, 100%), transparent 0),
+    repeating-linear-gradient(135deg, var(--specimen-accent) 0 2px, transparent 2px 5px);
+}
+.wider { font: 11px/1.5 var(--specimen-mono); color: var(--specimen-fail); }
+.viewport { position: absolute; top: 0; bottom: 0; left: var(--specimen-viewport); border-left: 1px dashed var(--specimen-fail); pointer-events: none; }
+.viewport span { position: absolute; top: 0; left: 6px; font: 11px/1.5 var(--specimen-mono); color: var(--specimen-fail); white-space: nowrap; }
 .sample { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .leading { display: block; max-width: 30ch; font-size: 13px; }
 .duration { position: relative; display: block; height: 16px; }
@@ -125,6 +138,18 @@ document.addEventListener('click', async (event) => {
   toastTimer = setTimeout(() => { toast.hidden = true; }, 1600);
 });
 
+const viewportLabels = document.querySelectorAll('.viewport span');
+function markViewport() {
+  root.style.setProperty('--specimen-viewport', window.innerWidth + 'px');
+  for (const label of viewportLabels) label.textContent = 'viewport ' + window.innerWidth + 'px';
+  for (const token of document.querySelectorAll('.canvas .token')) {
+    token.querySelector('.wider').hidden = token.querySelector('.bar').offsetWidth <= window.innerWidth;
+  }
+}
+markViewport();
+window.addEventListener('resize', markViewport);
+for (const line of document.querySelectorAll('.viewport')) line.hidden = false;
+
 const filter = document.querySelector('.filter');
 filter.addEventListener('input', () => {
   const query = filter.value.trim().toLowerCase();
@@ -137,6 +162,7 @@ filter.addEventListener('input', () => {
   for (const link of document.querySelectorAll('nav a')) {
     link.hidden = document.getElementById(link.hash.slice(1))?.hidden ?? false;
   }
+  markViewport();
 });
 `.trim();
 
@@ -162,14 +188,7 @@ function kindOf(token: Token): Kind {
   return token.role ?? inferType(token) ?? 'untyped';
 }
 
-function toPx(literal: string): number | undefined {
-  const match = /^(-?(?:\d+|\d*\.\d+))(px|rem|em)?$/.exec(literal);
-  if (match === null) return undefined;
-  const n = Number(match[1]);
-  return match[2] === 'rem' || match[2] === 'em' ? n * REM_PX : n;
-}
-
-function isBar(kind: Kind): boolean {
+function isCanvas(kind: Kind): boolean {
   return kind === 'sizing' || kind === 'dimension';
 }
 
@@ -211,18 +230,11 @@ function values(token: Token, tokens: readonly Token[], modes: readonly string[]
     .join('');
 }
 
-// Width is the token's share of the largest px bar in its subgroup. A unit it
-// cannot measure falls back to min(100%, var(--token)).
-function bar(ref: string, literal: string, max: number | undefined): string {
-  const px = toPx(literal);
-  const width =
-    px === undefined || max === undefined || max <= 0
-      ? `min(100%, ${ref})`
-      : `${Number(((px / max) * 100).toFixed(2))}%`;
-  return `<span class="track"><span class="bar" style="width: ${width}"></span></span>`;
+function bar(ref: string): string {
+  return `<span class="bar" style="width: ${ref}"></span>`;
 }
 
-function preview(token: Token, kind: Kind, literal: string, max: number | undefined): string {
+function preview(token: Token, kind: Kind): string {
   const ref = cssVariableReference(token.path);
   switch (kind) {
     case 'color':
@@ -243,7 +255,7 @@ function preview(token: Token, kind: Kind, literal: string, max: number | undefi
       return `<span class="duration"><i style="transition-duration: ${ref}"></i></span>`;
     case 'sizing':
     case 'dimension':
-      return bar(ref, literal, max);
+      return bar(ref);
     default:
       return '';
   }
@@ -260,28 +272,40 @@ function nameCell(token: Token): string {
   return `<button type="button" class="path" data-copy="${path}" title="copy token('${path}')">${path}</button>${note}${description}`;
 }
 
-function tokenBlock(token: Token, resolved: ResolvedTokens, modes: readonly string[], max: number | undefined): string {
+type Layout = 'swatches' | 'canvas' | 'rows';
+
+// Colours as swatches, lengths on a sideways-scrolling canvas so each bar is
+// drawn at its real width instead of being capped to fit, the rest as rows.
+function layoutOf(tokens: readonly Token[]): Layout {
+  if (tokens.every((t) => kindOf(t) === 'color')) return 'swatches';
+  if (tokens.every((t) => isCanvas(kindOf(t)))) return 'canvas';
+  return 'rows';
+}
+
+function tokenBlock(token: Token, resolved: ResolvedTokens, modes: readonly string[], layout: Layout): string {
   const kind = kindOf(token);
-  const literal = String(resolveValue(token.path, resolved.tokens));
   const classes = ['token', ...(token.deprecated === undefined ? [] : ['deprecated'])].join(' ');
   const open = `<div class="${classes}" data-path="${escape(token.path)}">`;
   const valueCell = `<div class="values">${values(token, resolved.tokens, modes)}</div>`;
-  if (kind === 'color') {
-    return `${open}${preview(token, kind, literal, max)}<div class="meta">${nameCell(token)}${valueCell}</div></div>`;
+  switch (layout) {
+    case 'swatches':
+      return `${open}${preview(token, kind)}<div class="meta">${nameCell(token)}${valueCell}</div></div>`;
+    case 'canvas':
+      return `${open}<div class="label">${nameCell(token)}${valueCell}<span class="wider" hidden>wider than window</span></div>${preview(token, kind)}</div>`;
+    case 'rows':
+      return `${open}<div>${nameCell(token)}</div><div class="preview">${preview(token, kind)}</div>${valueCell}</div>`;
   }
-  return `${open}<div>${nameCell(token)}</div><div class="preview">${preview(token, kind, literal, max)}</div>${valueCell}</div>`;
 }
 
 function subgroupBlock(group: Group, subgroup: Subgroup, resolved: ResolvedTokens, modes: readonly string[]): string {
-  const sizes = subgroup.tokens
-    .filter((t) => isBar(kindOf(t)))
-    .map((t) => toPx(String(resolveValue(t.path, resolved.tokens))))
-    .filter((px) => px !== undefined);
-  const max = sizes.length === 0 ? undefined : Math.max(...sizes);
-  const layout = subgroup.tokens.every((t) => kindOf(t) === 'color') ? 'swatches' : 'rows';
+  const layout = layoutOf(subgroup.tokens);
   const heading = subgroup.path === group.name || subgroup.path === '' ? '' : `<h3>${escape(subgroup.path)}</h3>`;
-  const blocks = subgroup.tokens.map((t) => tokenBlock(t, resolved, modes, max)).join('\n');
-  return `<div class="subgroup">${heading}<div class="${layout}">\n${blocks}\n</div></div>`;
+  const blocks = subgroup.tokens.map((t) => tokenBlock(t, resolved, modes, layout)).join('\n');
+  const body =
+    layout === 'canvas'
+      ? `<div class="canvas"><div class="canvas-inner">\n${blocks}\n<div class="viewport" aria-hidden="true" hidden><span></span></div></div></div>`
+      : `<div class="${layout}">\n${blocks}\n</div>`;
+  return `<div class="subgroup">${heading}${body}</div>`;
 }
 
 function groupSection(group: Group, resolved: ResolvedTokens, modes: readonly string[]): string {

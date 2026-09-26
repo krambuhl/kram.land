@@ -93,19 +93,24 @@ describe('emitSpecimen', () => {
     expect(block(rolesPage, 'ease.fast')).toContain('style="transition-duration: var(--ease-fast)"');
   });
 
-  test('a sizing bar is scaled to the largest token in its group, rem counted at 16px', () => {
-    expect(block(rolesPage, 'size.x480')).toContain('style="width: 50%"');
-    expect(block(rolesPage, 'size.x960')).toContain('style="width: 100%"');
-    expect(block(rolesPage, 'size.wide')).toContain('style="width: 100%"');
+  test('a sizing or plain dimension bar is drawn at its real width', () => {
+    expect(block(rolesPage, 'size.x960')).toContain('<span class="bar" style="width: var(--size-x960)"></span>');
+    expect(block(rolesPage, 'size.wide')).toContain('<span class="bar" style="width: var(--size-wide)"></span>');
+    expect(block(rolesPage, 'fluid.half')).toContain('<span class="bar" style="width: var(--fluid-half)"></span>');
   });
 
-  test('a dimension it cannot measure falls back to the custom property, capped at the track', () => {
-    expect(block(rolesPage, 'fluid.half')).toContain('style="width: min(100%, var(--fluid-half))"');
+  test('a bar wider than the window is tagged, with the tag and the viewport line shown by the script', () => {
+    expect(block(rolesPage, 'size.x960')).toContain('<span class="wider" hidden>wider than window</span>');
+    expect(rolesPage).toContain('<div class="viewport" aria-hidden="true" hidden><span></span></div>');
+    expect(rolesPage).toContain("root.style.setProperty('--specimen-viewport', window.innerWidth + 'px');");
   });
 
-  test('colours sit in a swatch grid and everything else in rows', () => {
+  test('colours sit in a swatch grid, lengths on a scrolling canvas, everything else in rows', () => {
     expect(html).toMatch(/<div class="swatches">\n<div class="token" data-path="gray\.50">/);
     expect(html).toMatch(/<div class="rows">\n<div class="token" data-path="space\.x4">/);
+    expect(rolesPage).toMatch(
+      /<div class="canvas"><div class="canvas-inner">\n<div class="token" data-path="size\.x480">/
+    );
   });
 
   test('a value shows the literal per mode and the reference it came through', () => {
