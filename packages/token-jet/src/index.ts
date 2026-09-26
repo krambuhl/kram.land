@@ -26,6 +26,8 @@ export { cssVariableName, typeName, unionName } from './core/names.ts';
 export { emitCss } from './core/emit-css.ts';
 export { emitSpecimen } from './core/emit-specimen.ts';
 export { emitJs } from './core/emit-js.ts';
+export { MANIFEST_SCHEMA, emitManifest } from './core/emit-manifest.ts';
+export type { Manifest, ManifestToken } from './core/emit-manifest.ts';
 export { emitTypes } from './core/emit-types.ts';
 export type { EmitCssOptions } from './core/emit-css.ts';
 export { generateFiles, writeFiles } from './core/generate.ts';

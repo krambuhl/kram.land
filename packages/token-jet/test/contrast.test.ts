@@ -134,6 +134,6 @@ describe('contrast gates generation', () => {
 
   test('a passing palette generates', () => {
     const c = config({ minimum: 4.5, pairs: [['content.regular', 'bg.page']] });
-    expect(generateFiles(loadTokens(c))).toHaveLength(3);
+    expect(generateFiles(loadTokens(c))).toHaveLength(5);
   });
 });

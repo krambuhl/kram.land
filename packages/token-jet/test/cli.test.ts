@@ -37,12 +37,12 @@ describe('token-jet generate', () => {
     dir = project();
   });
 
-  test('writes tokens.css, types.ts and index.ts to generated/tokens', () => {
+  test('writes tokens.css, types.ts, index.ts, the manifest and its schema to generated/tokens', () => {
     const out = run(dir, 'generate');
-    for (const file of ['tokens.css', 'types.ts', 'index.ts']) {
+    for (const file of ['tokens.css', 'types.ts', 'index.ts', 'manifest.json', 'manifest.schema.json']) {
       expect(existsSync(join(dir, 'generated/tokens', file)), file).toBe(true);
     }
-    expect(out).toMatch(/3 files/);
+    expect(out).toMatch(/5 files/);
   });
 
   test('the written css is the emitter output', () => {

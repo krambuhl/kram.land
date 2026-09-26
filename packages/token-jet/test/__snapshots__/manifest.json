@@ -1,0 +1,220 @@
+{
+  "$schema": "./manifest.schema.json",
+  "version": 1,
+  "modes": {
+    "dark": "(prefers-color-scheme: dark)",
+    "contrast": "(prefers-contrast: more)"
+  },
+  "tokens": [
+    {
+      "path": "space.x4",
+      "variable": "--space-x4",
+      "reference": "var(--space-x4)",
+      "type": "dimension",
+      "value": "4px",
+      "modes": {},
+      "resolved": {
+        "base": "4px"
+      }
+    },
+    {
+      "path": "space.x16",
+      "variable": "--space-x16",
+      "reference": "var(--space-x16)",
+      "type": "dimension",
+      "value": "16px",
+      "modes": {},
+      "resolved": {
+        "base": "16px"
+      },
+      "description": "The default gap."
+    },
+    {
+      "path": "weight.bold",
+      "variable": "--weight-bold",
+      "reference": "var(--weight-bold)",
+      "type": "fontWeight",
+      "value": 700,
+      "modes": {},
+      "resolved": {
+        "base": 700
+      }
+    },
+    {
+      "path": "family.body",
+      "variable": "--family-body",
+      "reference": "var(--family-body)",
+      "type": "fontFamily",
+      "value": "Inter, sans-serif",
+      "modes": {},
+      "resolved": {
+        "base": "Inter, sans-serif"
+      }
+    },
+    {
+      "path": "ratio.golden",
+      "variable": "--ratio-golden",
+      "reference": "var(--ratio-golden)",
+      "type": "number",
+      "value": 1.618,
+      "modes": {},
+      "resolved": {
+        "base": 1.618
+      },
+      "inherits": false
+    },
+    {
+      "path": "gray.50",
+      "variable": "--gray-50",
+      "reference": "var(--gray-50)",
+      "type": "color",
+      "value": "#fafafa",
+      "modes": {},
+      "resolved": {
+        "base": "#fafafa"
+      }
+    },
+    {
+      "path": "gray.900",
+      "variable": "--gray-900",
+      "reference": "var(--gray-900)",
+      "type": "color",
+      "value": "#171717",
+      "modes": {},
+      "resolved": {
+        "base": "#171717"
+      }
+    },
+    {
+      "path": "bg.page",
+      "variable": "--bg-page",
+      "reference": "var(--bg-page)",
+      "type": "color",
+      "value": "{gray.50}",
+      "modes": {
+        "dark": "{gray.900}"
+      },
+      "resolved": {
+        "base": "#fafafa",
+        "dark": "#171717"
+      }
+    },
+    {
+      "path": "bg.card",
+      "variable": "--bg-card",
+      "reference": "var(--bg-card)",
+      "type": "color",
+      "value": "#ffffff",
+      "modes": {
+        "dark": "#1a1a1a",
+        "contrast": "#000000"
+      },
+      "resolved": {
+        "base": "#ffffff",
+        "dark": "#1a1a1a",
+        "contrast": "#000000"
+      }
+    },
+    {
+      "path": "content.regular",
+      "variable": "--content-regular",
+      "reference": "var(--content-regular)",
+      "type": "color",
+      "value": "#111111",
+      "modes": {
+        "dark": "#eeeeee"
+      },
+      "resolved": {
+        "base": "#111111",
+        "dark": "#eeeeee"
+      },
+      "deprecated": "use content.body"
+    },
+    {
+      "path": "content.body",
+      "variable": "--content-body",
+      "reference": "var(--content-body)",
+      "type": "color",
+      "value": "{content.regular}",
+      "modes": {},
+      "resolved": {
+        "base": "#111111"
+      }
+    }
+  ],
+  "unions": [
+    {
+      "name": "SpaceToken",
+      "source": "tokens.space",
+      "paths": [
+        "space.x4",
+        "space.x16"
+      ]
+    },
+    {
+      "name": "WeightToken",
+      "source": "tokens.weight",
+      "paths": [
+        "weight.bold"
+      ]
+    },
+    {
+      "name": "FamilyToken",
+      "source": "tokens.family",
+      "paths": [
+        "family.body"
+      ]
+    },
+    {
+      "name": "RatioToken",
+      "source": "tokens.ratio",
+      "paths": [
+        "ratio.golden"
+      ]
+    },
+    {
+      "name": "GrayToken",
+      "source": "tokens.gray",
+      "paths": [
+        "gray.50",
+        "gray.900"
+      ]
+    },
+    {
+      "name": "BgToken",
+      "source": "tokens.bg",
+      "paths": [
+        "bg.page",
+        "bg.card"
+      ]
+    },
+    {
+      "name": "ContentToken",
+      "source": "tokens.content",
+      "paths": [
+        "content.regular",
+        "content.body"
+      ]
+    },
+    {
+      "name": "ColorToken",
+      "source": "types.color",
+      "paths": [
+        "gray.50",
+        "gray.900",
+        "bg.page",
+        "bg.card",
+        "content.regular",
+        "content.body"
+      ]
+    },
+    {
+      "name": "SurfaceToken",
+      "source": "types.surface",
+      "paths": [
+        "bg.page",
+        "bg.card"
+      ]
+    }
+  ]
+}
