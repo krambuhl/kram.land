@@ -1,0 +1,28 @@
+{
+  "name": "token-jet-generate",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Token-indexed generation: select tokens, map each through a template, aggregate the fragments into files.",
+  "type": "module",
+  "bin": {
+    "token-jet-generate": "./src/cli.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run --typecheck",
+    "check": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.6",
+    "typescript": "6.0.3",
+    "vitest": "^5.0.1"
+  },
+  "dependencies": {
+    "token-jet": "*"
+  }
+}

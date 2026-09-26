@@ -1,0 +1,7 @@
+.bgPage {
+  background-color: token('bg.page');
+}
+
+.bgCard {
+  background-color: token('bg.card');
+}

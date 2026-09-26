@@ -8,6 +8,9 @@
     },
     "packages/token-jet": {
       "ignore": ["test/__snapshots__/**", "test/fixtures/usage/**"]
+    },
+    "packages/token-jet-generate": {
+      "ignore": ["test/__snapshots__/**"]
     }
   }
 }

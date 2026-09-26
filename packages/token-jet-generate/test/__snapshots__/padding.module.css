@@ -1,0 +1,7 @@
+.spaceX4 {
+  padding: token('space.x4');
+}
+
+.spaceX16 {
+  padding: token('space.x16');
+}
