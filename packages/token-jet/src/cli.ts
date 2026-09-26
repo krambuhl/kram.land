@@ -1,18 +1,19 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from 'node:fs';
-import { relative, resolve } from 'node:path';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname, relative, resolve } from 'node:path';
 
 import { toDtcg } from './core/dtcg.ts';
 import { diffDtcg, formatDiff } from './core/dtcg-diff.ts';
 import { fromDtcg, renderConfig } from './core/dtcg-import.ts';
 import type { DtcgNode } from './core/dtcg.ts';
+import { emitSpecimen } from './core/emit-specimen.ts';
 import { DEFAULT_OUT_DIR, generateFiles, writeFiles } from './core/generate.ts';
 import { loadConfigFile, loadTokens } from './core/load.ts';
 import { renameConfigKey } from './core/rename-config.ts';
 import { findUsages, renameUsages } from './core/usage.ts';
 import { version } from './version.ts';
 
-const COMMANDS = ['generate', 'check', 'export', 'import', 'diff', 'usage', 'rename'] as const;
+const COMMANDS = ['generate', 'check', 'specimen', 'export', 'import', 'diff', 'usage', 'rename'] as const;
 
 function usageText(): string {
   return [
@@ -20,6 +21,7 @@ function usageText(): string {
     '',
     '  generate [--out <dir>]        write tokens.css, types.ts and index.ts',
     '  check                         print the contrast ratio of every pair in every mode',
+    '  specimen [--out <file>]       write an html page of every token in every mode',
     '  export --dtcg [--out <file>]  write the tokens as DTCG 2025.10 json, to stdout by default',
     '  import --dtcg <file> [--out <file>]  read DTCG json into tokens.config.ts text, to stdout by default',
     '  diff <export.json>            compare the config with a DTCG export; exit 1 on any difference',
@@ -53,6 +55,16 @@ async function check(): Promise<string> {
   );
   if (contrast.some((r) => !r.pass)) throw new Error(lines.join('\n'));
   return lines.join('\n');
+}
+
+async function specimen(args: readonly string[]): Promise<string> {
+  const outFlag = args.indexOf('--out');
+  const out = outFlag >= 0 ? args[outFlag + 1] : `${DEFAULT_OUT_DIR}/specimen.html`;
+  if (out === undefined) throw new Error('--out needs a file.');
+  const { config } = await loadConfigFile(process.cwd());
+  mkdirSync(dirname(resolve(out)), { recursive: true });
+  writeFileSync(resolve(out), emitSpecimen(loadTokens(config)));
+  return `wrote ${relative(process.cwd(), resolve(out))}`;
 }
 
 async function exportTokens(args: readonly string[]): Promise<string> {
@@ -138,6 +150,9 @@ async function main(argv: readonly string[]): Promise<void> {
       return;
     case 'check':
       console.log(await check());
+      return;
+    case 'specimen':
+      console.log(await specimen(rest));
       return;
     case 'export':
       console.log(await exportTokens(rest));

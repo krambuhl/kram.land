@@ -24,6 +24,7 @@ export type { Token } from './core/flatten.ts';
 export { matchGlob } from './core/glob.ts';
 export { cssVariableName, typeName, unionName } from './core/names.ts';
 export { emitCss } from './core/emit-css.ts';
+export { emitSpecimen } from './core/emit-specimen.ts';
 export { emitJs } from './core/emit-js.ts';
 export { emitTypes } from './core/emit-types.ts';
 export type { EmitCssOptions } from './core/emit-css.ts';

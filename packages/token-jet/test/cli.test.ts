@@ -89,6 +89,16 @@ describe('token-jet check', () => {
   });
 });
 
+describe('token-jet specimen', () => {
+  test('writes generated/tokens/specimen.html by default, or --out', () => {
+    const dir = project();
+    expect(run(dir, 'specimen')).toMatch(/wrote generated\/tokens\/specimen\.html/);
+    expect(readFileSync(join(dir, 'generated/tokens/specimen.html'), 'utf8')).toMatch(/^<!doctype html>/);
+    run(dir, 'specimen', '--out', 'public/tokens.html');
+    expect(existsSync(join(dir, 'public/tokens.html'))).toBe(true);
+  });
+});
+
 describe('token-jet export', () => {
   test('--dtcg prints the json, and --out writes it', () => {
     const dir = project();
