@@ -70,7 +70,7 @@ describe('generate', () => {
 
   test('the template context carries the tokens specifier the generated files import from', () => {
     expect(file('padding.ts').contents).toContain("from './tokens/index.ts'");
-    expect(defineGenerate({}).tokens).toBe('./tokens');
+    expect(defineGenerate({}).tokens).toBe('../tokens');
   });
 });
 

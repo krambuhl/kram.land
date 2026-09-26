@@ -1,6 +1,6 @@
 import cx from 'classnames';
 
-import { classNameForMaxWidth } from 'generated/maxWidth';
+import { classNameForMaxWidth } from 'generated/classnames/maxWidth';
 import { token } from 'generated/tokens';
 import type { SizeToken } from 'generated/tokens';
 

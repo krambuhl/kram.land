@@ -1,6 +1,6 @@
 import cx from 'classnames';
 
-import { classNameForGap } from 'generated/gap';
+import { classNameForGap } from 'generated/classnames/gap';
 import { token } from 'generated/tokens';
 import type { SpaceToken } from 'generated/tokens';
 import type { Align } from 'types/common';

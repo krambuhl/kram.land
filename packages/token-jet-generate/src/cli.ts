@@ -9,7 +9,7 @@ import { generate } from './index.ts';
 import type { GenerateConfig } from './index.ts';
 
 const CONFIG_FILE = 'generate.config.ts';
-const DEFAULT_OUT_DIR = 'generated';
+const DEFAULT_OUT_DIR = 'generated/classnames';
 
 async function loadGenerateConfig(dir: string): Promise<GenerateConfig> {
   const file = resolve(dir, CONFIG_FILE);

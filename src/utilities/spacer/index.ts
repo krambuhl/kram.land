@@ -1,8 +1,8 @@
 import cx from 'classnames';
 
-import { classNameForPadding } from 'generated/padding';
-import { classNameForPaddingBlock } from 'generated/paddingBlock';
-import { classNameForPaddingInline } from 'generated/paddingInline';
+import { classNameForPadding } from 'generated/classnames/padding';
+import { classNameForPaddingBlock } from 'generated/classnames/paddingBlock';
+import { classNameForPaddingInline } from 'generated/classnames/paddingInline';
 import type { SpaceToken } from 'generated/tokens';
 
 export interface SpacerOptions {

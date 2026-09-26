@@ -14,7 +14,7 @@ export default defineGenerate({
 });
 ```
 
-`token-jet-generate [--out <dir>]` reads `tokens.config.ts` and `generate.config.ts` from the working directory and writes every entry into `generated/` by default. Run it after `token-jet generate`, since the generated files import the tokens.
+`token-jet-generate [--out <dir>]` reads `tokens.config.ts` and `generate.config.ts` from the working directory and writes every entry into `generated/classnames/` by default. Run it after `token-jet generate`, since the generated files import the tokens.
 
 ## Config
 
@@ -22,7 +22,7 @@ export default defineGenerate({
 
 - `select` is a union token-jet emits, from a group (`SpaceToken`) or from the `types` block (`ColorToken`), or a glob over token paths (`bg.*`). An unknown name lists the unions that exist.
 - `template` is `{ fragment(token, context), aggregate(fragments, context) }`. `fragment` runs once per selected token and `aggregate` turns the fragments into files. The token is the manifest shape: `path`, `variable`, `reference`, `type`, `value`, `modes`, `resolved`, `description`, `deprecated`.
-- `tokens` is the module specifier the generated files import the token types from, written verbatim. Default `./tokens`, which resolves from the output directory to `generated/tokens`.
+- `tokens` is the module specifier the generated files import the token types from, written verbatim. Default `../tokens`, which resolves from the output directory to `generated/tokens`.
 
 Two entries writing the same path is an error.
 

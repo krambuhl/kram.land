@@ -40,7 +40,7 @@ export interface GenerateConfig {
   tokens: string;
 }
 
-export const DEFAULT_TOKENS_SPECIFIER = './tokens';
+export const DEFAULT_TOKENS_SPECIFIER = '../tokens';
 
 export function defineGenerate(entries: Record<string, Entry>, options: GenerateOptions = {}): GenerateConfig {
   return { entries, tokens: options.tokens ?? DEFAULT_TOKENS_SPECIFIER };
