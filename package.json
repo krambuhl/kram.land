@@ -15,7 +15,7 @@
     "format": "prettier --check .",
     "verify": "npm run format && npm run lint && npm run lint:css && npm run check && npm run knip && npm test && npm run build",
     "lint:css": "npm run tokens && stylelint \"src/**/*.css\"",
-    "tokens": "token-jet generate",
+    "tokens": "token-jet generate && token-jet-generate",
     "prebuild": "npm run tokens",
     "test": "vitest run && npm test --workspaces --if-present",
     "predev": "npm run tokens",
@@ -43,6 +43,7 @@
     "stylelint-config-standard": "^40.0.0",
     "stylelint-value-no-unknown-custom-properties": "^6.1.1",
     "token-jet": "*",
+    "token-jet-generate": "*",
     "typescript": "6.0.3",
     "vitest": "^5.0.1"
   },

@@ -21,7 +21,7 @@ Requires Node 22.12 or later.
 
 ## Workspace
 
-The repo is an npm workspace. The site is the root package, and `packages/` holds packages it depends on. `packages/token-jet` is the design token generator; its plan is in `packages/token-jet/PLAN.md`. Its TypeScript runs from source, which needs Node 22.18 or later.
+The repo is an npm workspace. The site is the root package, and `packages/` holds packages it depends on. `packages/token-jet` is the design token generator and `packages/token-jet-generate` turns selected tokens into files through templates; the plan for both is in `packages/token-jet/PLAN.md`. Their TypeScript runs from source, which needs Node 22.18 or later.
 
 ## Layout
 
@@ -29,7 +29,8 @@ The repo is an npm workspace. The site is the root package, and `packages/` hold
 - `src/layouts/Layout.astro` holds the document `<html>` and `<head>` and wraps each page in `Mode` and `PageContainer`. It stays in Astro: a `<head>` rendered by React gets no stylesheet links, so the page comes out unstyled.
 - `src/components/` holds each component as `name/index.tsx` beside `name/styles.module.css`. A component's tests sit beside it as `name/index.test.tsx`, run by Vitest with `react-dom/server`.
 - `src/utilities/` holds style utilities: functions that return CSS Module class names to put on any element, such as `stack({ gap: token('space.x16') })`.
-- `tokens.config.ts` defines the design tokens. `token-jet` generates `generated/tokens/` from it before every dev, build and check: `tokens.css` (custom properties, with an `@property` per token and a slot per colour mode), `types.ts` and `index.ts` (a typed `token()`). The folder is gitignored; `npm install` generates it.
+- `tokens.config.ts` defines the design tokens. `token-jet` generates `generated/tokens/` from it before every dev, build and check: `tokens.css` (custom properties, with an `@property` per token and a slot per colour mode), `types.ts` and `index.ts` (a typed `token()`), plus `manifest.json` for tools and agents. The folder is gitignored; `npm install` generates it.
+- `generate.config.ts` names the per-token class families the utilities use. `token-jet-generate` writes each entry into `generated/` as a `.module.css` with one rule per token, a `.d.ts` beside it, and a `.ts` exporting a function such as `classNameForGap(token('space.x16'))` that is typed on the entry's token union. It runs with `npm run tokens`; the Vite adapter regenerates on a change to `tokens.config.ts` only, so a change to `generate.config.ts` needs `npm run tokens` by hand.
 - `src/assets/` holds images Astro resizes at build time. `public/` holds files served as-is.
 
 ## Styling conventions
@@ -42,6 +43,7 @@ The repo is an npm workspace. The site is the root package, and `packages/` hold
 Layout behaviour that applies to any element is a utility function, not a component. A utility returns a class string, so it composes with `classnames` in `.tsx` and `class:list` in `.astro`.
 
 - `area({ width })` centers an element and caps its width. `stack({ gap, align })` makes an element a vertical flex stack. `spacer({ p, ph, pv })` sets padding on all sides, horizontally and vertically. `superellipse()` gives an element the site's curved shape and clips its children to it. `headingText({ size })` and `bodyText({ size })` set the type style; the caller chooses the element.
+- The per-token classes behind `area`, `stack` and `spacer` are generated from `generate.config.ts`; the utility composes a generated class with its own `.module.css` for the rest.
 - Token arguments take `token('…')` values. Spacing takes a `space` token (`x0` to `x128`) and widths take a `size` token (`x192` to `x1920`); the generated unions reject the other group.
 - Utilities are not responsive. Spacing that changes at a breakpoint is written in a CSS Module, as `PageContainer` does.
 

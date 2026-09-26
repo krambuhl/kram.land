@@ -4,7 +4,7 @@
     ".": {
       "ignore": ["src/utilities/spacer/**"],
       "ignoreDependencies": ["the-new-css-reset"],
-      "entry": ["tokens.config.ts"]
+      "entry": ["tokens.config.ts", "generate.config.ts"]
     },
     "packages/token-jet": {
       "ignore": ["test/__snapshots__/**", "test/fixtures/usage/**"]

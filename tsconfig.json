@@ -13,7 +13,7 @@
     "rootDirs": [".", "generated"]
   },
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "node_modules", "packages"],
+  "exclude": ["dist", "node_modules", "packages", "generated/*.module.css"],
   "cmkOptions": {
     "enabled": true,
     "dtsOutDir": "generated"
