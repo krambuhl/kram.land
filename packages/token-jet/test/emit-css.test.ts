@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { defineConfig } from '../src/core/config.ts';
 import { emitCss } from '../src/core/emit-css.ts';
 import { loadTokens } from '../src/core/load.ts';
 import config from './fixtures/emit.config.ts';
@@ -39,6 +40,40 @@ describe('emitCss', () => {
 
   test('a token with two modes chains the slots in mode order, base last', () => {
     expect(css).toContain('--bg-card: var(--bg-card--dark, var(--bg-card--contrast, var(--bg-card--light)));');
+  });
+
+  test('a mode value written the same as the base value is not emitted', () => {
+    const same = emitCss(
+      loadTokens(
+        defineConfig({
+          modes: { dark: '(prefers-color-scheme: dark)', contrast: '(prefers-contrast: more)' },
+          tokens: {
+            gray: { $group: { type: 'color' }, 50: { value: '#fafafa' } },
+            flat: { $group: { type: 'color' }, ink: { value: '#111111', dark: '#111111' } },
+            ref: { $group: { type: 'color' }, page: { value: '{gray.50}', dark: '{gray.50}', contrast: '#000000' } },
+          },
+        })
+      )
+    );
+    expect(same).toMatch(/:where\(html\) \{[^}]*--flat-ink: #111111;/);
+    expect(same).not.toContain('--flat-ink--');
+    expect(same).not.toContain('--ref-page--dark');
+    expect(same).toContain('--ref-page: var(--ref-page--contrast, var(--ref-page--light));');
+  });
+
+  test('a mode value that only resolves to the base literal is still emitted', () => {
+    const resolvesSame = emitCss(
+      loadTokens(
+        defineConfig({
+          modes: { dark: '(prefers-color-scheme: dark)' },
+          tokens: {
+            white: { $group: { type: 'color' }, base: { value: '#ffffff', dark: '#000000' } },
+            page: { $group: { type: 'color' }, bg: { value: '#ffffff', dark: '{white.base}' } },
+          },
+        })
+      )
+    );
+    expect(resolvesSame).toContain('--page-bg--dark: var(--white-base);');
   });
 
   test('every token gets an @property before the base block', () => {

@@ -62,10 +62,18 @@ function closure(tokens: readonly Token[], used: ReadonlySet<string>): Set<strin
   return keep;
 }
 
+// Drops a mode value written the same as the base value. Only identical text
+// is safe: a value that merely resolves to the same literal can differ in
+// another mode, since a reference it names may carry its own mode values.
+function withoutRedundantModes(token: Token): Token {
+  const modes = Object.fromEntries(Object.entries(token.modes).filter(([, v]) => String(v) !== String(token.value)));
+  return { ...token, modes };
+}
+
 export function emitCss(resolved: ResolvedTokens, options: EmitCssOptions = {}): string {
   const all = resolved.tokens;
   const keep = options.prune ? closure(all, options.used ?? new Set()) : null;
-  const tokens = keep === null ? all : all.filter((t) => keep.has(t.path));
+  const tokens = (keep === null ? all : all.filter((t) => keep.has(t.path))).map(withoutRedundantModes);
   const modeNames = Object.keys(resolved.config.modes);
 
   const out: string[] = [];
