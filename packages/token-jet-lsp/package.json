@@ -3,10 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "description": "A language server for token() calls: completion, hover and diagnostics from tokens.config.ts.",
-  "type": "module",
   "bin": {
     "token-jet-lsp": "./dist/server.js"
   },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/analyze.d.ts",
@@ -19,20 +22,17 @@
     "test": "vitest run --typecheck",
     "check": "tsc --noEmit"
   },
-  "engines": {
-    "node": ">=22.18.0"
+  "dependencies": {
+    "token-jet": "*",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.12"
   },
   "devDependencies": {
     "@types/node": "24.13.6",
     "typescript": "6.0.3",
     "vitest": "^5.0.1"
   },
-  "dependencies": {
-    "token-jet": "*",
-    "vscode-languageserver": "^9.0.1",
-    "vscode-languageserver-textdocument": "^1.0.12"
-  },
-  "files": [
-    "dist"
-  ]
+  "engines": {
+    "node": ">=22.18.0"
+  }
 }

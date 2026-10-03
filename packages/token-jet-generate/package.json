@@ -3,10 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "description": "Token-indexed generation: select tokens, map each through a template, aggregate the fragments into files.",
-  "type": "module",
   "bin": {
     "token-jet-generate": "./dist/cli.js"
   },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -19,18 +22,15 @@
     "test": "vitest run --typecheck",
     "check": "tsc --noEmit"
   },
-  "engines": {
-    "node": ">=22.18.0"
+  "dependencies": {
+    "token-jet": "*"
   },
   "devDependencies": {
     "@types/node": "24.13.6",
     "typescript": "6.0.3",
     "vitest": "^5.0.1"
   },
-  "dependencies": {
-    "token-jet": "*"
-  },
-  "files": [
-    "dist"
-  ]
+  "engines": {
+    "node": ">=22.18.0"
+  }
 }

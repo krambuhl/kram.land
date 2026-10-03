@@ -5,6 +5,7 @@
   "workspaces": [
     "packages/*"
   ],
+  "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -52,6 +53,5 @@
   },
   "engines": {
     "node": ">=22.18.0"
-  },
-  "type": "module"
+  }
 }
