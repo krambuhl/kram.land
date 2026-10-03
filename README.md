@@ -12,7 +12,7 @@ A one-page personal site. Components are React, and [Astro](https://astro.build)
 | `npm run check`    | Type-check `.astro` and `.ts` files             |
 | `npm run lint`     | Run oxlint                                      |
 | `npm run lint:css` | Run stylelint on the stylesheets                |
-| `npm run format`   | Check formatting with Prettier                  |
+| `npm run format`   | Check formatting with oxfmt, Prettier for Astro |
 | `npm run knip`     | Find unused files, dependencies and exports     |
 | `npm test`         | Run the site tests, then every workspace's      |
 | `npm run verify`   | Run every check above, then build. CI runs this |
