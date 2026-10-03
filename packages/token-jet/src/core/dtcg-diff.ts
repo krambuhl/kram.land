@@ -1,5 +1,5 @@
-import type { DtcgNode } from './dtcg.ts';
 import { fromDtcg } from './dtcg-import.ts';
+import type { DtcgNode } from './dtcg.ts';
 import { flatten } from './flatten.ts';
 import type { Token } from './flatten.ts';
 import { inferType } from './metadata.ts';

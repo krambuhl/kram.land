@@ -1,7 +1,6 @@
-import { describe, expect, test } from 'vitest';
-
 import { generateFiles, loadTokens } from 'token-jet';
 import type { OutputFile } from 'token-jet';
+import { describe, expect, test } from 'vitest';
 
 import { defineGenerate, generate, selectTokens } from '../src/index.ts';
 import type { Template } from '../src/index.ts';

@@ -5,8 +5,8 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import type { Config, Modes } from '../src/core/config.ts';
-import { toDtcg } from '../src/core/dtcg.ts';
 import { fromDtcg, fromDtcgValue, renderConfig } from '../src/core/dtcg-import.ts';
+import { toDtcg } from '../src/core/dtcg.ts';
 import { flatten } from '../src/core/flatten.ts';
 import { loadTokens } from '../src/core/load.ts';
 import config from './fixtures/emit.config.ts';

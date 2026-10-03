@@ -2,9 +2,9 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
-import { toDtcg } from './core/dtcg.ts';
 import { diffDtcg, formatDiff } from './core/dtcg-diff.ts';
 import { fromDtcg, renderConfig } from './core/dtcg-import.ts';
+import { toDtcg } from './core/dtcg.ts';
 import type { DtcgNode } from './core/dtcg.ts';
 import { emitSpecimen } from './core/emit-specimen.ts';
 import { DEFAULT_OUT_DIR, generateFiles, writeFiles } from './core/generate.ts';

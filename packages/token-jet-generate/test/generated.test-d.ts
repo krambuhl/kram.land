@@ -1,8 +1,8 @@
 import { describe, expectTypeOf, test } from 'vitest';
 
 import { classNameForPadding } from './__snapshots__/padding.ts';
-import { classNameForSurface } from './__snapshots__/surface.ts';
 import { spaceValue } from './__snapshots__/spaceValue.ts';
+import { classNameForSurface } from './__snapshots__/surface.ts';
 import { token } from './__snapshots__/tokens/index.ts';
 
 describe('generated cssModuleClass function', () => {

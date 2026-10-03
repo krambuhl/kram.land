@@ -1,6 +1,5 @@
-import { describe, expect, test } from 'vitest';
-
 import { loadTokens } from 'token-jet';
+import { describe, expect, test } from 'vitest';
 
 import { callAt, complete, diagnose, findCalls, hover } from '../src/analyze.ts';
 import config from './fixtures/tokens.config.ts';

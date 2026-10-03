@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { toDtcg } from '../src/core/dtcg.ts';
 import { diffDtcg, formatDiff } from '../src/core/dtcg-diff.ts';
+import { toDtcg } from '../src/core/dtcg.ts';
 import type { DtcgNode } from '../src/core/dtcg.ts';
 import { loadTokens } from '../src/core/load.ts';
 import config from './fixtures/emit.config.ts';

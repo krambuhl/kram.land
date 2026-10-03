@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 import { loadConfigFile, loadTokens } from 'token-jet';
 import type { ResolvedTokens } from 'token-jet';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import {
   CodeActionKind,
   CompletionItemKind,
@@ -16,7 +17,6 @@ import {
   createConnection,
 } from 'vscode-languageserver/node.js';
 import type { CodeAction, CompletionItem, Diagnostic } from 'vscode-languageserver/node.js';
-import { TextDocument } from 'vscode-languageserver-textdocument';
 
 import { callAt, complete, diagnose, hover } from './analyze.ts';
 

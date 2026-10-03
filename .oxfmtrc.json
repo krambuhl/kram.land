@@ -6,6 +6,9 @@
   "tabWidth": 2,
   "useTabs": false,
   "printWidth": 120,
+  "sortImports": {
+    "internalPattern": ["components/", "generated/", "layouts/", "types/", "utilities/"]
+  },
   "ignorePatterns": [
     "**/*.astro",
     "packages/*/test/__snapshots__/",
