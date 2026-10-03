@@ -1,9 +1,21 @@
 export { defineConfig } from './core/config.ts';
+export { defineSchema, isDefinedTokens, pattern, schemaToConfig, slots } from './core/schema.ts';
+export type {
+  DefinedGenerate,
+  DefinedTokens,
+  GenerateEntry,
+  Pattern,
+  Schema,
+  Slots,
+  TagsOf,
+  TokensFor,
+} from './core/schema.ts';
 export { TOKEN_TYPES } from './core/config.ts';
 export type {
   Config,
   ContrastConfig,
   Modes,
+  Preview,
   TokenLeaf,
   TokenMetadata,
   TokenTree,

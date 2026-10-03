@@ -1,5 +1,5 @@
 import { GROUP_KEY, METADATA_KEYS } from './config.ts';
-import type { Modes, TokenLeaf, TokenRole, TokenTree, TokenType, TokenValue } from './config.ts';
+import type { Modes, Preview, TokenLeaf, TokenRole, TokenTree, TokenType, TokenValue } from './config.ts';
 
 export interface Token {
   path: string;
@@ -10,6 +10,8 @@ export interface Token {
   description?: string;
   deprecated?: boolean | string;
   inherits?: boolean;
+  tags?: readonly string[];
+  preview?: Preview;
   // The type declared on the nearest enclosing group, if any.
   groupType?: TokenType;
   // The role declared on the nearest enclosing group, if any.
@@ -52,6 +54,8 @@ export function flatten(
         ...(node.description !== undefined && { description: node.description }),
         ...(node.deprecated !== undefined && { deprecated: node.deprecated }),
         ...(node.inherits !== undefined && { inherits: node.inherits }),
+        ...(node.tags !== undefined && { tags: node.tags }),
+        ...(node.preview !== undefined && { preview: node.preview }),
         ...(ownType !== undefined && { groupType: ownType }),
         ...(ownRole !== undefined && { role: ownRole }),
       });

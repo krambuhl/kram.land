@@ -17,9 +17,12 @@ export const TOKEN_ROLES = {
 export type TokenRole = keyof typeof TOKEN_ROLES;
 
 // Keys on a leaf that are not its value or a mode value.
-export const METADATA_KEYS = ['type', 'description', 'deprecated', 'inherits'] as const;
+export const METADATA_KEYS = ['type', 'description', 'deprecated', 'inherits', 'tags', 'preview'] as const;
 // The key a group's metadata lives under.
 export const GROUP_KEY = '$group';
+
+const PREVIEWS = ['swatch', 'gap', 'bar', 'corner', 'text', 'paragraph'] as const;
+export type Preview = (typeof PREVIEWS)[number];
 
 export interface TokenMetadata {
   type?: TokenType;
@@ -27,6 +30,8 @@ export interface TokenMetadata {
   deprecated?: boolean | string;
   // Whether the custom property inherits. Defaults to true.
   inherits?: boolean;
+  tags?: readonly string[];
+  preview?: Preview;
 }
 
 // A leaf: a value plus an optional override per mode. The mode keys are the

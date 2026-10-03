@@ -37,6 +37,38 @@ token('space.x17'); // type error
 
 Node 22.18 or later. The config is TypeScript and is imported by Node directly, so it can use anything TypeScript allows and is type-checked like the rest of a project.
 
+## Schema
+
+A schema describes the shape of the token tree as values, so the tree is type-checked against it and tools can read it at runtime.
+
+```ts
+import { defineSchema, pattern, slots } from 'token-jet';
+
+const spacing = pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' });
+const color = pattern({ type: 'color', tags: ['color'], preview: 'swatch', modes: ['dark'] });
+
+export const schema = defineSchema({
+  modes: { dark: '(prefers-color-scheme: dark)' },
+  shape: {
+    space: slots(['x4', 'x8', 'x16'], spacing),
+    page: color,
+  },
+});
+
+export default schema.defineTokens({
+  space: { x4: { value: '4px' }, x8: { value: '8px' }, x16: { value: '16px' } },
+  page: { value: '#ffffff', dark: '#040404' },
+});
+```
+
+- `pattern({ type, tags?, preview?, modes? })` describes a leaf. `type` is a token type, `tags` are free-form strings, `preview` picks how the specimen draws the token (`swatch`, `gap`, `bar`, `corner`, `text`, `paragraph`), and `modes` lists the modes every leaf of this pattern must define.
+- `slots(keys, shape)` puts the same pattern or group under each key. A plain object is a group whose keys each hold their own shape.
+- `defineSchema({ modes, shape })` declares the modes once. A pattern that requires a mode the schema does not declare is a type error.
+- `schema.defineTokens(tree)` checks the tree against the shape: a missing slot, a key the schema lacks, a leaf without a required mode or an unknown mode key is a type error. It returns `{ schema, tokens }`.
+- `schema.defineGenerate(entries)` checks each entry's `tag` against the tags in the schema and returns `{ schema, entries }`.
+
+`schemaToConfig({ schema, tokens })` turns a defined tree into the config the rest of token-jet reads, with each leaf's `type`, `tags` and `preview` taken from its pattern. It repeats the shape checks at runtime, so a config that skipped the type check still fails on a missing slot or mode.
+
 ## Config reference
 
 `defineConfig({ modes, tokens, types?, contrast? })` returns the config unchanged; its job is to type-check it, so a mode key on a token that is not in `modes` is a compile error.
