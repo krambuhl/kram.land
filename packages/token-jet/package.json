@@ -4,9 +4,10 @@
   "private": true,
   "description": "Design tokens from one typed config: CSS custom properties, TypeScript types, and a token() function for both.",
   "bin": {
-    "token-jet": "./dist/cli.js"
+    "token-jet": "./bin/token-jet.js"
   },
   "files": [
+    "bin",
     "dist"
   ],
   "type": "module",

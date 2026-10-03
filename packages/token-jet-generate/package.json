@@ -4,9 +4,10 @@
   "private": true,
   "description": "Token-indexed generation: select tokens, map each through a template, aggregate the fragments into files.",
   "bin": {
-    "token-jet-generate": "./dist/cli.js"
+    "token-jet-generate": "./bin/token-jet-generate.js"
   },
   "files": [
+    "bin",
     "dist"
   ],
   "type": "module",
