@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, watch } from 'node:fs';
-import { join } from 'node:path';
+import { relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { loadConfigFile, loadTokens } from 'token-jet';
@@ -20,7 +20,6 @@ import type { CodeAction, CompletionItem, Diagnostic } from 'vscode-languageserv
 
 import { callAt, complete, diagnose, hover } from './analyze.ts';
 
-const CONFIG_FILE = 'tokens.config.ts';
 const SOURCE = 'token-jet';
 
 const connection = createConnection(process.stdin, process.stdout);
@@ -29,12 +28,14 @@ const documents = new TextDocuments(TextDocument);
 let root = process.cwd();
 let resolved: ResolvedTokens | undefined;
 let loadError: string | undefined;
+let configFile: string | undefined;
 
 function validate(document: TextDocument): void {
   let diagnostics: Diagnostic[];
   if (resolved === undefined) {
     const range = { start: document.positionAt(0), end: document.positionAt(0) };
-    const message = `${CONFIG_FILE} failed to load: ${loadError ?? 'unknown error'}`;
+    const name = configFile === undefined ? 'The token config' : relative(root, configFile);
+    const message = `${name} failed to load: ${loadError ?? 'unknown error'}`;
     diagnostics = [{ range, severity: DiagnosticSeverity.Error, message, source: SOURCE }];
   } else {
     diagnostics = diagnose(document.getText(), resolved).map((f) => ({
@@ -49,12 +50,12 @@ function validate(document: TextDocument): void {
   void connection.sendDiagnostics({ uri: document.uri, diagnostics });
 }
 
-// Loads tokens.config.ts from the workspace root, then re-checks every open
-// document. A failed load is reported as a diagnostic on each document
-// rather than crashing the server, so a half-edited config shows up in place.
+// Loads the token config from the workspace root and re-checks every open
+// document. A failed load is reported as a diagnostic on each one instead of crashing the server.
 async function load(): Promise<void> {
   try {
-    const { config } = await loadConfigFile(root);
+    const { file, config } = await loadConfigFile(root);
+    configFile = file;
     resolved = loadTokens(config);
     loadError = undefined;
   } catch (error) {
@@ -89,7 +90,9 @@ connection.onInitialize((params) => {
 });
 
 connection.onInitialized(() => {
-  void load().then(() => watchConfig(join(root, CONFIG_FILE)));
+  void load().then(() => {
+    if (configFile !== undefined) watchConfig(configFile);
+  });
 });
 
 documents.onDidChangeContent((change) => {

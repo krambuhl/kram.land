@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import type { Config, Modes } from './config.ts';
@@ -11,9 +11,11 @@ import { matchGlob } from './glob.ts';
 import { checkRoles, checkTypes } from './metadata.ts';
 import { checkTypeNameCollisions, unionName } from './names.ts';
 import { checkReferences } from './references.ts';
+import { isDefinedTokens, schemaToConfig } from './schema.ts';
 import { validate } from './validate.ts';
 
 const CONFIG_FILE = 'tokens.config.ts';
+const SCHEMA_TOKENS_FILE = 'tokens/tokens.ts';
 
 export interface Union {
   name: string;
@@ -59,20 +61,24 @@ export function loadTokens(config: Config<Modes>): ResolvedTokens {
   return { config, tokens, unions, contrast: checkContrast(config, tokens) };
 }
 
-// Imports tokens.config.ts from a directory. Node runs the TypeScript
-// directly, so no build step sits between the config and the generator.
+// Imports tokens.config.ts when it is there, else tokens/tokens.ts; a schema
+// export is converted to a config. Node runs the TypeScript directly, with
+// no build step between the config and the generator.
 export async function loadConfigFile(dir: string): Promise<{ file: string; config: Config<Modes> }> {
-  const file = resolve(dir, CONFIG_FILE);
+  const legacy = resolve(dir, CONFIG_FILE);
+  const schemaTokens = resolve(dir, SCHEMA_TOKENS_FILE);
+  const file = existsSync(legacy) ? legacy : schemaTokens;
   if (!existsSync(file)) {
-    throw new Error(`No ${CONFIG_FILE} found in ${dir}.`);
+    throw new Error(`No ${CONFIG_FILE} or ${SCHEMA_TOKENS_FILE} found in ${dir}.`);
   }
   // Node caches a module by its url for the life of the process. A version
   // query makes every load a fresh import, so a long-running caller such as
   // the vite adapter sees the config as it is on disk now.
   const url = `${pathToFileURL(file).href}?v=${Date.now()}`;
-  const module = (await import(url)) as { default?: Config<Modes> };
+  const module = (await import(url)) as { default?: unknown };
   if (module.default === undefined) {
-    throw new Error(`${CONFIG_FILE} must export the config as its default export.`);
+    throw new Error(`${relative(dir, file)} must export the config as its default export.`);
   }
-  return { file, config: module.default };
+  if (isDefinedTokens(module.default)) return { file, config: schemaToConfig(module.default) };
+  return { file, config: module.default as Config<Modes> };
 }
