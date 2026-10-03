@@ -3,12 +3,14 @@
 Turns a selection of tokens into files: select tokens, map each through a template, aggregate the fragments. The first use is a family of CSS Module classes with a typed function per family, so a component can say `classNameForGap(token('space.x16'))` and get a hashed class the bundler knows about.
 
 ```ts
-// generate.config.ts
-import { cssModuleClass, defineGenerate } from 'token-jet-generate';
+// tokens/generate.ts
+import { cssModuleClass } from 'token-jet-generate';
 
-export default defineGenerate({
+import { schema } from './schema.ts';
+
+export default schema.defineGenerate({
   gap: {
-    select: 'SpaceToken',
+    tag: 'spacing',
     template: cssModuleClass({ property: 'gap', fn: 'classNameForGap' }),
   },
 });
@@ -18,10 +20,9 @@ export default defineGenerate({
 
 ## Config
 
-`defineGenerate(entries, { tokens? })`. Each entry is `{ select, template }` or `{ tag, template }`; the key names the entry's output files.
+`defineGenerate(entries, { tokens? })`. Each entry is `{ tag, template }`; the key names the entry's output files.
 
 - `tag` selects every token whose schema pattern carries that tag, across groups, and types the generated function on the tag's union (`spacing` gives `SpacingToken`). An unknown tag lists the tags that exist.
-- `select` is a union token-jet emits, from a group (`SpaceToken`) or from the `types` block (`ColorToken`), or a glob over token paths (`bg.*`). An unknown name lists the unions that exist.
 - `template` is `{ fragment(token, context), aggregate(fragments, context) }`. `fragment` runs once per selected token and `aggregate` turns the fragments into files. The token is the manifest shape: `path`, `variable`, `reference`, `type`, `value`, `modes`, `resolved`, `description`, `deprecated`.
 - `tokens` is the module specifier the generated files import the token types from, written verbatim. Default `../tokens`, which resolves from the output directory to `generated/tokens`.
 

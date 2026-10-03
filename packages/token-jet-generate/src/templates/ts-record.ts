@@ -21,10 +21,7 @@ export function tsRecord(options: TsRecordOptions): Template<RecordFragment> {
       const type = selectedTypeName(context);
       const ts = [
         HEADER,
-        selectedTypeImport(
-          fragments.map((f) => f.token),
-          context
-        ),
+        selectedTypeImport(context),
         '',
         `export const ${name}: Record<${type}, string> = {`,
         ...fragments.map((f) => `  '${f.token.reference}': '${f.value.replace(/'/g, "\\'")}',`),

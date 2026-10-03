@@ -21,6 +21,7 @@ export type RatioToken = RatioGolden;
 export type GrayToken = Gray50 | Gray900;
 export type BgToken = BgPage | BgCard;
 export type ContentToken = ContentRegular | ContentBody;
+export type SpacingToken = SpaceX4 | SpaceX16;
 export type ColorToken = Gray50 | Gray900 | BgPage | BgCard | ContentRegular | ContentBody;
 export type SurfaceToken = BgPage | BgCard;
 

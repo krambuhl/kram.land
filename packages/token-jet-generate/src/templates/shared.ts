@@ -11,12 +11,10 @@ export function className(token: ManifestToken): string {
 }
 
 export function selectedTypeName(context: EntryContext): string {
-  return context.union?.name ?? 'Selected';
+  return context.union.name;
 }
 
-export function selectedTypeImport(tokens: readonly ManifestToken[], context: EntryContext): string {
-  const names = context.union === undefined ? tokens.map((t) => typeName(t.path)) : [context.union.name];
-  const lines = [`import type { ${names.join(', ')} } from '${context.tokens}';`];
-  if (context.union === undefined) lines.push('', `type Selected = ${names.join(' | ')};`);
-  return lines.join('\n');
+export function selectedTypeImport(context: EntryContext): string {
+  const specifier = `'${context.tokens}'`;
+  return `import type { ${context.union.name} } from ${specifier};`;
 }

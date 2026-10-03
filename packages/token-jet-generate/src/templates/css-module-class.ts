@@ -32,10 +32,7 @@ export function cssModuleClass(options: CssModuleClassOptions): Template<ClassFr
       const type = selectedTypeName(context);
       const ts = [
         HEADER,
-        selectedTypeImport(
-          fragments.map((f) => f.token),
-          context
-        ),
+        selectedTypeImport(context),
         `import styles from './${stylesheet}';`,
         '',
         `const classes: Record<${type}, string> = {`,

@@ -3,19 +3,19 @@ import { cssModuleClass, defineGenerate, storyPerToken, tsRecord } from '../../s
 export default defineGenerate(
   {
     padding: {
-      select: 'SpaceToken',
+      tag: 'spacing',
       template: cssModuleClass({ property: 'padding', fn: 'classNameForPadding' }),
     },
     surface: {
-      select: 'bg.*',
+      tag: 'surface',
       template: cssModuleClass({ property: 'background-color', fn: 'classNameForSurface' }),
     },
     spaceValue: {
-      select: 'SpaceToken',
+      tag: 'spacing',
       template: tsRecord({ name: 'spaceValue' }),
     },
     spaceStories: {
-      select: 'SpaceToken',
+      tag: 'spacing',
       template: storyPerToken({
         title: 'Tokens/Space',
         render: (t) => `<div style={{ width: '${t.resolved.base}' }} />`,
