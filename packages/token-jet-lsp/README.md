@@ -1,6 +1,6 @@
 # token-jet-lsp
 
-A language server for `token('…')` calls in CSS. It reads `tokens.config.ts` from the workspace root and gives an editor:
+A language server for `token('…')` calls in CSS. It reads the token config (`tokens.config.ts`, or `tokens/tokens.ts` without one) from the workspace root and gives an editor:
 
 - Completion inside the quotes: every path, with its value per mode as the detail and the description as documentation. The edit replaces the whole quoted argument, so a half-typed path with dots completes cleanly.
 - Hover: the path, its value in the base and in each mode with references resolved, the description, and the deprecation if any.
@@ -15,7 +15,7 @@ The server speaks LSP over stdio:
 token-jet-lsp --stdio
 ```
 
-or `node node_modules/token-jet-lsp/dist/server.js --stdio` from the workspace root. It takes the first workspace folder (or `rootUri`) as the root and looks for `tokens.config.ts` there.
+or `node node_modules/token-jet-lsp/dist/server.js --stdio` from the workspace root. It takes the first workspace folder (or `rootUri`) as the root and looks for the token config there.
 
 ### Zed
 

@@ -7,51 +7,51 @@
 }
 
 .body {
-  font-weight: token('font.weight.body');
-  line-height: token('lineHeight.body');
+  font-weight: token('body.weight');
+  line-height: token('body.lineHeight');
 }
 
 .heading {
-  font-weight: token('font.weight.header');
-  line-height: token('lineHeight.header');
+  font-weight: token('heading.weight');
+  line-height: token('heading.lineHeight');
 }
 
 .bodyXs {
-  font-size: token('font.size.body.xs');
+  font-size: token('body.size.xs');
 }
 
 .bodySm {
-  font-size: token('font.size.body.sm');
+  font-size: token('body.size.sm');
 }
 
 .bodyMd {
-  font-size: token('font.size.body.md');
+  font-size: token('body.size.md');
 }
 
 .bodyLg {
-  font-size: token('font.size.body.lg');
+  font-size: token('body.size.lg');
 }
 
 .bodyXl {
-  font-size: token('font.size.body.xl');
+  font-size: token('body.size.xl');
 }
 
 .headingXs {
-  font-size: token('font.size.header.xs');
+  font-size: token('heading.size.xs');
 }
 
 .headingSm {
-  font-size: token('font.size.header.sm');
+  font-size: token('heading.size.sm');
 }
 
 .headingMd {
-  font-size: token('font.size.header.md');
+  font-size: token('heading.size.md');
 }
 
 .headingLg {
-  font-size: token('font.size.header.lg');
+  font-size: token('heading.size.lg');
 }
 
 .headingXl {
-  font-size: token('font.size.header.xl');
+  font-size: token('heading.size.xl');
 }

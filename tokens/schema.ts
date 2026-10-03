@@ -1,4 +1,4 @@
-import { defineSchema, pattern, slots } from './library.ts';
+import { defineSchema, pattern, slots } from 'token-jet';
 
 // basic patterns:
 const spacing = pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' });
@@ -7,7 +7,7 @@ const radius = pattern({ type: 'dimension', tags: ['border-radius'], preview: 'c
 const fontFamily = pattern({ type: 'fontFamily', tags: ['font-family'], preview: 'text' });
 const fontWeight = pattern({ type: 'fontWeight', tags: ['font-weight'], preview: 'text' });
 const fontSize = pattern({ type: 'dimension', tags: ['font-size'], preview: 'text' });
-const lineHeight = pattern({ type: 'dimension', tags: ['line-height'], preview: 'text' });
+const lineHeight = pattern({ type: 'number', tags: ['line-height'], preview: 'paragraph' });
 const letterSpacing = pattern({ type: 'dimension', tags: ['letter-spacing'] });
 const color = <const Tags extends readonly string[]>(...tags: Tags) =>
   pattern({ type: 'color', tags: ['color', ...tags], preview: 'swatch', modes: ['dark'] });

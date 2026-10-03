@@ -6,12 +6,12 @@
 }
 
 html {
-  line-height: token('lineHeight.body');
+  line-height: token('body.lineHeight');
   tab-size: 4;
-  font-family: token('font.family.base');
-  font-size: token('font.size.base');
-  background-color: token('bg.page.default');
-  color: token('content.regular.default');
+  font-family: token('body.family');
+  font-size: token('body.size.md');
+  background-color: token('page');
+  color: token('base.regular.default');
 }
 
 body {

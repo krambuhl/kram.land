@@ -29,8 +29,8 @@ The repo is an npm workspace. The site is the root package, and `packages/` hold
 - `src/layouts/Layout.astro` holds the document `<html>` and `<head>` and wraps each page in `Mode` and `PageContainer`. It stays in Astro: a `<head>` rendered by React gets no stylesheet links, so the page comes out unstyled.
 - `src/components/` holds each component as `name/index.tsx` beside `name/styles.module.css`. A component's tests sit beside it as `name/index.test.tsx`, run by Vitest with `react-dom/server`.
 - `src/utilities/` holds style utilities: functions that return CSS Module class names to put on any element, such as `stack({ gap: token('space.x16') })`.
-- `tokens.config.ts` defines the design tokens. `token-jet` generates `generated/tokens/` from it before every dev, build and check: `tokens.css` (custom properties, with an `@property` per token and a slot per colour mode), `types.ts` and `index.ts` (a typed `token()`), plus `manifest.json` for tools and agents. The folder is gitignored; `npm install` generates it.
-- `generate.config.ts` names the per-token class families the utilities use. `token-jet-generate` writes each entry into `generated/classnames/` as a `.module.css` with one rule per token, a `.d.ts` beside it, and a `.ts` exporting a function such as `classNameForGap(token('space.x16'))` that is typed on the entry's token union. It runs with `npm run tokens`; the Vite adapter regenerates on a change to `tokens.config.ts` only, so a change to `generate.config.ts` needs `npm run tokens` by hand.
+- `tokens/` defines the design tokens. `schema.ts` describes their shape (patterns with a type, tags and a specimen preview, and the modes), `tokens.ts` fills it with values, and `generate.ts` names the per-token class families. `token-jet` generates `generated/tokens/` from `tokens.ts` before every dev, build and check: `tokens.css` (custom properties, with an `@property` per token and a slot per colour mode), `types.ts` and `index.ts` (a typed `token()`), plus `manifest.json` for tools and agents. The folder is gitignored; `npm install` generates it.
+- `token-jet-generate` writes each entry in `tokens/generate.ts` into `generated/classnames/` as a `.module.css` with one rule per token, a `.d.ts` beside it, and a `.ts` exporting a function such as `classNameForGap(token('space.x16'))` that is typed on the union of the entry's tag. It runs with `npm run tokens`. The Vite adapter regenerates when `tokens/tokens.ts` changes; a change to `schema.ts` or `generate.ts` needs `npm run tokens` or a restart, since Node caches the modules `tokens.ts` imports.
 - `src/assets/` holds images Astro resizes at build time. `public/` holds files served as-is.
 
 ## Styling conventions
@@ -43,7 +43,7 @@ The repo is an npm workspace. The site is the root package, and `packages/` hold
 Layout behaviour that applies to any element is a utility function, not a component. A utility returns a class string, so it composes with `classnames` in `.tsx` and `class:list` in `.astro`.
 
 - `area({ width })` centers an element and caps its width. `stack({ gap, align })` makes an element a vertical flex stack. `spacer({ p, ph, pv })` sets padding on all sides, horizontally and vertically. `superellipse()` gives an element the site's curved shape and clips its children to it. `headingText({ size })` and `bodyText({ size })` set the type style; the caller chooses the element.
-- The per-token classes behind `area`, `stack` and `spacer` are generated from `generate.config.ts`; the utility composes a generated class with its own `.module.css` for the rest.
+- The per-token classes behind `area`, `stack` and `spacer` are generated from `tokens/generate.ts`; the utility composes a generated class with its own `.module.css` for the rest.
 - Token arguments take `token('…')` values. Spacing takes a `space` token (`x0` to `x128`) and widths take a `size` token (`x192` to `x1920`); the generated unions reject the other group.
 - Utilities are not responsive. Spacing that changes at a breakpoint is written in a CSS Module, as `PageContainer` does.
 
@@ -53,7 +53,7 @@ Every colour token has a light and a dark value. `<Mode value>` sets which one a
 
 ## Editor support
 
-`token-jet-lsp` gives CSS buffers completion, hover and diagnostics for `token('…')`: every path with its value per mode, an error with the nearest path for an unknown one, a warning with a quick fix for a deprecated one, and a re-check of open files when `tokens.config.ts` changes.
+`token-jet-lsp` gives CSS buffers completion, hover and diagnostics for `token('…')`: every path with its value per mode, an error with the nearest path for an unknown one, a warning with a quick fix for a deprecated one, and a re-check of open files when `tokens/tokens.ts` changes.
 
 In Zed, install `packages/token-jet-zed` once with `zed: install dev extension` (it needs `rustup` and `cargo` on the machine; Zed compiles the extension to wasm). The extension runs `node node_modules/token-jet-lsp/dist/server.js --stdio` from the workspace root, so it works in any checkout that has installed this repo's packages. Zed's own CSS language server keeps running beside it.
 

@@ -2,5 +2,5 @@
   margin: token('space.x12') 0;
   height: 1px;
   width: token('space.x32');
-  background: token('content.regular.default');
+  background: token('base.regular.default');
 }
