@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { defineConfig } from '../src/core/config.ts';
 import { emitSpecimen } from '../src/core/emit-specimen.ts';
 import { loadTokens } from '../src/core/load.ts';
+import { defineSchema, pattern, schemaToConfig, slots } from '../src/core/schema.ts';
 import config from './fixtures/emit.config.ts';
 
 const resolved = loadTokens(config);
@@ -194,5 +195,55 @@ describe('emitSpecimen', () => {
     const page = emitSpecimen(loadTokens(c));
     expect(page).toContain('Inter, &quot;Segoe UI&quot;');
     expect(page).toContain('x &lt; y &amp; z');
+  });
+});
+
+describe('previews from the schema', () => {
+  const previews = defineSchema({
+    modes: {},
+    shape: {
+      gutter: slots(['md'], pattern({ type: 'dimension', preview: 'gap' })),
+      measure: slots(['wide'], pattern({ type: 'dimension', preview: 'bar' })),
+      corner: slots(['soft'], pattern({ type: 'dimension', preview: 'corner' })),
+      ink: slots(['brand'], pattern({ type: 'color', preview: 'swatch' })),
+      font: {
+        family: pattern({ type: 'fontFamily', preview: 'text' }),
+        weight: pattern({ type: 'fontWeight', preview: 'text' }),
+        size: pattern({ type: 'dimension', preview: 'text' }),
+        leading: pattern({ type: 'number', preview: 'paragraph' }),
+      },
+    },
+  });
+  const page = emitSpecimen(
+    loadTokens(
+      schemaToConfig(
+        previews.defineTokens({
+          gutter: { md: { value: '16px' } },
+          measure: { wide: { value: '960px' } },
+          corner: { soft: { value: '8px' } },
+          ink: { brand: { value: '#0055ff' } },
+          font: {
+            family: { value: 'Inter, sans-serif' },
+            weight: { value: 600 },
+            size: { value: '1.25rem' },
+            leading: { value: 1.4 },
+          },
+        })
+      )
+    )
+  );
+
+  test('a pattern preview picks the drawing whatever the group is called', () => {
+    expect(block(page, 'gutter.md')).toContain('<span class="spacing" style="gap: var(--gutter-md)">');
+    expect(block(page, 'measure.wide')).toContain('<span class="bar" style="width: var(--measure-wide)"></span>');
+    expect(block(page, 'corner.soft')).toContain('<span class="radius" style="border-radius: var(--corner-soft)">');
+    expect(block(page, 'ink.brand')).toContain('<span class="swatch" style="background: var(--ink-brand)"></span>');
+  });
+
+  test('a text preview draws by type: family, weight or size, and paragraph draws leading', () => {
+    expect(block(page, 'font.family')).toContain('style="font-family: var(--font-family)"');
+    expect(block(page, 'font.weight')).toContain('style="font-weight: var(--font-weight)"');
+    expect(block(page, 'font.size')).toContain('style="font-size: var(--font-size)"');
+    expect(block(page, 'font.leading')).toContain('style="line-height: var(--font-leading)"');
   });
 });

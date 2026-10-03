@@ -1,4 +1,4 @@
-import type { TokenRole, TokenType } from './config.ts';
+import type { Preview, TokenRole, TokenType } from './config.ts';
 import type { ContrastResult } from './contrast.ts';
 import { emitCss } from './emit-css.ts';
 import type { Token } from './flatten.ts';
@@ -186,7 +186,23 @@ function escape(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+const PREVIEW_KINDS: Record<Exclude<Preview, 'text'>, Kind> = {
+  swatch: 'color',
+  gap: 'spacing',
+  bar: 'sizing',
+  corner: 'radius',
+  paragraph: 'lineHeight',
+};
+
+function textKind(type: TokenType | undefined): Kind {
+  if (type === 'dimension') return 'fontSize';
+  if (type === 'number') return 'lineHeight';
+  return type ?? 'untyped';
+}
+
 function kindOf(token: Token): Kind {
+  if (token.preview === 'text') return textKind(inferType(token));
+  if (token.preview !== undefined) return PREVIEW_KINDS[token.preview];
   return token.role ?? inferType(token) ?? 'untyped';
 }
 
