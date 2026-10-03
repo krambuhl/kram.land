@@ -67,6 +67,8 @@ export default schema.defineTokens({
 - `schema.defineTokens(tree)` checks the tree against the shape: a missing slot, a key the schema lacks, a leaf without a required mode or an unknown mode key is a type error. It returns `{ schema, tokens }`.
 - `schema.defineGenerate(entries)` checks each entry's `tag` against the tags in the schema and returns `{ schema, entries }`.
 
+Every tag becomes a union in the generated types, next to the group unions: `spacing` emits `SpacingToken`, `border-radius` emits `BorderRadiusToken`. A tag is letters, digits and dashes, starting with a letter, and a tag union named like a group union is an error. The manifest lists each token's `tags` and `preview`.
+
 The CLI, the Vite adapter and the language server read `tokens/tokens.ts` when a directory has no `tokens.config.ts`; its default export is the result of `schema.defineTokens`. With both files present, `tokens.config.ts` wins, so a project can add `tokens/` before switching to it.
 
 `schemaToConfig({ schema, tokens })` turns a defined tree into the config the rest of token-jet reads, with each leaf's `type`, `tags` and `preview` taken from its pattern. It repeats the shape checks at runtime, so a config that skipped the type check still fails on a missing slot or mode.

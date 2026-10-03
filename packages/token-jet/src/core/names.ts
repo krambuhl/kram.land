@@ -22,6 +22,10 @@ export function unionName(path: string): string {
   return `${typeName(path)}Token`;
 }
 
+export function tagUnionName(tag: string): string {
+  return `${tag.split('-').map(pascal).join('')}Token`;
+}
+
 export interface NamedType {
   name: string;
   source: string;

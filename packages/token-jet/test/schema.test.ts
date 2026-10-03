@@ -1,11 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
 import { emitCss } from '../src/core/emit-css.ts';
+import { emitManifest } from '../src/core/emit-manifest.ts';
+import { emitTypes } from '../src/core/emit-types.ts';
 import { loadTokens } from '../src/core/load.ts';
 import { defineSchema, isDefinedTokens, pattern, schemaToConfig, slots } from '../src/core/schema.ts';
 
 const spacing = pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' });
-const color = pattern({ type: 'color', tags: ['color', 'surface'], preview: 'swatch', modes: ['dark'] });
+const color = pattern({ type: 'color', tags: ['color', 'background'], preview: 'swatch', modes: ['dark'] });
 
 const schema = defineSchema({
   modes: { dark: '(prefers-color-scheme: dark)' },
@@ -60,7 +62,7 @@ describe('schemaToConfig', () => {
     const resolved = loadTokens(config);
     expect(resolved.tokens.find((t) => t.path === 'surface.hover')).toMatchObject({
       type: 'color',
-      tags: ['color', 'surface'],
+      tags: ['color', 'background'],
       preview: 'swatch',
       modes: { dark: '#111111' },
     });
@@ -87,5 +89,51 @@ describe('schemaToConfig', () => {
   test('a group where the schema has a pattern is an error', () => {
     const tokens = { ...defined.tokens, space: { ...defined.tokens.space, x4: { nested: { value: '4px' } } } };
     expect(() => schemaToConfig({ schema, tokens } as never)).toThrow(/Token "space\.x4" needs a value/);
+  });
+});
+
+describe('tag unions', () => {
+  const resolved = loadTokens(schemaToConfig(defined));
+
+  test('every tag is a union of the tokens that carry it, named in PascalCase', () => {
+    const byName = Object.fromEntries(resolved.unions.map((u) => [u.name, u]));
+    expect(byName.SpacingToken).toEqual({
+      name: 'SpacingToken',
+      source: 'tags.spacing',
+      paths: ['space.x4', 'space.x8'],
+    });
+    expect(byName.BackgroundToken?.paths).toEqual(['surface.default', 'surface.hover']);
+  });
+
+  test('a kebab-case tag becomes a PascalCase union', () => {
+    const kebab = defineSchema({
+      modes: {},
+      shape: { radius: slots(['sm'], pattern({ type: 'dimension', tags: ['border-radius'] })) },
+    });
+    const unions = loadTokens(schemaToConfig(kebab.defineTokens({ radius: { sm: { value: '2px' } } }))).unions;
+    expect(unions.map((u) => u.name)).toContain('BorderRadiusToken');
+  });
+
+  test('a tag whose union name a group already has is an error naming both', () => {
+    const clash = defineSchema({
+      modes: {},
+      shape: { spacing: slots(['x4'], pattern({ type: 'dimension', tags: ['spacing'] })) },
+    });
+    expect(() => loadTokens(schemaToConfig(clash.defineTokens({ spacing: { x4: { value: '4px' } } })))).toThrow(
+      'Type name "SpacingToken" is produced by both tokens.spacing and tags.spacing.'
+    );
+  });
+
+  test('a tag that cannot become a type name is an error naming it', () => {
+    const bad = defineSchema({ modes: {}, shape: { a: pattern({ type: 'dimension', tags: ['two words'] }) } });
+    expect(() => loadTokens(schemaToConfig(bad.defineTokens({ a: { value: '1px' } })))).toThrow(
+      'Token "a" has the tag "two words"; a tag is letters, digits and dashes, starting with a letter.'
+    );
+  });
+
+  test('the emitted types and the manifest carry the tag unions and each token’s tags', () => {
+    expect(emitTypes(resolved)).toContain('export type SpacingToken = SpaceX4 | SpaceX8;');
+    const manifest = emitManifest(resolved);
+    expect(manifest.tokens.find((t) => t.path === 'space.x4')).toMatchObject({ tags: ['spacing'], preview: 'gap' });
   });
 });

@@ -21,7 +21,7 @@ export const METADATA_KEYS = ['type', 'description', 'deprecated', 'inherits', '
 // The key a group's metadata lives under.
 export const GROUP_KEY = '$group';
 
-const PREVIEWS = ['swatch', 'gap', 'bar', 'corner', 'text', 'paragraph'] as const;
+export const PREVIEWS = ['swatch', 'gap', 'bar', 'corner', 'text', 'paragraph'] as const;
 export type Preview = (typeof PREVIEWS)[number];
 
 export interface TokenMetadata {

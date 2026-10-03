@@ -9,13 +9,14 @@ import { flatten } from './flatten.ts';
 import type { Token } from './flatten.ts';
 import { matchGlob } from './glob.ts';
 import { checkRoles, checkTypes } from './metadata.ts';
-import { checkTypeNameCollisions, unionName } from './names.ts';
+import { checkTypeNameCollisions, tagUnionName, unionName } from './names.ts';
 import { checkReferences } from './references.ts';
 import { isDefinedTokens, schemaToConfig } from './schema.ts';
 import { validate } from './validate.ts';
 
 const CONFIG_FILE = 'tokens.config.ts';
 const SCHEMA_TOKENS_FILE = 'tokens/tokens.ts';
+const TAG = /^[A-Za-z][A-Za-z0-9-]*$/;
 
 export interface Union {
   name: string;
@@ -55,6 +56,20 @@ export function loadTokens(config: Config<Modes>): ResolvedTokens {
     const patterns = Array.isArray(pattern) ? pattern : [pattern];
     const matched = [...new Set(patterns.flatMap((p) => matchGlob(p, paths)))];
     unions.push({ name: unionName(name), source: `types.${name}`, paths: matched });
+  }
+  const tagged = new Map<string, string[]>();
+  for (const token of tokens) {
+    for (const tag of token.tags ?? []) {
+      if (!TAG.test(tag)) {
+        throw new Error(
+          `Token "${token.path}" has the tag "${tag}"; a tag is letters, digits and dashes, starting with a letter.`
+        );
+      }
+      tagged.set(tag, [...(tagged.get(tag) ?? []), token.path]);
+    }
+  }
+  for (const [tag, members] of tagged) {
+    unions.push({ name: tagUnionName(tag), source: `tags.${tag}`, paths: members });
   }
   checkTypeNameCollisions(unions);
 

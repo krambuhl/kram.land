@@ -1,5 +1,5 @@
-import { TOKEN_TYPES } from './config.ts';
-import type { Modes, TokenType, TokenValue } from './config.ts';
+import { PREVIEWS, TOKEN_TYPES } from './config.ts';
+import type { Modes, Preview, TokenType, TokenValue } from './config.ts';
 import type { ContrastResult } from './contrast.ts';
 import type { ResolvedTokens, Union } from './load.ts';
 import { inferType } from './metadata.ts';
@@ -17,6 +17,8 @@ export interface ManifestToken {
   description?: string;
   deprecated?: boolean | string;
   inherits?: boolean;
+  tags?: readonly string[];
+  preview?: Preview;
 }
 
 export interface Manifest {
@@ -61,6 +63,8 @@ export const MANIFEST_SCHEMA = {
           description: { type: 'string' },
           deprecated: { type: ['boolean', 'string'] },
           inherits: { type: 'boolean' },
+          tags: { type: 'array', items: { type: 'string' } },
+          preview: { enum: [...PREVIEWS] },
         },
       },
     },
@@ -129,6 +133,8 @@ export function emitManifest(resolved: ResolvedTokens): Manifest {
         ...(token.description !== undefined && { description: token.description }),
         ...(token.deprecated !== undefined && { deprecated: token.deprecated }),
         ...(token.inherits !== undefined && { inherits: token.inherits }),
+        ...(token.tags !== undefined && { tags: token.tags }),
+        ...(token.preview !== undefined && { preview: token.preview }),
       };
     }),
     unions,
