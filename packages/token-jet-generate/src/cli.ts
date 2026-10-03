@@ -1,23 +1,32 @@
 #!/usr/bin/env node
 import { existsSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { loadConfigFile, loadTokens, writeFiles } from 'token-jet';
 
-import { generate } from './index.ts';
-import type { GenerateConfig } from './index.ts';
+import { defineGenerate, generate } from './index.ts';
+import type { Entry, GenerateConfig } from './index.ts';
 
 const CONFIG_FILE = 'generate.config.ts';
+const SCHEMA_GENERATE_FILE = 'tokens/generate.ts';
 const DEFAULT_OUT_DIR = 'generated/classnames';
 
+function isDefinedGenerate(value: unknown): value is { entries: Record<string, Entry> } {
+  return typeof value === 'object' && value !== null && 'schema' in value && 'entries' in value;
+}
+
 async function loadGenerateConfig(dir: string): Promise<GenerateConfig> {
-  const file = resolve(dir, CONFIG_FILE);
-  if (!existsSync(file)) throw new Error(`No ${CONFIG_FILE} found in ${dir}.`);
+  const legacy = resolve(dir, CONFIG_FILE);
+  const file = existsSync(legacy) ? legacy : resolve(dir, SCHEMA_GENERATE_FILE);
+  if (!existsSync(file)) throw new Error(`No ${CONFIG_FILE} or ${SCHEMA_GENERATE_FILE} found in ${dir}.`);
   const url = `${pathToFileURL(file).href}?v=${Date.now()}`;
-  const module = (await import(url)) as { default?: GenerateConfig };
-  if (module.default === undefined) throw new Error(`${CONFIG_FILE} must export the config as its default export.`);
-  return module.default;
+  const module = (await import(url)) as { default?: unknown };
+  if (module.default === undefined) {
+    throw new Error(`${relative(dir, file)} must export the config as its default export.`);
+  }
+  if (isDefinedGenerate(module.default)) return defineGenerate(module.default.entries);
+  return module.default as GenerateConfig;
 }
 
 async function main(argv: readonly string[]): Promise<void> {

@@ -1,8 +1,8 @@
-import { generateFiles, loadTokens } from 'token-jet';
+import { defineSchema, generateFiles, loadTokens, pattern, schemaToConfig, slots } from 'token-jet';
 import type { OutputFile } from 'token-jet';
 import { describe, expect, test } from 'vitest';
 
-import { defineGenerate, generate, selectTokens } from '../src/index.ts';
+import { cssModuleClass, defineGenerate, generate, selectTokens, tagTokens } from '../src/index.ts';
 import type { Template } from '../src/index.ts';
 import config from './fixtures/generate.config.ts';
 import tokens from './fixtures/tokens.config.ts';
@@ -121,5 +121,50 @@ describe('tokens fixture', () => {
         await expect(f.contents).toMatchFileSnapshot(`./__snapshots__/tokens/${f.path}`);
       }
     }
+  });
+});
+
+describe('selecting by tag', () => {
+  const schema = defineSchema({
+    modes: {},
+    shape: {
+      space: slots(['x4', 'x8'], pattern({ type: 'dimension', tags: ['spacing'] })),
+      inset: slots(['sm'], pattern({ type: 'dimension', tags: ['spacing'] })),
+      size: slots(['x640'], pattern({ type: 'dimension', tags: ['sizing'] })),
+    },
+  });
+  const tagged = loadTokens(
+    schemaToConfig(
+      schema.defineTokens({
+        space: { x4: { value: '4px' }, x8: { value: '8px' } },
+        inset: { sm: { value: '6px' } },
+        size: { x640: { value: '640px' } },
+      })
+    )
+  );
+
+  test('a tag selects every token that carries it, across groups, typed on the tag union', () => {
+    const { tokens: selected, union } = tagTokens('spacing', tagged);
+    expect(selected.map((t) => t.path)).toEqual(['space.x4', 'space.x8', 'inset.sm']);
+    expect(union.name).toBe('SpacingToken');
+  });
+
+  test('an unknown tag is an error listing the tags', () => {
+    expect(() => tagTokens('spaceing', tagged)).toThrow(
+      'No token has the tag "spaceing". The tags are: spacing, sizing.'
+    );
+  });
+
+  test('an entry with a tag generates from that selection and imports the tag union', () => {
+    const out = generate(
+      defineGenerate({ gap: { tag: 'spacing', template: cssModuleClass({ property: 'gap', fn: 'classNameForGap' }) } }),
+      tagged
+    );
+    const ts = out.find((f) => f.path === 'gap.ts');
+    expect(ts?.contents).toContain("import type { SpacingToken } from '../tokens';");
+    expect(ts?.contents).toContain('export function classNameForGap(token: SpacingToken): string;');
+    expect(out.find((f) => f.path === 'gap.module.css')?.contents).toContain(
+      ".insetSm {\n  gap: token('inset.sm');\n}"
+    );
   });
 });

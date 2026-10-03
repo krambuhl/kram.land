@@ -14,12 +14,13 @@ export default defineGenerate({
 });
 ```
 
-`token-jet-generate [--out <dir>]` reads `tokens.config.ts` and `generate.config.ts` from the working directory and writes every entry into `generated/classnames/` by default. Run it after `token-jet generate`, since the generated files import the tokens.
+`token-jet-generate [--out <dir>]` reads the token config and `generate.config.ts` from the working directory and writes every entry into `generated/classnames/` by default. Without a `generate.config.ts` it reads `tokens/generate.ts`, whose default export is the result of a token-jet schema's `defineGenerate`. Run it after `token-jet generate`, since the generated files import the tokens.
 
 ## Config
 
-`defineGenerate(entries, { tokens? })`. Each entry is `{ select, template }`; the key names the entry's output files.
+`defineGenerate(entries, { tokens? })`. Each entry is `{ select, template }` or `{ tag, template }`; the key names the entry's output files.
 
+- `tag` selects every token whose schema pattern carries that tag, across groups, and types the generated function on the tag's union (`spacing` gives `SpacingToken`). An unknown tag lists the tags that exist.
 - `select` is a union token-jet emits, from a group (`SpaceToken`) or from the `types` block (`ColorToken`), or a glob over token paths (`bg.*`). An unknown name lists the unions that exist.
 - `template` is `{ fragment(token, context), aggregate(fragments, context) }`. `fragment` runs once per selected token and `aggregate` turns the fragments into files. The token is the manifest shape: `path`, `variable`, `reference`, `type`, `value`, `modes`, `resolved`, `description`, `deprecated`.
 - `tokens` is the module specifier the generated files import the token types from, written verbatim. Default `../tokens`, which resolves from the output directory to `generated/tokens`.
