@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineConfig } from '../src/core/config.ts';
 import { emitCss } from '../src/core/emit-css.ts';
 import { loadTokens } from '../src/core/load.ts';
+import { config as defineConfig } from './config.ts';
 import config from './fixtures/emit.config.ts';
 
 const resolved = loadTokens(config);
@@ -48,9 +48,9 @@ describe('emitCss', () => {
         defineConfig({
           modes: { dark: '(prefers-color-scheme: dark)', contrast: '(prefers-contrast: more)' },
           tokens: {
-            gray: { $group: { type: 'color' }, 50: { value: '#fafafa' } },
-            flat: { $group: { type: 'color' }, ink: { value: '#111111', dark: '#111111' } },
-            ref: { $group: { type: 'color' }, page: { value: '{gray.50}', dark: '{gray.50}', contrast: '#000000' } },
+            gray: { 50: { value: '#fafafa', type: 'color' } },
+            flat: { ink: { value: '#111111', dark: '#111111', type: 'color' } },
+            ref: { page: { value: '{gray.50}', dark: '{gray.50}', contrast: '#000000', type: 'color' } },
           },
         })
       )
@@ -67,8 +67,8 @@ describe('emitCss', () => {
         defineConfig({
           modes: { dark: '(prefers-color-scheme: dark)' },
           tokens: {
-            white: { $group: { type: 'color' }, base: { value: '#ffffff', dark: '#000000' } },
-            page: { $group: { type: 'color' }, bg: { value: '#ffffff', dark: '{white.base}' } },
+            white: { base: { value: '#ffffff', dark: '#000000', type: 'color' } },
+            page: { bg: { value: '#ffffff', dark: '{white.base}', type: 'color' } },
           },
         })
       )

@@ -1,4 +1,4 @@
-import { TOKEN_ROLES, TOKEN_TYPES } from './config.ts';
+import { TOKEN_TYPES } from './config.ts';
 import type { TokenType, TokenValue } from './config.ts';
 import type { Token } from './flatten.ts';
 import { parseReference } from './references.ts';
@@ -36,9 +36,8 @@ export function validateValue(type: TokenType, value: TokenValue): string | null
   }
 }
 
-// A leaf's own type, else the nearest group's, else none.
 export function inferType(token: Token): TokenType | undefined {
-  return token.type ?? token.groupType;
+  return token.type;
 }
 
 // Validates every typed token's values, base and per mode, and checks that a
@@ -70,24 +69,5 @@ export function checkTypes(tokens: readonly Token[]): void {
         );
       }
     }
-  }
-}
-
-// Checks that every role is one token-jet knows (a config built outside
-// TypeScript, such as one read from DTCG, can hold any string) and suits the
-// token's type. A role needs a type to check against, so a role on an untyped
-// token fails.
-export function checkRoles(tokens: readonly Token[]): void {
-  for (const token of tokens) {
-    if (token.role === undefined) continue;
-    if (!Object.hasOwn(TOKEN_ROLES, token.role)) {
-      const valid = Object.keys(TOKEN_ROLES).join(', ');
-      throw new Error(`Token "${token.path}" has the role "${token.role}". Valid roles are ${valid}.`);
-    }
-    const needs = TOKEN_ROLES[token.role];
-    const type = inferType(token);
-    if (type === needs) continue;
-    const actual = type === undefined ? '' : `, not ${type}`;
-    throw new Error(`Token "${token.path}" has the role "${token.role}", which needs the type ${needs}${actual}.`);
   }
 }

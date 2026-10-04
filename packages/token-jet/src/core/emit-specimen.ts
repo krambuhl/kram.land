@@ -1,4 +1,4 @@
-import type { Preview, TokenRole, TokenType } from './config.ts';
+import type { Preview, TokenType } from './config.ts';
 import type { ContrastResult } from './contrast.ts';
 import { emitCss } from './emit-css.ts';
 import type { Token } from './flatten.ts';
@@ -168,7 +168,7 @@ filter.addEventListener('input', () => {
 });
 `.trim();
 
-type Kind = TokenRole | TokenType | 'untyped';
+type Kind = TokenType | 'spacing' | 'sizing' | 'radius' | 'fontSize' | 'lineHeight' | 'untyped';
 
 interface Subgroup {
   path: string;
@@ -203,7 +203,7 @@ function textKind(type: TokenType | undefined): Kind {
 function kindOf(token: Token): Kind {
   if (token.preview === 'text') return textKind(inferType(token));
   if (token.preview !== undefined) return PREVIEW_KINDS[token.preview];
-  return token.role ?? inferType(token) ?? 'untyped';
+  return inferType(token) ?? 'untyped';
 }
 
 function isCanvas(kind: Kind): boolean {

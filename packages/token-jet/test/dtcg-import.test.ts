@@ -4,8 +4,7 @@ import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
-import type { Config, Modes } from '../src/core/config.ts';
-import { fromDtcg, fromDtcgValue, renderConfig, renderTokensFile } from '../src/core/dtcg-import.ts';
+import { fromDtcg, fromDtcgValue, renderTokensFile } from '../src/core/dtcg-import.ts';
 import { toDtcg } from '../src/core/dtcg.ts';
 import { flatten } from '../src/core/flatten.ts';
 import type { Token } from '../src/core/flatten.ts';
@@ -66,28 +65,6 @@ describe('fromDtcg', () => {
   });
 });
 
-describe('renderConfig', () => {
-  test('writes a tokens.config.ts that loads to the same tokens', async () => {
-    const dir = mkdtempSync(join(tmpdir(), 'token-jet-import-'));
-    const text = renderConfig(fromDtcg(exported)).replace(
-      "from 'token-jet'",
-      `from '${join(import.meta.dirname, '../src/index.ts')}'`
-    );
-    writeFileSync(join(dir, 'tokens.config.ts'), text);
-    const module = (await import(join(dir, 'tokens.config.ts'))) as { default: Config<Modes> };
-    expect(flatten(module.default.tokens)).toEqual(flatten(config.tokens));
-    expect(module.default.modes).toEqual(config.modes);
-  });
-
-  test('quotes keys that are not identifiers and leaves the rest bare', () => {
-    const text = renderConfig(fromDtcg(exported));
-    expect(text).toContain("    gray: {\n      $group: { type: 'color' },\n      50: { value: '#fafafa' },");
-    expect(text).toContain("      bold: { value: 700, type: 'fontWeight' },");
-    expect(renderConfig({ modes: {}, tokens: { 'a-b': { value: '1px', type: 'dimension' } } })).toContain("'a-b': {");
-    expect(text).toMatch(/^import \{ defineConfig \} from 'token-jet';\n\nexport default defineConfig\(\{/);
-  });
-});
-
 describe('renderTokensFile', () => {
   test('writes a tokens/tokens.ts that loads to the same tokens', async () => {
     const dir = mkdtempSync(join(tmpdir(), 'token-jet-import-'));
@@ -118,10 +95,10 @@ describe('renderTokensFile', () => {
     const text = renderTokensFile({
       modes: {},
       tokens: {
-        space: { x4: { value: '4px', type: 'dimension', tags: ['spacing'], preview: 'gap' } },
+        space: { x4: { value: '4px', type: 'dimension', tags: ['spacing'], preview: 'gap' } as never },
         mixed: {
           a: { value: '1px', type: 'dimension' },
-          b: { value: '#fff', type: 'color', tags: ['color', 'surface'] },
+          b: { value: '#fff', type: 'color', tags: ['color', 'surface'] } as never,
         },
       },
     });

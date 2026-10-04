@@ -1,5 +1,5 @@
-import { GROUP_KEY, PREVIEWS, TOKEN_TYPES } from './config.ts';
-import type { Modes, Preview, TokenLeaf, TokenRole, TokenTree, TokenType, TokenValue } from './config.ts';
+import { PREVIEWS, TOKEN_TYPES } from './config.ts';
+import type { Modes, Preview, TokenLeaf, TokenTree, TokenType, TokenValue } from './config.ts';
 import { DTCG_EXTENSION } from './dtcg.ts';
 import type { DtcgNode } from './dtcg.ts';
 import { flatten } from './flatten.ts';
@@ -70,8 +70,7 @@ function leaf(
   }
   const type = own ?? groupType;
   if (type === undefined) throw new Error(`Token "${path}" has no $type on it or a group above it.`);
-  const out: TokenLeaf<Modes> = { value: fromDtcgValue(type, node.$value) };
-  if (own !== undefined) out.type = own;
+  const out: TokenLeaf<Modes> = { value: fromDtcgValue(type, node.$value), type };
   if (typeof node.$description === 'string') out.description = node.$description;
   if (typeof node.$deprecated === 'string' || typeof node.$deprecated === 'boolean') out.deprecated = node.$deprecated;
   const extension =
@@ -111,16 +110,6 @@ function group(
     );
   }
   const ownType = node.$type ?? inherited;
-  const extension =
-    isObject(node.$extensions) && isObject(node.$extensions[DTCG_EXTENSION]) ? node.$extensions[DTCG_EXTENSION] : {};
-  const role = typeof extension.role === 'string' ? (extension.role as TokenRole) : undefined;
-  if (node.$type !== undefined || typeof node.$description === 'string' || role !== undefined) {
-    out[GROUP_KEY] = {
-      ...(node.$type !== undefined && { type: node.$type }),
-      ...(role !== undefined && { role }),
-      ...(typeof node.$description === 'string' && { description: node.$description }),
-    };
-  }
   for (const [name, child] of Object.entries(node)) {
     if (name.startsWith('$') || !isObject(child)) continue;
     const segments = [...parent, name];
@@ -130,9 +119,10 @@ function group(
   return out;
 }
 
-// Reads a DTCG file into the modes and token tree of a config. $type and
-// $description on a group become its $group; a token's mode values come
-// from the token-jet extension and must name a mode the file declares.
+// Reads a DTCG file into the modes and token tree of a config. A token takes
+// its own $type, else the nearest group's, and throws if neither is set; a
+// token's mode values come from the token-jet extension and must name a mode
+// the file declares.
 export function fromDtcg(file: DtcgNode): ImportedConfig {
   const extension =
     isObject(file.$extensions) && isObject(file.$extensions[DTCG_EXTENSION]) ? file.$extensions[DTCG_EXTENSION] : {};
@@ -159,44 +149,6 @@ function inline(record: Record<string, unknown>): string {
   return `{ ${Object.entries(record)
     .map(([k, v]) => `${key(k)}: ${literal(v)}`)
     .join(', ')} }`;
-}
-
-function block(tree: TokenTree<Modes>, depth: number): string {
-  const pad = '  '.repeat(depth);
-  const lines: string[] = [];
-  const meta = tree[GROUP_KEY];
-  if (meta !== undefined) lines.push(`${pad}${GROUP_KEY}: ${inline(meta as Record<string, unknown>)},`);
-  for (const [name, node] of Object.entries(tree)) {
-    if (node === undefined || name === GROUP_KEY) continue;
-    if ('value' in node) {
-      lines.push(`${pad}${key(name)}: ${inline(node as Record<string, unknown>)},`);
-    } else {
-      lines.push(`${pad}${key(name)}: {`, block(node as TokenTree<Modes>, depth + 1), `${pad}},`);
-    }
-  }
-  return lines.join('\n');
-}
-
-// Writes the imported modes and tokens as tokens.config.ts text. A key is
-// bare when it is an identifier or a plain number, quoted otherwise; a leaf
-// sits on one line, a group on many.
-export function renderConfig(config: ImportedConfig): string {
-  const modes = Object.entries(config.modes)
-    .map(([name, query]) => `    ${key(name)}: ${quote(query)},`)
-    .join('\n');
-  return [
-    "import { defineConfig } from 'token-jet';",
-    '',
-    'export default defineConfig({',
-    '  modes: {',
-    modes,
-    '  },',
-    '  tokens: {',
-    block(config.tokens, 2),
-    '  },',
-    '});',
-    '',
-  ].join('\n');
 }
 
 type ShapeNode = Map<string, ShapeNode | string>;

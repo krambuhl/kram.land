@@ -28,7 +28,7 @@ describe('diffDtcg', () => {
     const theirs = edited((file) => {
       const space = file.space as Record<string, unknown>;
       delete space.x4;
-      space.x24 = { $value: { value: 24, unit: 'px' } };
+      space.x24 = { $type: 'dimension', $value: { value: 24, unit: 'px' } };
       const gray = file.gray as Record<string, Record<string, unknown>>;
       gray[900].$value = { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000000' };
     });

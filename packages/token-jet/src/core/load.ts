@@ -9,7 +9,7 @@ import type { ContrastResult } from './contrast.ts';
 import { flatten } from './flatten.ts';
 import type { Token } from './flatten.ts';
 import { matchGlob } from './glob.ts';
-import { checkRoles, checkTypes } from './metadata.ts';
+import { checkTypes } from './metadata.ts';
 import { checkTypeNameCollisions, tagUnionName, unionName } from './names.ts';
 import { checkReferences } from './references.ts';
 import { isDefinedTokens, schemaToConfig } from './schema.ts';
@@ -40,7 +40,6 @@ export function loadTokens(config: Config<Modes>): ResolvedTokens {
   validate(config, tokens);
   checkReferences(tokens);
   checkTypes(tokens);
-  checkRoles(tokens);
 
   const paths = tokens.map((t) => t.path);
   const unions: Union[] = [];

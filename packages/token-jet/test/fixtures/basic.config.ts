@@ -1,6 +1,6 @@
-import { defineConfig } from '../../src/index.ts';
+import type { Config } from '../../src/index.ts';
 
-export default defineConfig({
+export default {
   modes: {
     dark: '(prefers-color-scheme: dark)',
   },
@@ -34,4 +34,4 @@ export default defineConfig({
       },
     },
   },
-});
+} satisfies Config;

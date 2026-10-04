@@ -15,7 +15,8 @@
       "modes": {},
       "resolved": {
         "base": "4px"
-      }
+      },
+      "preview": "gap"
     },
     {
       "path": "space.x16",
@@ -27,7 +28,8 @@
       "resolved": {
         "base": "16px"
       },
-      "description": "The default gap."
+      "description": "The default gap.",
+      "preview": "gap"
     },
     {
       "path": "weight.bold",

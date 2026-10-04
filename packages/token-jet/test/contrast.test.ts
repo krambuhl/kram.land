@@ -1,27 +1,24 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineConfig } from '../src/core/config.ts';
 import { checkContrast, contrastRatio, parseColor } from '../src/core/contrast.ts';
 import { generateFiles } from '../src/core/generate.ts';
 import { loadTokens } from '../src/core/load.ts';
+import { config as defineConfig } from './config.ts';
 
 function config(contrast: { minimum: number; pairs: [string, string][] }) {
   return defineConfig({
     modes: { dark: '(prefers-color-scheme: dark)' },
     tokens: {
       gray: {
-        $group: { type: 'color' },
-        900: { value: '#171717' },
+        900: { value: '#171717', type: 'color' },
       },
       bg: {
-        $group: { type: 'color' },
-        page: { value: '#ffffff', dark: '{gray.900}' },
+        page: { value: '#ffffff', dark: '{gray.900}', type: 'color' },
       },
       content: {
-        $group: { type: 'color' },
-        regular: { value: '#000000', dark: '#ffffff' },
-        muted: { value: '#767676', dark: '#555555' },
-        faint: { value: 'rgb(0 0 0 / 0.5)' },
+        regular: { value: '#000000', dark: '#ffffff', type: 'color' },
+        muted: { value: '#767676', dark: '#555555', type: 'color' },
+        faint: { value: 'rgb(0 0 0 / 0.5)', type: 'color' },
       },
       space: { x16: { value: '16px', type: 'dimension' } },
       accent: { value: 'rebeccapurple', type: 'color' },

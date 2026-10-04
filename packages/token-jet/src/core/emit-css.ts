@@ -36,7 +36,7 @@ function block(selector: string, lines: string[]): string {
 }
 
 function property(token: Token, tokens: readonly Token[]): string {
-  const type = token.type ?? token.groupType;
+  const type = token.type;
   const syntax = type === undefined ? '*' : SYNTAX[type];
   const lines = [`syntax: '${syntax}';`, `inherits: ${token.inherits ?? true};`];
   // `*` syntax may not carry an initial value.

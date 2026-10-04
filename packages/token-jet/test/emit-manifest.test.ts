@@ -1,10 +1,10 @@
 import { Ajv } from 'ajv';
 import { describe, expect, test } from 'vitest';
 
-import { defineConfig } from '../src/core/config.ts';
 import { MANIFEST_SCHEMA, emitManifest } from '../src/core/emit-manifest.ts';
 import { generateFiles } from '../src/core/generate.ts';
 import { loadTokens } from '../src/core/load.ts';
+import { config as defineConfig } from './config.ts';
 import config from './fixtures/emit.config.ts';
 
 const resolved = loadTokens(config);
@@ -57,8 +57,8 @@ describe('emitManifest', () => {
     const c = defineConfig({
       modes: {},
       tokens: {
-        bg: { $group: { type: 'color' }, page: { value: '#ffffff' } },
-        content: { $group: { type: 'color' }, regular: { value: '#000000' } },
+        bg: { page: { value: '#ffffff', type: 'color' } },
+        content: { regular: { value: '#000000', type: 'color' } },
       },
       contrast: { minimum: 4.5, pairs: [['content.regular', 'bg.page']] },
     });

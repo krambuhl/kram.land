@@ -1,23 +1,25 @@
 # token-jet
 
-Design tokens from one typed config. `tokens.config.ts` is the only hand-written file; token-jet generates CSS custom properties, TypeScript types, a `token()` function that reads the same in CSS and TypeScript, and a manifest for tools and agents.
+Design tokens from one typed schema. `tokens/tokens.ts` is the only hand-written file; token-jet generates CSS custom properties, TypeScript types, a `token()` function that reads the same in CSS and TypeScript, and a manifest for tools and agents.
 
 ```ts
-// tokens.config.ts
-import { defineConfig } from 'token-jet';
+// tokens/tokens.ts
+import { defineSchema, pattern } from 'token-jet';
 
-export default defineConfig({
+const spacing = pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' });
+const surface = pattern({ type: 'color', preview: 'swatch', modes: ['dark'] });
+
+const schema = defineSchema({
   modes: { dark: '(prefers-color-scheme: dark)' },
-  tokens: {
-    space: {
-      $group: { type: 'dimension' },
-      x16: { value: '16px', description: 'The default gap.' },
-    },
-    bg: {
-      $group: { type: 'color' },
-      page: { value: '#ffffff', dark: '#040404' },
-    },
+  shape: {
+    space: { x16: spacing },
+    bg: { page: surface },
   },
+});
+
+export default schema.defineTokens({
+  space: { x16: { value: '16px', description: 'The default gap.' } },
+  bg: { page: { value: '#ffffff', dark: '#040404' } },
 });
 ```
 
@@ -35,7 +37,7 @@ token('space.x16'); // 'var(--space-x16)', typed as that literal
 token('space.x17'); // type error
 ```
 
-Node 22.18 or later. The config is TypeScript and is imported by Node directly, so it can use anything TypeScript allows and is type-checked like the rest of a project.
+Node 22.18 or later. The tokens file is TypeScript and is imported by Node directly, so it can use anything TypeScript allows and is type-checked like the rest of a project.
 
 ## Schema
 
@@ -75,7 +77,7 @@ The CLI, the Vite adapter and the language server read `tokens/tokens.ts` when a
 
 ## Config reference
 
-`defineConfig({ modes, tokens, contrast? })` returns the config unchanged; its job is to type-check it, so a mode key on a token that is not in `modes` is a compile error.
+`schemaToConfig` turns a schema's tokens into a config, `{ modes, tokens, contrast? }`, which is what every emitter and tool reads. The `Config` type describes it.
 
 ### `modes`
 
@@ -93,10 +95,6 @@ A tree of groups and leaves. A leaf is any object with a `value` key:
 | `description` | `string`            | Free text; shown in the editor, the manifest, the specimen and the DTCG export.                         |
 | `deprecated`  | `boolean \| string` | Marks the token on its way out. The generator keeps emitting it; every surface warns.                   |
 | `inherits`    | `boolean`           | Whether the custom property inherits. Default `true`.                                                   |
-
-A group may carry `$group: { type, role, description }`. `type` applies to every leaf below it, and a leaf may not contradict it.
-
-`role` says what a group's tokens are for when the type alone does not: space, size and radius are all dimensions. `spacing`, `sizing`, `radius` and `fontSize` suit `dimension`; `lineHeight` suits `number`. It applies to every leaf below the group, a role that does not suit the token's type is an error, the DTCG export carries it on the group under the `token-jet` extension, and the specimen picks each token's preview by it.
 
 A token is addressed by its full path, `space.x16`. The custom property is `--space-x16`, the TypeScript literal type is `SpaceX16`, and every group gets a union named after it (`SpaceToken`). A group key that is not a valid identifier is quoted in the config as usual.
 
@@ -132,7 +130,7 @@ A scope is an attribute on any element: `data-mode="light"`, `"dark"`, `"auto"` 
 | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `generate [--out <dir>]`              | Write the generated files. Fails on a config error or a contrast failure.                                                                                                                                                   |
 | `check`                               | Print the contrast ratio of every pair in every mode; exit 1 if any is below the minimum.                                                                                                                                   |
-| `specimen [--out <file>]`             | Write a self-contained HTML page of every token by group, with a preview per role or type, and every contrast pair.                                                                                                         |
+| `specimen [--out <file>]`             | Write a self-contained HTML page of every token by group, with a preview per token, and every contrast pair.                                                                                                                |
 | `export --dtcg [--out <file>]`        | Write the tokens as DTCG 2025.10 JSON; modes, tags and previews go under `$extensions['token-jet']`.                                                                                                                        |
 | `import --dtcg <file> [--out <file>]` | Read DTCG JSON into `tokens/tokens.ts` text: a schema with one pattern per type, tags and preview, and the tokens.                                                                                                          |
 | `diff <export.json>`                  | Compare the config with a DTCG export; list missing, extra and changed tokens; exit 1 on any.                                                                                                                               |

@@ -1,4 +1,3 @@
-export { defineConfig } from './core/config.ts';
 export { defineSchema, isDefinedTokens, pattern, schemaToConfig, slots } from './core/schema.ts';
 export type {
   DefinedGenerate,
@@ -32,7 +31,7 @@ export { DTCG_EXTENSION, toDtcg, toDtcgValue } from './core/dtcg.ts';
 export type { DtcgColor, DtcgFile, DtcgNode, DtcgUnitValue, DtcgValue } from './core/dtcg.ts';
 export { diffDtcg, formatDiff } from './core/dtcg-diff.ts';
 export type { DiffFinding } from './core/dtcg-diff.ts';
-export { fromDtcg, fromDtcgValue, renderConfig, renderTokensFile } from './core/dtcg-import.ts';
+export { fromDtcg, fromDtcgValue, renderTokensFile } from './core/dtcg-import.ts';
 export type { ImportedConfig } from './core/dtcg-import.ts';
 export { flatten } from './core/flatten.ts';
 export type { Token } from './core/flatten.ts';

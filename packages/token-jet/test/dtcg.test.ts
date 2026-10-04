@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineConfig } from '../src/core/config.ts';
 import { fromDtcg } from '../src/core/dtcg-import.ts';
 import { toDtcg, toDtcgValue } from '../src/core/dtcg.ts';
 import { flatten } from '../src/core/flatten.ts';
 import { loadTokens } from '../src/core/load.ts';
 import { defineSchema, pattern, schemaToConfig, slots } from '../src/core/schema.ts';
+import { config as defineConfig } from './config.ts';
 import config from './fixtures/emit.config.ts';
 
 const file = toDtcg(loadTokens(config));
@@ -64,20 +64,16 @@ describe('toDtcg', () => {
     });
   });
 
-  test('a group type is $type on the group and a leaf with the same type repeats nothing', () => {
+  test('every token carries its own $type and a group carries none', () => {
     const space = file.space as Record<string, unknown>;
-    expect(space.$type).toBe('dimension');
-    expect(space.x4).toEqual({ $value: { value: 4, unit: 'px' } });
-  });
-
-  test('a group role goes under the token-jet extension on the group', () => {
-    const space = file.space as Record<string, unknown>;
-    expect(space.$extensions).toEqual({ 'token-jet': { role: 'spacing' } });
+    expect(space.$type).toBeUndefined();
+    expect(space.x4).toMatchObject({ $type: 'dimension', $value: { value: 4, unit: 'px' } });
   });
 
   test('a mode value goes under the token-jet extension on the token, references kept', () => {
     const bg = file.bg as Record<string, Record<string, unknown>>;
     expect(bg.page).toEqual({
+      $type: 'color',
       $value: '{gray.50}',
       $extensions: { 'token-jet': { modes: { dark: '{gray.900}' } } },
     });

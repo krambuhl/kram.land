@@ -36,13 +36,8 @@ describe('validate with metadata', () => {
     expect(() => validate(c, flatten(c.tokens))).not.toThrow();
   });
 
-  test("a group's type is not mistaken for a child", () => {
-    const c = { ...config, tokens: { bg: { $group: { type: 'color' as const }, page: { value: '#fff' } } } };
-    expect(() => validate(c, flatten(c.tokens))).not.toThrow();
-  });
-
   test('a group with only metadata has no tokens', () => {
-    const c = { ...config, tokens: { bg: { $group: { type: 'color' as const } } } };
+    const c = { ...config, tokens: { bg: {} } };
     expect(() => validate(c, flatten(c.tokens))).toThrow(/bg.*no tokens/);
   });
 });

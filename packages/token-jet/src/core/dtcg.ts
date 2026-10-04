@@ -1,4 +1,4 @@
-import { GROUP_KEY, METADATA_KEYS } from './config.ts';
+import { METADATA_KEYS } from './config.ts';
 import type { Modes, TokenLeaf, TokenTree, TokenType, TokenValue } from './config.ts';
 import { parseColor } from './contrast.ts';
 import { isLeaf } from './flatten.ts';
@@ -80,13 +80,11 @@ export function toDtcgValue(type: TokenType, value: TokenValue, path: string): D
   }
 }
 
-// A leaf writes $type only when it differs from the group's.
-function leaf(node: TokenLeaf<Modes>, segments: string[], groupType: TokenType | undefined): DtcgNode {
+function leaf(node: TokenLeaf<Modes>, segments: string[]): DtcgNode {
   const path = segments.join('.');
-  const type = node.type ?? groupType;
-  if (type === undefined) throw new Error(`Token "${path}" has no type; set one on it or on its group to export it.`);
-  const out: DtcgNode = {};
-  if (node.type !== undefined && node.type !== groupType) out.$type = node.type;
+  const type = node.type;
+  if (type === undefined) throw new Error(`Token "${path}" has no type, so it cannot be exported.`);
+  const out: DtcgNode = { $type: type };
   out.$value = toDtcgValue(type, node.value, path);
   if (node.description !== undefined) out.$description = node.description;
   if (node.deprecated !== undefined) out.$deprecated = node.deprecated;
@@ -103,17 +101,12 @@ function leaf(node: TokenLeaf<Modes>, segments: string[], groupType: TokenType |
   return out;
 }
 
-function group(tree: TokenTree<Modes>, parent: string[], inherited: TokenType | undefined): DtcgNode {
+function group(tree: TokenTree<Modes>, parent: string[]): DtcgNode {
   const out: DtcgNode = {};
-  const meta = tree.$group;
-  const ownType = meta?.type ?? inherited;
-  if (meta?.type !== undefined) out.$type = meta.type;
-  if (meta?.description !== undefined) out.$description = meta.description;
-  if (meta?.role !== undefined) out.$extensions = { [DTCG_EXTENSION]: { role: meta.role } };
   for (const [key, node] of Object.entries(tree)) {
-    if (key === GROUP_KEY || typeof node !== 'object' || node === null) continue;
+    if (typeof node !== 'object' || node === null) continue;
     const segments = [...parent, key];
-    out[key] = isLeaf(node) ? leaf(node, segments, ownType) : group(node as TokenTree<Modes>, segments, ownType);
+    out[key] = isLeaf(node) ? leaf(node, segments) : group(node as TokenTree<Modes>, segments);
   }
   return out;
 }
@@ -125,6 +118,6 @@ export function toDtcg(resolved: ResolvedTokens): DtcgFile {
   const { config } = resolved;
   return {
     $extensions: { [DTCG_EXTENSION]: { modes: config.modes } },
-    ...group(config.tokens, [], undefined),
+    ...group(config.tokens, []),
   };
 }

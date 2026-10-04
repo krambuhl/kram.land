@@ -15,7 +15,7 @@ const schema = defineSchema({ modes: {}, shape: { space: slots(['x4', 'x8'], spa
 export default schema.defineTokens({ space: { x4: { value: '4px' }, x8: { value: '8px' } } });
 `;
 
-const LEGACY = `export default { modes: {}, tokens: { space: { $group: { type: 'dimension' }, x16: { value: '16px' } } } };
+const LEGACY = `export default { modes: {}, tokens: { space: { x16: { value: '16px', type: 'dimension' } } } };
 `;
 
 function workspace(files: Record<string, string>): string {

@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineConfig } from '../src/core/config.ts';
 import { emitSpecimen } from '../src/core/emit-specimen.ts';
 import { loadTokens } from '../src/core/load.ts';
 import { defineSchema, pattern, schemaToConfig, slots } from '../src/core/schema.ts';
+import { config as defineConfig } from './config.ts';
 import config from './fixtures/emit.config.ts';
 
 const resolved = loadTokens(config);
@@ -16,24 +16,23 @@ function block(page: string, path: string): string {
   return page.slice(start, end < 0 ? undefined : end);
 }
 
-const roles = defineConfig({
+const kinds = defineConfig({
   modes: {},
   tokens: {
-    space: { $group: { type: 'dimension', role: 'spacing' }, x4: { value: '4px' } },
+    space: { x4: { value: '4px', type: 'dimension', preview: 'gap' } },
     size: {
-      $group: { type: 'dimension', role: 'sizing' },
-      x480: { value: '480px' },
-      x960: { value: '960px' },
-      wide: { value: '60rem' },
+      x480: { value: '480px', type: 'dimension', preview: 'bar' },
+      x960: { value: '960px', type: 'dimension', preview: 'bar' },
+      wide: { value: '60rem', type: 'dimension', preview: 'bar' },
     },
-    radius: { $group: { type: 'dimension', role: 'radius' }, sm: { value: '4px' } },
-    text: { $group: { type: 'dimension', role: 'fontSize' }, md: { value: '1rem' } },
-    leading: { $group: { type: 'number', role: 'lineHeight' }, body: { value: 1.5 } },
-    fluid: { $group: { type: 'dimension' }, half: { value: '50%' } },
+    radius: { sm: { value: '4px', type: 'dimension', preview: 'corner' } },
+    text: { md: { value: '1rem', type: 'dimension', preview: 'text' } },
+    leading: { body: { value: 1.5, type: 'number', preview: 'paragraph' } },
+    fluid: { half: { value: '50%', type: 'dimension' } },
     ease: { fast: { value: '120ms', type: 'duration' } },
   },
 });
-const rolesPage = emitSpecimen(loadTokens(roles));
+const kindsPage = emitSpecimen(loadTokens(kinds));
 
 describe('emitSpecimen', () => {
   test('matches the snapshot', async () => {
@@ -65,7 +64,7 @@ describe('emitSpecimen', () => {
       'group-content',
     ]);
     expect(html).toContain('<a href="#group-space">space<span>2</span></a>');
-    expect(rolesPage).not.toContain('id="contrast"');
+    expect(kindsPage).not.toContain('id="contrast"');
   });
 
   test('a nested group gets a heading with its path', () => {
@@ -73,7 +72,7 @@ describe('emitSpecimen', () => {
       loadTokens(
         defineConfig({
           modes: {},
-          tokens: { font: { $group: { type: 'dimension' }, size: { body: { md: { value: '1rem' } } } } },
+          tokens: { font: { size: { body: { md: { value: '1rem', type: 'dimension' } } } } },
         })
       )
     );
@@ -86,30 +85,30 @@ describe('emitSpecimen', () => {
     expect(block(html, 'weight.bold')).toContain('style="font-weight: var(--weight-bold)"');
   });
 
-  test('each role gets its own preview', () => {
-    expect(block(rolesPage, 'space.x4')).toContain('<span class="spacing" style="gap: var(--space-x4)">');
-    expect(block(rolesPage, 'radius.sm')).toContain('<span class="radius" style="border-radius: var(--radius-sm)">');
-    expect(block(rolesPage, 'text.md')).toContain('style="font-size: var(--text-md)"');
-    expect(block(rolesPage, 'leading.body')).toContain('style="line-height: var(--leading-body)"');
-    expect(block(rolesPage, 'ease.fast')).toContain('style="transition-duration: var(--ease-fast)"');
+  test('each preview draws its own way', () => {
+    expect(block(kindsPage, 'space.x4')).toContain('<span class="spacing" style="gap: var(--space-x4)">');
+    expect(block(kindsPage, 'radius.sm')).toContain('<span class="radius" style="border-radius: var(--radius-sm)">');
+    expect(block(kindsPage, 'text.md')).toContain('style="font-size: var(--text-md)"');
+    expect(block(kindsPage, 'leading.body')).toContain('style="line-height: var(--leading-body)"');
+    expect(block(kindsPage, 'ease.fast')).toContain('style="transition-duration: var(--ease-fast)"');
   });
 
   test('a sizing or plain dimension bar is drawn at its real width', () => {
-    expect(block(rolesPage, 'size.x960')).toContain('<span class="bar" style="width: var(--size-x960)"></span>');
-    expect(block(rolesPage, 'size.wide')).toContain('<span class="bar" style="width: var(--size-wide)"></span>');
-    expect(block(rolesPage, 'fluid.half')).toContain('<span class="bar" style="width: var(--fluid-half)"></span>');
+    expect(block(kindsPage, 'size.x960')).toContain('<span class="bar" style="width: var(--size-x960)"></span>');
+    expect(block(kindsPage, 'size.wide')).toContain('<span class="bar" style="width: var(--size-wide)"></span>');
+    expect(block(kindsPage, 'fluid.half')).toContain('<span class="bar" style="width: var(--fluid-half)"></span>');
   });
 
   test('a bar wider than the window is tagged, with the tag and the viewport line shown by the script', () => {
-    expect(block(rolesPage, 'size.x960')).toContain('<span class="wider" hidden>wider than window</span>');
-    expect(rolesPage).toContain('<div class="viewport" aria-hidden="true" hidden><span></span></div>');
-    expect(rolesPage).toContain("root.style.setProperty('--specimen-viewport', window.innerWidth + 'px');");
+    expect(block(kindsPage, 'size.x960')).toContain('<span class="wider" hidden>wider than window</span>');
+    expect(kindsPage).toContain('<div class="viewport" aria-hidden="true" hidden><span></span></div>');
+    expect(kindsPage).toContain("root.style.setProperty('--specimen-viewport', window.innerWidth + 'px');");
   });
 
   test('colours sit in a swatch grid, lengths on a scrolling canvas, everything else in rows', () => {
     expect(html).toMatch(/<div class="swatches">\n<div class="token" data-path="gray\.50">/);
     expect(html).toMatch(/<div class="rows">\n<div class="token" data-path="space\.x4">/);
-    expect(rolesPage).toMatch(
+    expect(kindsPage).toMatch(
       /<div class="canvas"><div class="canvas-inner">\n<div class="token" data-path="size\.x480">/
     );
   });
@@ -161,8 +160,8 @@ describe('emitSpecimen', () => {
     const c = defineConfig({
       modes: { dark: '(prefers-color-scheme: dark)' },
       tokens: {
-        bg: { $group: { type: 'color' }, page: { value: '#ffffff', dark: '#000000' } },
-        content: { $group: { type: 'color' }, regular: { value: '#000000', dark: '#ffffff' } },
+        bg: { page: { value: '#ffffff', dark: '#000000', type: 'color' } },
+        content: { regular: { value: '#000000', dark: '#ffffff', type: 'color' } },
       },
       contrast: { minimum: 4.5, pairs: [['content.regular', 'bg.page']] },
     });
@@ -177,8 +176,8 @@ describe('emitSpecimen', () => {
     const c = defineConfig({
       modes: {},
       tokens: {
-        bg: { $group: { type: 'color' }, page: { value: '#ffffff' } },
-        content: { $group: { type: 'color' }, faint: { value: '#dddddd' } },
+        bg: { page: { value: '#ffffff', type: 'color' } },
+        content: { faint: { value: '#dddddd', type: 'color' } },
       },
       contrast: { minimum: 4.5, pairs: [['content.faint', 'bg.page']] },
     });

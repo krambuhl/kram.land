@@ -103,7 +103,7 @@ describe('token-jet export', () => {
   test('--dtcg prints the json, and --out writes it', () => {
     const dir = project();
     const out = run(dir, 'export', '--dtcg');
-    expect(JSON.parse(out)).toMatchObject({ space: { $type: 'dimension', x4: { $value: { value: 4, unit: 'px' } } } });
+    expect(JSON.parse(out)).toMatchObject({ space: { x4: { $type: 'dimension', $value: { value: 4, unit: 'px' } } } });
     expect(run(dir, 'export', '--dtcg', '--out', 'tokens.dtcg.json')).toMatch(/wrote tokens\.dtcg\.json/);
     expect(JSON.parse(readFileSync(join(dir, 'tokens.dtcg.json'), 'utf8'))).toEqual(JSON.parse(out));
   });
@@ -138,8 +138,8 @@ describe('token-jet diff', () => {
     expect(run(dir, 'diff', 'export.json')).toMatch(/export\.json matches the config/);
     const file = JSON.parse(readFileSync(join(dir, 'export.json'), 'utf8')) as Record<string, Record<string, unknown>>;
     delete file.space.x4;
-    file.space.x24 = { $value: { value: 24, unit: 'px' } };
-    file.gray[900] = { $value: { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000000' } };
+    file.space.x24 = { $type: 'dimension', $value: { value: 24, unit: 'px' } };
+    file.gray[900] = { $type: 'color', $value: { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000000' } };
     writeFileSync(join(dir, 'export.json'), JSON.stringify(file));
     expect(() => run(dir, 'diff', 'export.json')).toThrow(
       /exit 1.*space\.x4: missing from the export\n.*space\.x24: in the export only\n.*gray\.900 in base: #171717 here, #000000 in the export/s
@@ -171,7 +171,7 @@ describe('token-jet usage and rename', () => {
     expect(config).toMatch(/text: \{ value: '#111111'/);
     expect(config).not.toMatch(/\n\s+regular: \{/);
     // the reference from content.body moved with the key, so the config still loads
-    expect(config).toContain("body: { value: '{content.text}' }");
+    expect(config).toContain("body: { value: '{content.text}', type: 'color' }");
     expect(() => run(dir, 'generate')).not.toThrow();
   });
 
