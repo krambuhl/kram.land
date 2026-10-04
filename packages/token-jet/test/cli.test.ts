@@ -192,3 +192,77 @@ describe('token-jet usage and rename', () => {
     expect(() => run(dir, 'frobnicate')).toThrow(/exit 1.*generate.*usage.*rename/s);
   });
 });
+
+const SCHEMA = `import { defineSchema, pattern, slots } from 'token-jet';
+
+const spacing = pattern({ type: 'dimension', tags: ['spacing'] });
+const corner = pattern({ type: 'dimension' });
+
+export const schema = defineSchema({
+  modes: {},
+  shape: {
+    space: slots(['x4', 'x8'], spacing),
+    radius: { md: corner },
+    gutter: { md: corner },
+  },
+});
+`;
+
+const TOKENS = `import { schema } from './schema.ts';
+
+export default schema.defineTokens({
+  space: { x4: { value: '4px' }, x8: { value: '{space.x4}' } },
+  radius: { md: { value: '8px' } },
+  gutter: { md: { value: '12px' } },
+});
+`;
+
+function schemaProject(): string {
+  const dir = mkdtempSync(join(tmpdir(), 'token-jet-schema-'));
+  mkdirSync(join(dir, 'tokens'));
+  writeFileSync(join(dir, 'tokens/schema.ts'), SCHEMA);
+  writeFileSync(join(dir, 'tokens/tokens.ts'), TOKENS);
+  writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'fixture', type: 'module' }));
+  mkdirSync(join(dir, 'node_modules'));
+  symlinkSync(join(import.meta.dirname, '..'), join(dir, 'node_modules/token-jet'));
+  return dir;
+}
+
+describe('token-jet rename with a schema', () => {
+  test('renames the key in the schema, the token tree, references and the calls', () => {
+    const dir = schemaProject();
+    writeFileSync(join(dir, 'a.css'), ".a { gap: token('space.x4'); }\n");
+    expect(run(dir, 'rename', 'space.x4', 'space.x6', 'a.css')).toMatch(
+      /renamed space\.x4 to space\.x6 in the config and 1 files/
+    );
+    expect(readFileSync(join(dir, 'tokens/schema.ts'), 'utf8')).toContain("space: slots(['x6', 'x8'], spacing),");
+    const tokens = readFileSync(join(dir, 'tokens/tokens.ts'), 'utf8');
+    expect(tokens).toContain("space: { x6: { value: '4px' }, x8: { value: '{space.x6}' } },");
+    expect(readFileSync(join(dir, 'a.css'), 'utf8')).toBe(".a { gap: token('space.x6'); }\n");
+    expect(run(dir, 'generate')).toMatch(/wrote/);
+  });
+
+  test('renames a schema written inline in tokens.ts, as an import writes it', () => {
+    const dir = schemaProject();
+    rmSync(join(dir, 'tokens/schema.ts'));
+    const inline =
+      SCHEMA.replace('export const schema', 'const schema') +
+      TOKENS.replace("import { schema } from './schema.ts';\n", '');
+    writeFileSync(join(dir, 'tokens/tokens.ts'), inline);
+    run(dir, 'rename', 'space.x8', 'space.x12');
+    const text = readFileSync(join(dir, 'tokens/tokens.ts'), 'utf8');
+    expect(text).toContain("space: slots(['x4', 'x12'], spacing),");
+    expect(text).toContain("x12: { value: '{space.x4}' }");
+  });
+
+  test('a key the schema has more than once is an error that changes nothing', () => {
+    const dir = schemaProject();
+    writeFileSync(join(dir, 'a.css'), ".a { border-radius: token('radius.md'); }\n");
+    expect(() => run(dir, 'rename', 'radius.md', 'radius.mid', 'a.css')).toThrow(
+      /"md" appears 2 times in the schema; rename it there and in tokens\.ts by hand/
+    );
+    expect(readFileSync(join(dir, 'tokens/schema.ts'), 'utf8')).toBe(SCHEMA);
+    expect(readFileSync(join(dir, 'tokens/tokens.ts'), 'utf8')).toBe(TOKENS);
+    expect(readFileSync(join(dir, 'a.css'), 'utf8')).toBe(".a { border-radius: token('radius.md'); }\n");
+  });
+});

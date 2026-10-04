@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, relative, resolve } from 'node:path';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 
 import { diffDtcg, formatDiff } from './core/dtcg-diff.ts';
 import { fromDtcg, renderTokensFile } from './core/dtcg-import.ts';
@@ -9,7 +9,7 @@ import type { DtcgNode } from './core/dtcg.ts';
 import { emitSpecimen } from './core/emit-specimen.ts';
 import { DEFAULT_OUT_DIR, generateFiles, writeFiles } from './core/generate.ts';
 import { loadConfigFile, loadTokens } from './core/load.ts';
-import { renameConfigKey } from './core/rename-config.ts';
+import { renameConfigKey, renameSchemaKey } from './core/rename-config.ts';
 import { findUsages, renameUsages } from './core/usage.ts';
 import { version } from './version.ts';
 
@@ -122,6 +122,41 @@ async function usage(files: readonly string[]): Promise<string> {
   return lines.join('\n');
 }
 
+async function renameInConfig(configFile: string, from: string, to: string): Promise<void> {
+  if (basename(configFile) === 'tokens.config.ts') {
+    writeFileSync(configFile, renameConfigKey(readFileSync(configFile, 'utf8'), from, to));
+    return;
+  }
+  const tokensText = readFileSync(configFile, 'utf8');
+  const schemaFile = join(dirname(configFile), 'schema.ts');
+  const hasSchemaFile = existsSync(schemaFile);
+  const split = tokensText.indexOf('defineTokens(');
+  const shapeText = hasSchemaFile ? readFileSync(schemaFile, 'utf8') : tokensText.slice(0, split);
+  const key = from.split('.').at(-1);
+  const shape = renameSchemaKey(shapeText, from, to);
+  if (!('text' in shape)) {
+    throw new Error(
+      `"${key}" appears ${shape.occurrences} times in the schema; rename it there and in tokens.ts by hand.`
+    );
+  }
+  const tree = renameConfigKey(hasSchemaFile ? tokensText : tokensText.slice(split), from, to, 'defineTokens(');
+  const writes: [string, string, string][] = hasSchemaFile
+    ? [
+        [configFile, tokensText, tree],
+        [schemaFile, shapeText, shape.text],
+      ]
+    : [[configFile, tokensText, `${shape.text}${tree}`]];
+  for (const [file, , next] of writes) writeFileSync(file, next);
+  try {
+    await loadConfigFile(dirname(dirname(configFile)));
+  } catch (error) {
+    for (const [file, previous] of writes) writeFileSync(file, previous);
+    throw new Error(`renaming ${from} broke the config, so nothing changed: ${(error as Error).message}`, {
+      cause: error,
+    });
+  }
+}
+
 async function rename(args: readonly string[]): Promise<string> {
   const [from, to, ...files] = args;
   if (from === undefined || to === undefined) throw new Error('rename needs <from> <to>.');
@@ -131,7 +166,7 @@ async function rename(args: readonly string[]): Promise<string> {
   const toExists = tokens.some((t) => t.path === to);
 
   const renamed = renameUsages(readFiles(files), from, to);
-  if (!toExists) writeFileSync(configFile, renameConfigKey(readFileSync(configFile, 'utf8'), from, to));
+  if (!toExists) await renameInConfig(configFile, from, to);
   for (const f of renamed) if (f.changed) writeFileSync(resolve(f.file), f.text);
   const changed = renamed.filter((f) => f.changed).length;
   return toExists

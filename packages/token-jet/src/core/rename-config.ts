@@ -1,8 +1,7 @@
-// Renames a token's key in tokens.config.ts text. The config is TypeScript,
-// so the edit is textual: the last segment of the path is a key in an object
-// literal, and the rename changes that key where it sits at the path's depth.
-// The caller re-loads the result and refuses to write if it does not parse
-// to the expected token, which guards the edit without a parser.
+// Renames a token's key in config text: tokens.config.ts, or the token tree
+// after defineTokens( in tokens/tokens.ts. The config is TypeScript, so the
+// edit is textual: the last segment of the path is a key in an object literal,
+// and the rename changes that key where it sits at the path's depth.
 
 const IDENT = /^[A-Za-z_$][\w$]*$/;
 
@@ -17,7 +16,7 @@ function keyLiteral(key: string): string {
 
 // Finds the object-literal key for the last path segment by walking the
 // parent keys in order, each opening a brace, then rewrites the key.
-export function renameConfigKey(text: string, from: string, to: string): string {
+export function renameConfigKey(text: string, from: string, to: string, anchor = 'tokens:'): string {
   const fromSegments = from.split('.');
   const toSegments = to.split('.');
   if (
@@ -30,8 +29,8 @@ export function renameConfigKey(text: string, from: string, to: string): string 
   const newKey = toSegments[toSegments.length - 1];
 
   // Walk to the parent object by matching each ancestor key followed by `: {`.
-  let cursor = text.indexOf('tokens:');
-  if (cursor < 0) throw new Error('Could not find the tokens block in the config.');
+  let cursor = text.indexOf(anchor);
+  if (cursor < 0) throw new Error(`Could not find ${anchor} in the config.`);
   for (const segment of fromSegments.slice(0, -1)) {
     const re = new RegExp(`${keyPattern(segment)}\\s*:\\s*\\{`, 'g');
     re.lastIndex = cursor;
@@ -39,7 +38,7 @@ export function renameConfigKey(text: string, from: string, to: string): string 
     if (m === null) throw new Error(`Could not find "${segment}" on the way to "${from}" in the config.`);
     cursor = m.index + m[0].length;
   }
-  const keyRe = new RegExp(`(\\n\\s*)${keyPattern(oldKey)}(\\s*:)`, 'g');
+  const keyRe = new RegExp(`([\\s{,]\\s*)${keyPattern(oldKey)}(\\s*:)`, 'g');
   keyRe.lastIndex = cursor;
   const m = keyRe.exec(text);
   if (m === null) throw new Error(`Could not find "${from}" in the config.`);
@@ -49,4 +48,20 @@ export function renameConfigKey(text: string, from: string, to: string): string 
   // move with it, or the config would stop loading.
   const refRe = new RegExp(`\\{${from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\}`, 'g');
   return renamedKey.replace(refRe, `{${to}}`);
+}
+
+// Renames a key in a schema's shape, where it is an object key or a quoted
+// string. A key can repeat across groups or come from a helper, so the rename
+// only goes ahead when the key appears exactly once; otherwise it reports the count.
+export function renameSchemaKey(text: string, from: string, to: string): { text: string } | { occurrences: number } {
+  const oldKey = from.split('.').at(-1) ?? from;
+  const newKey = to.split('.').at(-1) ?? to;
+  const escaped = oldKey.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const asKey = IDENT.test(oldKey) ? `(?<=[\\s{,])${escaped}(?=\\s*:)` : '(?!)';
+  const occurrence = new RegExp(`${asKey}|'${escaped}'|"${escaped}"`, 'g');
+  const matches = [...text.matchAll(occurrence)];
+  if (matches.length !== 1) return { occurrences: matches.length };
+  const [match] = matches;
+  const replacement = match[0].startsWith("'") || match[0].startsWith('"') ? `'${newKey}'` : keyLiteral(newKey);
+  return { text: `${text.slice(0, match.index)}${replacement}${text.slice(match.index + match[0].length)}` };
 }
