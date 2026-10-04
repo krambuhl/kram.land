@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
 import { diffDtcg, formatDiff } from './core/dtcg-diff.ts';
-import { fromDtcg, renderConfig } from './core/dtcg-import.ts';
+import { fromDtcg, renderTokensFile } from './core/dtcg-import.ts';
 import { toDtcg } from './core/dtcg.ts';
 import type { DtcgNode } from './core/dtcg.ts';
 import { emitSpecimen } from './core/emit-specimen.ts';
@@ -23,7 +23,7 @@ function usageText(): string {
     '  check                         print the contrast ratio of every pair in every mode',
     '  specimen [--out <file>]       write an html page of every token in every mode',
     '  export --dtcg [--out <file>]  write the tokens as DTCG 2025.10 json, to stdout by default',
-    '  import --dtcg <file> [--out <file>]  read DTCG json into tokens.config.ts text, to stdout by default',
+    '  import --dtcg <file> [--out <file>]  read DTCG json into tokens/tokens.ts text, to stdout by default',
     '  diff <export.json>            compare the config with a DTCG export; exit 1 on any difference',
     '  usage <files...>              list every token() call by path',
     '  rename <from> <to> <files...> rename a token in the files, and in the config unless <to> exists',
@@ -84,11 +84,12 @@ function importTokens(args: readonly string[]): string {
   const file = dtcgFlag >= 0 ? args[dtcgFlag + 1] : undefined;
   if (file === undefined) throw new Error('import needs --dtcg <file>; it is the only format.');
   const parsed = JSON.parse(readFileSync(resolve(file), 'utf8')) as DtcgNode;
-  const text = renderConfig(fromDtcg(parsed));
+  const text = renderTokensFile(fromDtcg(parsed));
   const outFlag = args.indexOf('--out');
   if (outFlag < 0) return text.trimEnd();
   const out = args[outFlag + 1];
   if (out === undefined) throw new Error('--out needs a file.');
+  mkdirSync(dirname(resolve(out)), { recursive: true });
   writeFileSync(resolve(out), text);
   return `wrote ${relative(process.cwd(), resolve(out))}`;
 }

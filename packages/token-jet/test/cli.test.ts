@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, symlinkSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -120,10 +120,13 @@ describe('token-jet export', () => {
       return readFileSync(join(dir, 'generated/tokens/tokens.css'), 'utf8');
     };
     const before = css();
-    expect(run(dir, 'import', '--dtcg', 'tokens.dtcg.json', '--out', 'tokens.config.ts')).toMatch(
-      /wrote tokens\.config\.ts/
+    expect(run(dir, 'import', '--dtcg', 'tokens.dtcg.json', '--out', 'tokens/tokens.ts')).toMatch(
+      /wrote tokens\/tokens\.ts/
     );
-    expect(readFileSync(join(dir, 'tokens.config.ts'), 'utf8')).toMatch(/^import \{ defineConfig \} from 'token-jet';/);
+    expect(readFileSync(join(dir, 'tokens/tokens.ts'), 'utf8')).toMatch(
+      /^import \{ defineSchema, pattern, slots \} from 'token-jet';/
+    );
+    rmSync(join(dir, 'tokens.config.ts'));
     expect(css()).toBe(before);
   });
 });

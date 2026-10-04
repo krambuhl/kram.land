@@ -138,7 +138,7 @@ A scope is an attribute on any element: `data-mode="light"`, `"dark"`, `"auto"` 
 | `check`                               | Print the contrast ratio of every pair in every mode; exit 1 if any is below the minimum.                           |
 | `specimen [--out <file>]`             | Write a self-contained HTML page of every token by group, with a preview per role or type, and every contrast pair. |
 | `export --dtcg [--out <file>]`        | Write the tokens as DTCG 2025.10 JSON; modes, tags and previews go under `$extensions['token-jet']`.                |
-| `import --dtcg <file> [--out <file>]` | Read DTCG JSON into `tokens.config.ts` text (modes and tokens; `types` and `contrast` are added by hand).           |
+| `import --dtcg <file> [--out <file>]` | Read DTCG JSON into `tokens/tokens.ts` text: a schema with one pattern per type, tags and preview, and the tokens.  |
 | `diff <export.json>`                  | Compare the config with a DTCG export; list missing, extra and changed tokens; exit 1 on any.                       |
 | `usage <files…>`                      | List every `token()` call in the files by path, flagging deprecated ones.                                           |
 | `rename <from> <to> <files…>`         | Rename a token in the files, and in the config unless `<to>` already exists there.                                  |

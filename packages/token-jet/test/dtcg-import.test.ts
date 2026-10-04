@@ -1,14 +1,17 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { describe, expect, test } from 'vitest';
 
 import type { Config, Modes } from '../src/core/config.ts';
-import { fromDtcg, fromDtcgValue, renderConfig } from '../src/core/dtcg-import.ts';
+import { fromDtcg, fromDtcgValue, renderConfig, renderTokensFile } from '../src/core/dtcg-import.ts';
 import { toDtcg } from '../src/core/dtcg.ts';
 import { flatten } from '../src/core/flatten.ts';
+import type { Token } from '../src/core/flatten.ts';
+import { loadConfigFile } from '../src/core/load.ts';
 import { loadTokens } from '../src/core/load.ts';
+import { inferType } from '../src/core/metadata.ts';
 import config from './fixtures/emit.config.ts';
 
 const exported = toDtcg(loadTokens(config));
@@ -82,5 +85,56 @@ describe('renderConfig', () => {
     expect(text).toContain("      bold: { value: 700, type: 'fontWeight' },");
     expect(renderConfig({ modes: {}, tokens: { 'a-b': { value: '1px', type: 'dimension' } } })).toContain("'a-b': {");
     expect(text).toMatch(/^import \{ defineConfig \} from 'token-jet';\n\nexport default defineConfig\(\{/);
+  });
+});
+
+describe('renderTokensFile', () => {
+  test('writes a tokens/tokens.ts that loads to the same tokens', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'token-jet-import-'));
+    const text = renderTokensFile(fromDtcg(exported)).replace(
+      "from 'token-jet'",
+      `from '${join(import.meta.dirname, '../src/index.ts')}'`
+    );
+    mkdirSync(join(dir, 'tokens'));
+    writeFileSync(join(dir, 'tokens/tokens.ts'), text);
+    const project = (tokens: Token[]) =>
+      tokens.map(({ path, value, modes, description, deprecated, inherits }) => ({
+        path,
+        value,
+        modes,
+        description,
+        deprecated,
+        inherits,
+      }));
+    const { config: loaded } = await loadConfigFile(dir);
+    const original = loadTokens(config);
+    const roundTrip = loadTokens(loaded);
+    expect(project(roundTrip.tokens)).toEqual(project(original.tokens));
+    expect(roundTrip.tokens.map(inferType)).toEqual(original.tokens.map(inferType));
+    expect(loaded.modes).toEqual(config.modes);
+  });
+
+  test('names a pattern by its tags, or by its type without any, and collapses a uniform group to slots', () => {
+    const text = renderTokensFile({
+      modes: {},
+      tokens: {
+        space: { x4: { value: '4px', type: 'dimension', tags: ['spacing'], preview: 'gap' } },
+        mixed: {
+          a: { value: '1px', type: 'dimension' },
+          b: { value: '#fff', type: 'color', tags: ['color', 'surface'] },
+        },
+      },
+    });
+    expect(text).toContain("const spacing = pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' });");
+    expect(text).toContain("const colorSurface = pattern({ type: 'color', tags: ['color', 'surface'] });");
+    expect(text).toContain("    space: slots(['x4'], spacing),");
+    expect(text).toContain('    mixed: {\n      a: dimension,\n      b: colorSurface,\n    },');
+    expect(text).toContain('  modes: {},');
+  });
+
+  test('quotes keys that are not identifiers and skips slots when nothing uses it', () => {
+    const text = renderTokensFile({ modes: {}, tokens: { 'a-b': { value: '1px', type: 'dimension' } } });
+    expect(text).toContain("  'a-b': dimension,");
+    expect(text).toMatch(/^import \{ defineSchema, pattern \} from 'token-jet';/);
   });
 });

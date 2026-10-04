@@ -2,6 +2,8 @@ import { GROUP_KEY, PREVIEWS, TOKEN_TYPES } from './config.ts';
 import type { Modes, Preview, TokenLeaf, TokenRole, TokenTree, TokenType, TokenValue } from './config.ts';
 import { DTCG_EXTENSION } from './dtcg.ts';
 import type { DtcgNode } from './dtcg.ts';
+import { flatten } from './flatten.ts';
+import { inferType } from './metadata.ts';
 import { parseReference } from './references.ts';
 
 export interface ImportedConfig {
@@ -192,6 +194,114 @@ export function renderConfig(config: ImportedConfig): string {
     '  tokens: {',
     block(config.tokens, 2),
     '  },',
+    '});',
+    '',
+  ].join('\n');
+}
+
+type ShapeNode = Map<string, ShapeNode | string>;
+type ValueNode = Map<string, ValueNode | Record<string, unknown>>;
+
+function camel(text: string): string {
+  return text.replace(/-([a-zA-Z0-9])/g, (_, c: string) => c.toUpperCase());
+}
+
+function subtree<T>(node: Map<string, Map<string, T> | T>, name: string): Map<string, T> {
+  const existing = node.get(name);
+  if (existing instanceof Map) return existing as Map<string, T>;
+  const created = new Map<string, T>();
+  node.set(name, created as Map<string, T> | T);
+  return created;
+}
+
+function renderShape(node: ShapeNode, depth: number, useSlots: () => void): string {
+  const pad = '  '.repeat(depth);
+  const lines: string[] = [];
+  for (const [name, entry] of node) {
+    if (typeof entry === 'string') {
+      lines.push(`${pad}${key(name)}: ${entry},`);
+      continue;
+    }
+    const children = [...entry.values()];
+    const shared = children.every((c) => typeof c === 'string' && c === children[0]) ? children[0] : undefined;
+    if (typeof shared === 'string') {
+      useSlots();
+      const keys = [...entry.keys()].map(quote).join(', ');
+      lines.push(`${pad}${key(name)}: slots([${keys}], ${shared}),`);
+      continue;
+    }
+    lines.push(`${pad}${key(name)}: {`, renderShape(entry, depth + 1, useSlots), `${pad}},`);
+  }
+  return lines.join('\n');
+}
+
+function renderValues(node: ValueNode, depth: number): string {
+  const pad = '  '.repeat(depth);
+  const lines: string[] = [];
+  for (const [name, entry] of node) {
+    if (entry instanceof Map) lines.push(`${pad}${key(name)}: {`, renderValues(entry, depth + 1), `${pad}},`);
+    else lines.push(`${pad}${key(name)}: ${inline(entry)},`);
+  }
+  return lines.join('\n');
+}
+
+// Writes the imported modes and tokens as tokens/tokens.ts text with the schema
+// inline. One pattern per distinct type, tags and preview combination, named
+// after its tags, or its type when untagged. A group whose tokens share one
+// pattern renders as slots().
+export function renderTokensFile(config: ImportedConfig): string {
+  const patterns = new Map<string, string>();
+  const declarations: string[] = [];
+  const names = new Set(['defineSchema', 'pattern', 'slots', 'schema']);
+  const shape: ShapeNode = new Map();
+  const values: ValueNode = new Map();
+  for (const token of flatten(config.tokens)) {
+    const type = inferType(token);
+    if (type === undefined) throw new Error(`Token "${token.path}" has no type.`);
+    const tags = token.tags ?? [];
+    const signature = JSON.stringify([type, tags, token.preview ?? null]);
+    let name = patterns.get(signature);
+    if (name === undefined) {
+      const base = camel(tags.length > 0 ? tags.join('-') : type);
+      name = base;
+      for (let n = 2; names.has(name); n++) name = `${base}${n}`;
+      names.add(name);
+      patterns.set(signature, name);
+      const fields = [
+        `type: ${quote(type)}`,
+        ...(tags.length > 0 ? [`tags: [${tags.map(quote).join(', ')}]`] : []),
+        ...(token.preview !== undefined ? [`preview: ${quote(token.preview)}`] : []),
+      ];
+      declarations.push(`const ${name} = pattern({ ${fields.join(', ')} });`);
+    }
+    const parents = token.segments.slice(0, -1);
+    const leafName = token.segments[token.segments.length - 1];
+    parents.reduce<ShapeNode>((node, segment) => subtree(node, segment), shape).set(leafName, name);
+    const leafValue: Record<string, unknown> = { value: token.value, ...token.modes };
+    if (token.description !== undefined) leafValue.description = token.description;
+    if (token.deprecated !== undefined) leafValue.deprecated = token.deprecated;
+    if (token.inherits !== undefined) leafValue.inherits = token.inherits;
+    parents.reduce<ValueNode>((node, segment) => subtree(node, segment), values).set(leafName, leafValue);
+  }
+  let slotsUsed = false;
+  const shapeText = renderShape(shape, 2, () => {
+    slotsUsed = true;
+  });
+  const modes = Object.entries(config.modes).map(([mode, query]) => `    ${key(mode)}: ${quote(query)},`);
+  return [
+    `import { defineSchema, pattern${slotsUsed ? ', slots' : ''} } from 'token-jet';`,
+    '',
+    ...declarations,
+    '',
+    'const schema = defineSchema({',
+    modes.length > 0 ? ['  modes: {', ...modes, '  },'].join('\n') : '  modes: {},',
+    '  shape: {',
+    shapeText,
+    '  },',
+    '});',
+    '',
+    'export default schema.defineTokens({',
+    renderValues(values, 1),
     '});',
     '',
   ].join('\n');
