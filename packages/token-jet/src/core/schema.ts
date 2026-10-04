@@ -132,7 +132,7 @@ function leafFor(atom: Pattern, node: unknown, path: string, modes: Modes): Toke
   const leaf = {
     ...node,
     type: atom.type,
-    tags: atom.tags,
+    ...(atom.tags.length > 0 && { tags: atom.tags }),
     ...(atom.preview !== undefined && { preview: atom.preview }),
   };
   return leaf as unknown as TokenLeaf<Modes>;

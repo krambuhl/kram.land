@@ -58,6 +58,13 @@ describe('schemaToConfig', () => {
     });
   });
 
+  test('a pattern without tags or a preview adds neither to its leaves', () => {
+    const plain = defineSchema({ modes: {}, shape: { ratio: pattern({ type: 'number' }) } });
+    expect(schemaToConfig(plain.defineTokens({ ratio: { value: 1.5 } })).tokens).toEqual({
+      ratio: { value: 1.5, type: 'number' },
+    });
+  });
+
   test('loads into tokens that carry their tags and preview, and emits mode values', () => {
     const resolved = loadTokens(config);
     expect(resolved.tokens.find((t) => t.path === 'surface.hover')).toMatchObject({
