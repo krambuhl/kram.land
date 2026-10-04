@@ -1,8 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
 import { defineConfig } from '../src/core/config.ts';
+import { fromDtcg } from '../src/core/dtcg-import.ts';
 import { toDtcg, toDtcgValue } from '../src/core/dtcg.ts';
+import { flatten } from '../src/core/flatten.ts';
 import { loadTokens } from '../src/core/load.ts';
+import { defineSchema, pattern, schemaToConfig, slots } from '../src/core/schema.ts';
 import config from './fixtures/emit.config.ts';
 
 const file = toDtcg(loadTokens(config));
@@ -104,5 +107,48 @@ describe('toDtcg', () => {
   test('a token with no type is an error naming it', () => {
     const untyped = defineConfig({ modes: {}, tokens: { a: { b: { value: '1px' } } } });
     expect(() => toDtcg(loadTokens(untyped))).toThrow(/"a\.b" has no type/);
+  });
+});
+
+describe('tags and preview', () => {
+  const schema = defineSchema({
+    modes: { dark: '(prefers-color-scheme: dark)' },
+    shape: {
+      space: slots(['x4'], pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' })),
+      page: pattern({ type: 'color', tags: ['color', 'surface'], modes: ['dark'] }),
+    },
+  });
+  const tagged = schemaToConfig(
+    schema.defineTokens({ space: { x4: { value: '4px' } }, page: { value: '#ffffff', dark: '#000000' } })
+  );
+  const exported = toDtcg(loadTokens(tagged));
+
+  test('go under the token-jet extension on the token', () => {
+    const space = exported.space as Record<string, Record<string, unknown>>;
+    expect(space.x4.$extensions).toEqual({ 'token-jet': { tags: ['spacing'], preview: 'gap' } });
+    expect((exported.page as Record<string, unknown>).$extensions).toEqual({
+      'token-jet': {
+        modes: { dark: { colorSpace: 'srgb', components: [0, 0, 0], hex: '#000000' } },
+        tags: ['color', 'surface'],
+      },
+    });
+  });
+
+  test('come back on import', () => {
+    const tokens = flatten(fromDtcg(exported).tokens);
+    expect(tokens.find((t) => t.path === 'space.x4')).toMatchObject({ tags: ['spacing'], preview: 'gap' });
+    expect(tokens.find((t) => t.path === 'page')?.tags).toEqual(['color', 'surface']);
+  });
+
+  test('an unknown preview on import is an error naming the token', () => {
+    const bad = {
+      space: {
+        $type: 'dimension',
+        x4: { $value: { value: 4, unit: 'px' }, $extensions: { 'token-jet': { preview: 'blob' } } },
+      },
+    };
+    expect(() => fromDtcg(bad)).toThrow(
+      'Token "space.x4" has the preview "blob". Previews are swatch, gap, bar, corner, text, paragraph.'
+    );
   });
 });

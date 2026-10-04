@@ -1,5 +1,5 @@
-import { GROUP_KEY, TOKEN_TYPES } from './config.ts';
-import type { Modes, TokenLeaf, TokenRole, TokenTree, TokenType, TokenValue } from './config.ts';
+import { GROUP_KEY, PREVIEWS, TOKEN_TYPES } from './config.ts';
+import type { Modes, Preview, TokenLeaf, TokenRole, TokenTree, TokenType, TokenValue } from './config.ts';
 import { DTCG_EXTENSION } from './dtcg.ts';
 import type { DtcgNode } from './dtcg.ts';
 import { parseReference } from './references.ts';
@@ -52,6 +52,10 @@ export function fromDtcgValue(type: TokenType, value: unknown): TokenValue {
   }
 }
 
+function isPreview(value: unknown): value is Preview {
+  return (PREVIEWS as readonly unknown[]).includes(value);
+}
+
 function leaf(
   node: Record<string, unknown>,
   path: string,
@@ -78,6 +82,17 @@ function leaf(
     }
   }
   if (typeof extension.inherits === 'boolean') out.inherits = extension.inherits;
+  if (Array.isArray(extension.tags) && extension.tags.every((tag) => typeof tag === 'string')) {
+    out.tags = extension.tags;
+  }
+  if (extension.preview !== undefined) {
+    if (!isPreview(extension.preview)) {
+      throw new Error(
+        `Token "${path}" has the preview "${String(extension.preview)}". Previews are ${PREVIEWS.join(', ')}.`
+      );
+    }
+    out.preview = extension.preview;
+  }
   return out;
 }
 

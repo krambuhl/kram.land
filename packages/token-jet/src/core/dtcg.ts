@@ -97,6 +97,8 @@ function leaf(node: TokenLeaf<Modes>, segments: string[], groupType: TokenType |
   const extension: Record<string, unknown> = {};
   if (Object.keys(modes).length > 0) extension.modes = modes;
   if (node.inherits !== undefined) extension.inherits = node.inherits;
+  if (node.tags !== undefined && node.tags.length > 0) extension.tags = [...node.tags];
+  if (node.preview !== undefined) extension.preview = node.preview;
   if (Object.keys(extension).length > 0) out.$extensions = { [DTCG_EXTENSION]: extension };
   return out;
 }
