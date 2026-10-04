@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync } from 'node:fs';
-import { relative, resolve } from 'node:path';
+import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import { loadConfigFile, loadTokens, writeFiles } from 'token-jet';
@@ -8,8 +8,7 @@ import { loadConfigFile, loadTokens, writeFiles } from 'token-jet';
 import { defineGenerate, generate } from './index.ts';
 import type { Entry, GenerateConfig } from './index.ts';
 
-const CONFIG_FILE = 'generate.config.ts';
-const SCHEMA_GENERATE_FILE = 'tokens/generate.ts';
+const GENERATE_FILE = 'tokens/generate.ts';
 const DEFAULT_OUT_DIR = 'generated/classnames';
 
 function isDefinedGenerate(value: unknown): value is { entries: Record<string, Entry> } {
@@ -17,16 +16,14 @@ function isDefinedGenerate(value: unknown): value is { entries: Record<string, E
 }
 
 async function loadGenerateConfig(dir: string): Promise<GenerateConfig> {
-  const legacy = resolve(dir, CONFIG_FILE);
-  const file = existsSync(legacy) ? legacy : resolve(dir, SCHEMA_GENERATE_FILE);
-  if (!existsSync(file)) throw new Error(`No ${CONFIG_FILE} or ${SCHEMA_GENERATE_FILE} found in ${dir}.`);
+  const file = resolve(dir, GENERATE_FILE);
+  if (!existsSync(file)) throw new Error(`No ${GENERATE_FILE} found in ${dir}.`);
   const url = `${pathToFileURL(file).href}?v=${Date.now()}`;
   const module = (await import(url)) as { default?: unknown };
-  if (module.default === undefined) {
-    throw new Error(`${relative(dir, file)} must export the config as its default export.`);
+  if (!isDefinedGenerate(module.default)) {
+    throw new Error(`${GENERATE_FILE} must export schema.defineGenerate(...) as its default export.`);
   }
-  if (isDefinedGenerate(module.default)) return defineGenerate(module.default.entries);
-  return module.default as GenerateConfig;
+  return defineGenerate(module.default.entries);
 }
 
 async function main(argv: readonly string[]): Promise<void> {

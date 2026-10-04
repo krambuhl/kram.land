@@ -16,7 +16,7 @@ export default schema.defineGenerate({
 });
 ```
 
-`token-jet-generate [--out <dir>]` reads the token config and `generate.config.ts` from the working directory and writes every entry into `generated/classnames/` by default. Without a `generate.config.ts` it reads `tokens/generate.ts`, whose default export is the result of a token-jet schema's `defineGenerate`. Run it after `token-jet generate`, since the generated files import the tokens.
+`token-jet-generate [--out <dir>]` reads `tokens/tokens.ts` and `tokens/generate.ts` from the working directory and writes every entry into `generated/classnames/` by default. The default export of `tokens/generate.ts` must be the result of a token-jet schema's `defineGenerate`. Run it after `token-jet generate`, since the generated files import the tokens.
 
 ## Config
 
