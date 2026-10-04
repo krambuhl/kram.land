@@ -71,7 +71,7 @@ export default schema.defineTokens({
 
 Every tag becomes a union in the generated types, next to the group unions: `spacing` emits `SpacingToken`, `border-radius` emits `BorderRadiusToken`. A tag is letters, digits and dashes, starting with a letter, and a tag union named like a group union is an error. The manifest lists each token's `tags` and `preview`.
 
-The CLI, the Vite adapter and the language server read `tokens/tokens.ts` when a directory has no `tokens.config.ts`; its default export is the result of `schema.defineTokens`. With both files present, `tokens.config.ts` wins, so a project can add `tokens/` before switching to it.
+The CLI, the Vite adapter and the language server read `tokens/tokens.ts`; its default export must be the result of `schema.defineTokens`. The schema can live in the same file or in a module beside it, such as `tokens/schema.ts`, and an edit to either reloads.
 
 `schemaToConfig({ schema, tokens })` turns a defined tree into the config the rest of token-jet reads, with each leaf's `type`, `tags` and `preview` taken from its pattern. It repeats the shape checks at runtime, so a config that skipped the type check still fails on a missing slot or mode.
 
@@ -151,4 +151,4 @@ export default { plugins: [tokenJet({ outDir: 'generated/tokens' })] };
 
 ## Programmatic use
 
-`loadConfigFile(dir)` imports `tokens.config.ts`; `loadTokens(config)` validates it and returns the resolved model every emitter reads. `generateFiles(resolved)` returns the files without writing them; `emitCss`, `emitTypes`, `emitJs`, `emitManifest`, `emitSpecimen` and `toDtcg` are the individual emitters.
+`loadConfigFile(dir)` imports `tokens/tokens.ts` and returns its config; `loadTokens(config)` validates it and returns the resolved model every emitter reads. `generateFiles(resolved)` returns the files without writing them; `emitCss`, `emitTypes`, `emitJs`, `emitManifest`, `emitSpecimen` and `toDtcg` are the individual emitters.

@@ -8,7 +8,7 @@ import { pathToFileURL } from 'node:url';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 const server = join(import.meta.dirname, '../src/server.ts');
-const fixture = readFileSync(join(import.meta.dirname, 'fixtures/tokens.config.ts'), 'utf8');
+const fixture = readFileSync(join(import.meta.dirname, 'fixtures/tokens/tokens.ts'), 'utf8');
 
 interface Message {
   id?: number;
@@ -75,7 +75,8 @@ class Client {
 
 function project(): string {
   const dir = mkdtempSync(join(tmpdir(), 'token-jet-lsp-'));
-  writeFileSync(join(dir, 'tokens.config.ts'), fixture);
+  mkdirSync(join(dir, 'tokens'));
+  writeFileSync(join(dir, 'tokens/tokens.ts'), fixture);
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'fixture', type: 'module' }));
   mkdirSync(join(dir, 'node_modules'));
   symlinkSync(join(import.meta.dirname, '../../token-jet'), join(dir, 'node_modules/token-jet'));
@@ -214,8 +215,10 @@ describe('token-jet-lsp over stdio', () => {
       8000
     );
     writeFileSync(
-      join(dir, 'tokens.config.ts'),
-      fixture.replace("x16: { value: '16px'", "x17: { value: '17px' },\n      x16: { value: '16px'")
+      join(dir, 'tokens/tokens.ts'),
+      fixture
+        .replace("slots(['x4', 'x16']", "slots(['x4', 'x16', 'x17']")
+        .replace("x16: { value: '16px'", "x17: { value: '17px' },\n    x16: { value: '16px'")
     );
     const { diagnostics: after } = (await republished).params as { diagnostics: Diagnostic[] };
     expect(after[0].message).toContain('content.regular');
@@ -225,10 +228,10 @@ describe('token-jet-lsp over stdio', () => {
     const republished = client.wait(
       (m) =>
         m.method === 'textDocument/publishDiagnostics' &&
-        (m.params as { diagnostics: Diagnostic[] }).diagnostics[0]?.message.startsWith('tokens.config.ts failed'),
+        (m.params as { diagnostics: Diagnostic[] }).diagnostics[0]?.message.startsWith('tokens/tokens.ts failed'),
       8000
     );
-    writeFileSync(join(dir, 'tokens.config.ts'), fixture.replace("dark: '{gray.900}'", "dark: '{gray.999}'"));
+    writeFileSync(join(dir, 'tokens/tokens.ts'), fixture.replace("dark: '{gray.900}'", "dark: '{gray.999}'"));
     const { diagnostics: after } = (await republished).params as { diagnostics: Diagnostic[] };
     expect(after).toHaveLength(1);
     expect(after[0].message).toMatch(/gray\.999/);

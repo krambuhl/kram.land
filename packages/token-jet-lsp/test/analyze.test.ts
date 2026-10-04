@@ -1,10 +1,10 @@
-import { loadTokens } from 'token-jet';
+import { loadTokens, schemaToConfig } from 'token-jet';
 import { describe, expect, test } from 'vitest';
 
 import { callAt, complete, diagnose, findCalls, hover } from '../src/analyze.ts';
-import config from './fixtures/tokens.config.ts';
+import tokens from './fixtures/tokens/tokens.ts';
 
-const resolved = loadTokens(config);
+const resolved = loadTokens(schemaToConfig(tokens));
 
 describe('findCalls', () => {
   test('finds every token() literal with the offsets of its argument', () => {

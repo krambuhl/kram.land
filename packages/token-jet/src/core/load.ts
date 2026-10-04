@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { dirname, relative, resolve } from 'node:path';
+import { dirname, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 
@@ -13,8 +13,7 @@ import { checkReferences } from './references.ts';
 import { isDefinedTokens, schemaToConfig } from './schema.ts';
 import { validate } from './validate.ts';
 
-const CONFIG_FILE = 'tokens.config.ts';
-const SCHEMA_TOKENS_FILE = 'tokens/tokens.ts';
+const TOKENS_FILE = 'tokens/tokens.ts';
 const TAG = /^[A-Za-z][A-Za-z0-9-]*$/;
 
 export interface Union {
@@ -86,21 +85,14 @@ function importFresh(file: string): Promise<unknown> {
   });
 }
 
-// Imports tokens.config.ts when it is there, else tokens/tokens.ts; a schema
-// export is converted to a config. Node runs the TypeScript directly, with
-// no build step between the config and the generator.
+// Imports tokens/tokens.ts and converts its default export to a config. Node
+// runs the TypeScript directly, with no build step before the generator.
 export async function loadConfigFile(dir: string): Promise<{ file: string; watch: string; config: Config<Modes> }> {
-  const legacy = resolve(dir, CONFIG_FILE);
-  const schemaTokens = resolve(dir, SCHEMA_TOKENS_FILE);
-  const file = existsSync(legacy) ? legacy : schemaTokens;
-  const watch = file === schemaTokens ? dirname(file) : file;
-  if (!existsSync(file)) {
-    throw new Error(`No ${CONFIG_FILE} or ${SCHEMA_TOKENS_FILE} found in ${dir}.`);
-  }
+  const file = resolve(dir, TOKENS_FILE);
+  if (!existsSync(file)) throw new Error(`No ${TOKENS_FILE} found in ${dir}.`);
   const exported = await importFresh(file);
-  if (exported === undefined) {
-    throw new Error(`${relative(dir, file)} must export the config as its default export.`);
+  if (!isDefinedTokens(exported)) {
+    throw new Error(`${TOKENS_FILE} must export schema.defineTokens(...) as its default export.`);
   }
-  if (isDefinedTokens(exported)) return { file, watch, config: schemaToConfig(exported) };
-  return { file, watch, config: exported as Config<Modes> };
+  return { file, watch: dirname(file), config: schemaToConfig(exported) };
 }

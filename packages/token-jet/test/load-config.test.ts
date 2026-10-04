@@ -15,9 +15,6 @@ const schema = defineSchema({ modes: {}, shape: { space: slots(['x4', 'x8'], spa
 export default schema.defineTokens({ space: { x4: { value: '4px' }, x8: { value: '8px' } } });
 `;
 
-const LEGACY = `export default { modes: {}, tokens: { space: { x16: { value: '16px', type: 'dimension' } } } };
-`;
-
 function workspace(files: Record<string, string>): string {
   const dir = mkdtempSync(join(tmpdir(), 'token-jet-load-'));
   for (const [path, contents] of Object.entries(files)) {
@@ -40,22 +37,18 @@ describe('loadConfigFile', () => {
     ]);
   });
 
-  test('reads tokens.config.ts when it is there, even next to tokens/tokens.ts', async () => {
-    const dir = workspace({ 'tokens.config.ts': LEGACY, 'tokens/tokens.ts': SCHEMA_TOKENS });
-    const { file, watch, config } = await loadConfigFile(dir);
-    expect(file).toBe(join(dir, 'tokens.config.ts'));
-    expect(watch).toBe(file);
-    expect(loadTokens(config).tokens.map((t) => t.path)).toEqual(['space.x16']);
-  });
-
-  test('names both files when neither is there', async () => {
+  test('names the file when it is not there', async () => {
     const dir = workspace({});
-    await expect(loadConfigFile(dir)).rejects.toThrow('No tokens.config.ts or tokens/tokens.ts found in');
+    await expect(loadConfigFile(dir)).rejects.toThrow('No tokens/tokens.ts found in');
   });
 
-  test('names the file that has no default export', async () => {
-    const dir = workspace({ 'tokens/tokens.ts': 'export const nothing = 1;\n' });
-    await expect(loadConfigFile(dir)).rejects.toThrow('tokens/tokens.ts must export the config as its default export.');
+  test('a default export that is not schema.defineTokens is an error', async () => {
+    for (const text of ['export const nothing = 1;\n', 'export default { modes: {}, tokens: {} };\n']) {
+      const dir = workspace({ 'tokens/tokens.ts': text });
+      await expect(loadConfigFile(dir)).rejects.toThrow(
+        'tokens/tokens.ts must export schema.defineTokens(...) as its default export.'
+      );
+    }
   });
 
   test('a second load sees an edit to a module tokens.ts imports', async () => {

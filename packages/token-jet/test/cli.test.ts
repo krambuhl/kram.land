@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { beforeAll, describe, expect, test } from 'vitest';
 
 const cli = join(import.meta.dirname, '../src/cli.ts');
-const fixture = readFileSync(join(import.meta.dirname, 'fixtures/emit.config.ts'), 'utf8')
+const fixture = readFileSync(join(import.meta.dirname, 'fixtures/emit.tokens.ts'), 'utf8')
   // the fixture imports the package by relative path; a project imports it by name
   .replace("from '../../src/index.ts'", "from 'token-jet'");
 
@@ -23,7 +23,8 @@ function run(cwd: string, ...args: string[]): string {
 
 function project(config = fixture): string {
   const dir = mkdtempSync(join(tmpdir(), 'token-jet-'));
-  writeFileSync(join(dir, 'tokens.config.ts'), config);
+  mkdirSync(join(dir, 'tokens'));
+  writeFileSync(join(dir, 'tokens/tokens.ts'), config);
   // resolve 'token-jet' to this package from inside the temp project
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'fixture', type: 'module' }));
   mkdirSync(join(dir, 'node_modules'));
@@ -62,7 +63,7 @@ describe('token-jet generate', () => {
 
   test('a missing config exits 1 and names the file it looked for', () => {
     const empty = mkdtempSync(join(tmpdir(), 'token-jet-empty-'));
-    expect(() => run(empty, 'generate')).toThrow(/exit 1.*tokens\.config\.ts/s);
+    expect(() => run(empty, 'generate')).toThrow(/exit 1.*tokens\/tokens\.ts/s);
   });
 });
 
@@ -103,7 +104,6 @@ describe('token-jet export', () => {
     expect(readFileSync(join(dir, 'tokens/tokens.ts'), 'utf8')).toMatch(
       /^import \{ defineSchema, pattern, slots \} from 'token-jet';/
     );
-    rmSync(join(dir, 'tokens.config.ts'));
     expect(css()).toBe(before);
   });
 });
@@ -144,21 +144,21 @@ describe('token-jet usage and rename', () => {
     expect(out).toMatch(/1 files/);
     expect(readFileSync(join(dir, 'a.css'), 'utf8')).toContain("token('content.text')");
     expect(readFileSync(join(dir, 'b.tsx'), 'utf8')).not.toContain('content.text');
-    const config = readFileSync(join(dir, 'tokens.config.ts'), 'utf8');
+    const config = readFileSync(join(dir, 'tokens/tokens.ts'), 'utf8');
     expect(config).toMatch(/text: \{ value: '#111111'/);
     expect(config).not.toMatch(/\n\s+regular: \{/);
     // the reference from content.body moved with the key, so the config still loads
-    expect(config).toContain("body: { value: '{content.text}', type: 'color' }");
+    expect(config).toContain("body: { value: '{content.text}' }");
     expect(() => run(dir, 'generate')).not.toThrow();
   });
 
   test('rename to a path already in the config rewrites the calls and leaves the config alone', () => {
     writeFileSync(join(dir, 'c.css'), ".c { background: token('bg.page'); }\n");
-    const before = readFileSync(join(dir, 'tokens.config.ts'), 'utf8');
+    const before = readFileSync(join(dir, 'tokens/tokens.ts'), 'utf8');
     const out = run(dir, 'rename', 'bg.page', 'bg.card', 'c.css');
     expect(out).toMatch(/1 files.*bg\.card is already in the config.*bg\.page is left/);
     expect(readFileSync(join(dir, 'c.css'), 'utf8')).toContain("token('bg.card')");
-    expect(readFileSync(join(dir, 'tokens.config.ts'), 'utf8')).toBe(before);
+    expect(readFileSync(join(dir, 'tokens/tokens.ts'), 'utf8')).toBe(before);
   });
 
   test('rename from a path not in the config is an error', () => {

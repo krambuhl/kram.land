@@ -1,7 +1,7 @@
-// Renames a token's key in config text: tokens.config.ts, or the token tree
-// after defineTokens( in tokens/tokens.ts. The config is TypeScript, so the
-// edit is textual: the last segment of the path is a key in an object literal,
-// and the rename changes that key where it sits at the path's depth.
+// Renames a token's key. The file is TypeScript, so the edit is textual:
+// renameConfigKey walks parent keys from defineTokens( to the leaf, and
+// renameSchemaKey renames the key in the schema shape when it appears exactly
+// once.
 
 const IDENT = /^[A-Za-z_$][\w$]*$/;
 
@@ -16,7 +16,7 @@ function keyLiteral(key: string): string {
 
 // Finds the object-literal key for the last path segment by walking the
 // parent keys in order, each opening a brace, then rewrites the key.
-export function renameConfigKey(text: string, from: string, to: string, anchor = 'tokens:'): string {
+export function renameConfigKey(text: string, from: string, to: string, anchor = 'defineTokens('): string {
   const fromSegments = from.split('.');
   const toSegments = to.split('.');
   if (

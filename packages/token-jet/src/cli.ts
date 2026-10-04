@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join, relative, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 
 import { diffDtcg, formatDiff } from './core/dtcg-diff.ts';
 import { fromDtcg, renderTokensFile } from './core/dtcg-import.ts';
@@ -109,10 +109,6 @@ async function usage(files: readonly string[]): Promise<string> {
 }
 
 async function renameInConfig(configFile: string, from: string, to: string): Promise<void> {
-  if (basename(configFile) === 'tokens.config.ts') {
-    writeFileSync(configFile, renameConfigKey(readFileSync(configFile, 'utf8'), from, to));
-    return;
-  }
   const tokensText = readFileSync(configFile, 'utf8');
   const schemaFile = join(dirname(configFile), 'schema.ts');
   const hasSchemaFile = existsSync(schemaFile);
@@ -125,7 +121,7 @@ async function renameInConfig(configFile: string, from: string, to: string): Pro
       `"${key}" appears ${shape.occurrences} times in the schema; rename it there and in tokens.ts by hand.`
     );
   }
-  const tree = renameConfigKey(hasSchemaFile ? tokensText : tokensText.slice(split), from, to, 'defineTokens(');
+  const tree = renameConfigKey(hasSchemaFile ? tokensText : tokensText.slice(split), from, to);
   const writes: [string, string, string][] = hasSchemaFile
     ? [
         [configFile, tokensText, tree],

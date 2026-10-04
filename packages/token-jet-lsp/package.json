@@ -2,7 +2,7 @@
   "name": "token-jet-lsp",
   "version": "0.0.0",
   "private": true,
-  "description": "A language server for token() calls: completion, hover and diagnostics from tokens.config.ts.",
+  "description": "A language server for token() calls: completion, hover and diagnostics from tokens/tokens.ts.",
   "bin": {
     "token-jet-lsp": "./bin/token-jet-lsp.js"
   },

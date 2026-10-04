@@ -1,11 +1,11 @@
 # token-jet-lsp
 
-A language server for `token('…')` calls in CSS. It reads the token config (`tokens.config.ts`, or `tokens/tokens.ts` without one) from the workspace root and gives an editor:
+A language server for `token('…')` calls in CSS. It reads `tokens/tokens.ts` from the workspace root and gives an editor:
 
 - Completion inside the quotes: every path, with its value per mode as the detail and the description as documentation. The edit replaces the whole quoted argument, so a half-typed path with dots completes cleanly.
 - Hover: the path, its value in the base and in each mode with references resolved, the description, and the deprecation if any.
 - Diagnostics: an unknown path is an error naming the nearest existing one; a deprecated path is a warning. Each carries a quick fix that replaces the path when a replacement is known.
-- Reload: the config file is watched, and open documents are re-checked when it changes. A config that fails to load is reported as a diagnostic on each open document rather than taking the server down.
+- Reload: the `tokens/` folder is watched, and open documents are re-checked when a file in it changes. A config that fails to load is reported as a diagnostic on each open document rather than taking the server down.
 
 ## Running
 

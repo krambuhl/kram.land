@@ -3,7 +3,7 @@ name = "token-jet"
 version = "0.0.1"
 schema_version = 1
 authors = ["Evan Krambuhl <thekrambuhl@gmail.com>"]
-description = "Completion, hover and diagnostics for token() calls, from the workspace's tokens.config.ts."
+description = "Completion, hover and diagnostics for token() calls, from the workspace's tokens/tokens.ts."
 repository = "https://github.com/krambuhl/kram.land"
 
 [language_servers.token-jet]

@@ -7,7 +7,7 @@ import { describe, expect, test } from 'vitest';
 
 import tokenJet from '../src/vite.ts';
 
-const fixture = readFileSync(join(import.meta.dirname, 'fixtures/emit.config.ts'), 'utf8').replace(
+const fixture = readFileSync(join(import.meta.dirname, 'fixtures/emit.tokens.ts'), 'utf8').replace(
   "from '../../src/index.ts'",
   "from 'token-jet'"
 );
@@ -16,7 +16,8 @@ const fixture = readFileSync(join(import.meta.dirname, 'fixtures/emit.config.ts'
 // token-jet linked into node_modules so the config's import resolves.
 function project(): string {
   const dir = mkdtempSync(join(tmpdir(), 'token-jet-vite-'));
-  writeFileSync(join(dir, 'tokens.config.ts'), fixture);
+  mkdirSync(join(dir, 'tokens'));
+  writeFileSync(join(dir, 'tokens/tokens.ts'), fixture);
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'fixture', type: 'module' }));
   mkdirSync(join(dir, 'node_modules'));
   symlinkSync(join(import.meta.dirname, '..'), join(dir, 'node_modules/token-jet'));
@@ -55,9 +56,9 @@ describe('vite adapter', () => {
       const before = readFileSync(join(dir, 'generated/tokens/tokens.css'), 'utf8');
       expect(before).toContain('--space-x16: 16px;');
 
-      writeFileSync(join(dir, 'tokens.config.ts'), fixture.replace("x16: { value: '16px'", "x16: { value: '18px'"));
+      writeFileSync(join(dir, 'tokens/tokens.ts'), fixture.replace("x16: { value: '16px'", "x16: { value: '18px'"));
       // Drive the watcher directly: server.watch is off so the test is deterministic.
-      await server.watcher.emit('change', join(dir, 'tokens.config.ts'));
+      await server.watcher.emit('change', join(dir, 'tokens/tokens.ts'));
       await new Promise((r) => setTimeout(r, 200));
 
       const after = readFileSync(join(dir, 'generated/tokens/tokens.css'), 'utf8');
@@ -69,7 +70,7 @@ describe('vite adapter', () => {
 
   test('a config error fails the build with the message', async () => {
     const dir = project();
-    writeFileSync(join(dir, 'tokens.config.ts'), fixture.replace("dark: '{gray.900}'", "dark: '{gray.999}'"));
+    writeFileSync(join(dir, 'tokens/tokens.ts'), fixture.replace("dark: '{gray.900}'", "dark: '{gray.999}'"));
     await expect(
       build({
         root: dir,
