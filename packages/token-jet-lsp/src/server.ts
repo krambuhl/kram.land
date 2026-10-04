@@ -29,9 +29,13 @@ let root = process.cwd();
 let resolved: ResolvedTokens | undefined;
 let loadError: string | undefined;
 let configFile: string | undefined;
+let watchPath: string | undefined;
+let loading: Promise<void> = Promise.resolve();
 
 function validate(document: TextDocument): void {
   let diagnostics: Diagnostic[];
+  // Still loading: load() validates every open document when it finishes.
+  if (resolved === undefined && loadError === undefined) return;
   if (resolved === undefined) {
     const range = { start: document.positionAt(0), end: document.positionAt(0) };
     const name = configFile === undefined ? 'The token config' : relative(root, configFile);
@@ -54,8 +58,9 @@ function validate(document: TextDocument): void {
 // document. A failed load is reported as a diagnostic on each one instead of crashing the server.
 async function load(): Promise<void> {
   try {
-    const { file, config } = await loadConfigFile(root);
+    const { file, watch: watched, config } = await loadConfigFile(root);
     configFile = file;
+    watchPath = watched;
     resolved = loadTokens(config);
     loadError = undefined;
   } catch (error) {
@@ -67,12 +72,14 @@ async function load(): Promise<void> {
 
 // An editor writes a file in more than one step, so the reload waits for
 // the writes to settle.
-function watchConfig(file: string): void {
-  if (!existsSync(file)) return;
+function watchConfig(path: string): void {
+  if (!existsSync(path)) return;
   let timer: NodeJS.Timeout | undefined;
-  watch(file, () => {
+  watch(path, () => {
     clearTimeout(timer);
-    timer = setTimeout(() => void load(), 200);
+    timer = setTimeout(() => {
+      loading = load();
+    }, 200);
   });
 }
 
@@ -90,8 +97,9 @@ connection.onInitialize((params) => {
 });
 
 connection.onInitialized(() => {
-  void load().then(() => {
-    if (configFile !== undefined) watchConfig(configFile);
+  loading = load();
+  void loading.then(() => {
+    if (watchPath !== undefined) watchConfig(watchPath);
   });
 });
 
@@ -99,7 +107,8 @@ documents.onDidChangeContent((change) => {
   validate(change.document);
 });
 
-connection.onCompletion((params): CompletionItem[] | null => {
+connection.onCompletion(async (params): Promise<CompletionItem[] | null> => {
+  await loading;
   const document = documents.get(params.textDocument.uri);
   if (document === undefined || resolved === undefined) return null;
   const call = callAt(document.getText(), document.offsetAt(params.position));
@@ -121,7 +130,8 @@ connection.onCompletion((params): CompletionItem[] | null => {
   }));
 });
 
-connection.onHover((params) => {
+connection.onHover(async (params) => {
+  await loading;
   const document = documents.get(params.textDocument.uri);
   if (document === undefined || resolved === undefined) return null;
   const call = callAt(document.getText(), document.offsetAt(params.position));

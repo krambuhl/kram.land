@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { resolve, sep } from 'node:path';
 
 import type { Declaration, Helpers } from 'postcss';
 import type { Plugin } from 'vite';
@@ -20,12 +20,12 @@ export interface TokenJetViteOptions {
 // during dev is seen by the next css transform without restarting.
 export default function tokenJet(options: TokenJetViteOptions = {}): Plugin {
   let root = process.cwd();
-  let configFile = '';
+  let watchPath = '';
   let handler: DeclarationHandler | undefined;
 
   const regenerate = async (): Promise<ResolvedTokens> => {
-    const { file, config } = await loadConfigFile(root);
-    configFile = file;
+    const { watch, config } = await loadConfigFile(root);
+    watchPath = watch;
     const current = loadTokens(config);
     handler = createHandler(current).handler;
     writeFiles(resolve(root, options.outDir ?? DEFAULT_OUT_DIR), generateFiles(current));
@@ -59,9 +59,10 @@ export default function tokenJet(options: TokenJetViteOptions = {}): Plugin {
     },
 
     configureServer(server) {
-      server.watcher.add(configFile);
+      server.watcher.add(watchPath);
       server.watcher.on('change', (file) => {
-        if (resolve(file) !== configFile) return;
+        const changed = resolve(file);
+        if (changed !== watchPath && !changed.startsWith(`${watchPath}${sep}`)) return;
         regenerate()
           .then(() => server.ws.send({ type: 'full-reload' }))
           .catch((error: unknown) =>

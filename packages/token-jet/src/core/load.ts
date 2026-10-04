@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
-import { relative, resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { Worker } from 'node:worker_threads';
 
 import type { Config, Modes } from './config.ts';
 import { checkContrast } from './contrast.ts';
@@ -76,24 +77,40 @@ export function loadTokens(config: Config<Modes>): ResolvedTokens {
   return { config, tokens, unions, contrast: checkContrast(config, tokens) };
 }
 
+// Imports the file in a worker, which starts with an empty module cache, so a
+// reload sees edits to the modules it imports too. The default export comes
+// back as JSON, which a config is.
+function importFresh(file: string): Promise<unknown> {
+  const source = [
+    "import { parentPort } from 'node:worker_threads';",
+    `const module = await import(${JSON.stringify(pathToFileURL(file).href)});`,
+    'parentPort.postMessage(module.default === undefined ? undefined : JSON.stringify(module.default));',
+  ].join('\n');
+  return new Promise((resolvePromise, reject) => {
+    const worker = new Worker(new URL(`data:text/javascript,${encodeURIComponent(source)}`));
+    worker.once('message', (message: string | undefined) => {
+      resolvePromise(message === undefined ? undefined : JSON.parse(message));
+      void worker.terminate();
+    });
+    worker.once('error', reject);
+  });
+}
+
 // Imports tokens.config.ts when it is there, else tokens/tokens.ts; a schema
 // export is converted to a config. Node runs the TypeScript directly, with
 // no build step between the config and the generator.
-export async function loadConfigFile(dir: string): Promise<{ file: string; config: Config<Modes> }> {
+export async function loadConfigFile(dir: string): Promise<{ file: string; watch: string; config: Config<Modes> }> {
   const legacy = resolve(dir, CONFIG_FILE);
   const schemaTokens = resolve(dir, SCHEMA_TOKENS_FILE);
   const file = existsSync(legacy) ? legacy : schemaTokens;
+  const watch = file === schemaTokens ? dirname(file) : file;
   if (!existsSync(file)) {
     throw new Error(`No ${CONFIG_FILE} or ${SCHEMA_TOKENS_FILE} found in ${dir}.`);
   }
-  // Node caches a module by its url for the life of the process. A version
-  // query makes every load a fresh import, so a long-running caller such as
-  // the vite adapter sees the config as it is on disk now.
-  const url = `${pathToFileURL(file).href}?v=${Date.now()}`;
-  const module = (await import(url)) as { default?: unknown };
-  if (module.default === undefined) {
+  const exported = await importFresh(file);
+  if (exported === undefined) {
     throw new Error(`${relative(dir, file)} must export the config as its default export.`);
   }
-  if (isDefinedTokens(module.default)) return { file, config: schemaToConfig(module.default) };
-  return { file, config: module.default as Config<Modes> };
+  if (isDefinedTokens(exported)) return { file, watch, config: schemaToConfig(exported) };
+  return { file, watch, config: exported as Config<Modes> };
 }

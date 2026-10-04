@@ -157,7 +157,7 @@ export default { plugins: [tokenJet({ tokens: loadTokens(config) })] };
 
 ## Vite adapter
 
-Generates on start, regenerates and reloads when `tokens.config.ts` changes, and registers the PostCSS plugin over the same model.
+Generates on start, regenerates and reloads when the token config changes (anything in `tokens/` for a schema config, including modules `tokens.ts` imports), and registers the PostCSS plugin over the same model.
 
 ```ts
 import tokenJet from 'token-jet/vite';
