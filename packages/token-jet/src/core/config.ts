@@ -34,13 +34,7 @@ export interface TokenTree<M extends Modes> {
   [key: string]: TokenLeaf<M> | TokenTree<M>;
 }
 
-export interface ContrastConfig {
-  minimum: number;
-  pairs: readonly (readonly [foreground: string, background: string])[];
-}
-
 export interface Config<M extends Modes = Modes> {
   modes: M;
   tokens: TokenTree<M>;
-  contrast?: ContrastConfig;
 }

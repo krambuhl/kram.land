@@ -1,7 +1,6 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { formatContrastFailures } from './contrast.ts';
 import { emitCss } from './emit-css.ts';
 import { emitJs } from './emit-js.ts';
 import { MANIFEST_SCHEMA, MANIFEST_SCHEMA_FILE, emitManifest } from './emit-manifest.ts';
@@ -17,9 +16,6 @@ export interface OutputFile {
 
 // The files token-jet generates from one resolved model.
 export function generateFiles(resolved: ResolvedTokens): OutputFile[] {
-  if (resolved.contrast.some((r) => !r.pass)) {
-    throw new Error(formatContrastFailures(resolved.contrast, resolved.config.contrast?.minimum ?? 0));
-  }
   return [
     { path: 'tokens.css', contents: emitCss(resolved) },
     { path: 'types.ts', contents: emitTypes(resolved) },

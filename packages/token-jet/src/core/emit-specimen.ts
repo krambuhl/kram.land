@@ -1,5 +1,4 @@
 import type { Preview, TokenType } from './config.ts';
-import type { ContrastResult } from './contrast.ts';
 import { emitCss } from './emit-css.ts';
 import type { Token } from './flatten.ts';
 import type { ResolvedTokens } from './load.ts';
@@ -46,7 +45,7 @@ header .count { color: var(--specimen-muted); }
 .mode-control button { font: 12px/1.5 system-ui, sans-serif; padding: 3px 8px; color: var(--specimen-muted); background: none; border: 0; border-radius: 4px; cursor: pointer; }
 .mode-control button[aria-pressed='true'] { color: var(--specimen-text); background: var(--specimen-panel); box-shadow: 0 0 0 1px var(--specimen-line); }
 main { padding: 24px var(--specimen-gutter) 96px; }
-.group > h2, .subgroup > h3, .rows, .swatches, .pairs { max-width: 1056px; }
+.group > h2, .subgroup > h3, .rows, .swatches { max-width: 1056px; }
 .group { margin-bottom: 48px; scroll-margin-top: 72px; }
 .group > h2 { margin: 0 0 16px; font: 600 20px/1.3 var(--specimen-mono); }
 .group > h2 span { color: var(--specimen-muted); font-weight: 400; font-size: 13px; margin-left: 8px; }
@@ -92,12 +91,6 @@ main { padding: 24px var(--specimen-gutter) 96px; }
 .duration { position: relative; display: block; height: 16px; }
 .duration i { position: absolute; left: 0; width: 16px; height: 16px; background: var(--specimen-accent); border-radius: 50%; transition-property: left; transition-timing-function: ease-in-out; }
 .token:hover .duration i { left: calc(100% - 16px); }
-.pairs { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-.pair { overflow: hidden; background: var(--specimen-panel); border: 1px solid var(--specimen-line); border-radius: 10px; }
-.pair.fail { border-color: var(--specimen-fail); }
-.pair p { margin: 0; padding: 20px 16px; font-size: 16px; }
-.pair ul { margin: 0; padding: 8px 16px; list-style: none; font-size: 12px; color: var(--specimen-muted); border-top: 1px solid var(--specimen-line); }
-.pair li.fail { color: var(--specimen-fail); }
 .toast { position: fixed; bottom: 16px; left: 50%; padding: 6px 12px; font: 12px/1.5 var(--specimen-mono); color: var(--specimen-bg); background: var(--specimen-text); border-radius: 6px; transform: translateX(-50%); }
 @media (width < 760px) {
   .layout { grid-template-columns: minmax(0, 1fr); }
@@ -336,39 +329,6 @@ function groupSection(group: Group, resolved: ResolvedTokens, modes: readonly st
   ].join('\n');
 }
 
-function contrastSection(resolved: ResolvedTokens): string {
-  const byPair = new Map<string, ContrastResult[]>();
-  for (const result of resolved.contrast) {
-    const key = `${result.foreground}\n${result.background}`;
-    byPair.set(key, [...(byPair.get(key) ?? []), result]);
-  }
-  if (byPair.size === 0) return '';
-  const minimum = resolved.config.contrast?.minimum;
-  const cards = [...byPair.values()].map((results) => {
-    const { foreground, background } = results[0];
-    const fail = results.some((r) => !r.pass);
-    const items = results
-      .map((r) => {
-        const label = r.error ?? (r.pass ? String(r.ratio) : `${r.ratio} below ${minimum}`);
-        return `<li${r.pass ? '' : ' class="fail"'}>${escape(r.mode)} <b>${escape(label)}</b></li>`;
-      })
-      .join('');
-    const style = `color: ${cssVariableReference(foreground)}; background: ${cssVariableReference(background)}`;
-    return [
-      `<div class="pair${fail ? ' fail' : ''}">`,
-      `<p style="${style}">${escape(foreground)} on ${escape(background)}</p>`,
-      `<ul>${items}</ul>`,
-      '</div>',
-    ].join('');
-  });
-  return [
-    '<section class="group" id="contrast">',
-    `<h2>contrast<span>minimum ${minimum}</span></h2>`,
-    `<div class="pairs">\n${cards.join('\n')}\n</div>`,
-    '</section>',
-  ].join('\n');
-}
-
 // The page script sets this attribute on <html>: auto/light/dark for the
 // colour scheme, auto/on/off for other modes. auto removes it so the media query decides.
 function modeControl(mode: string): string {
@@ -387,13 +347,9 @@ function modeControl(mode: string): string {
 export function emitSpecimen(resolved: ResolvedTokens): string {
   const modes = Object.keys(resolved.config.modes);
   const groups = groupTokens(resolved.tokens);
-  const contrast = contrastSection(resolved);
-  const links = [
-    ...groups.map(
-      (g) => `<a href="#${escape(g.id)}">${escape(g.name === '' ? 'ungrouped' : g.name)}<span>${g.count}</span></a>`
-    ),
-    ...(contrast === '' ? [] : ['<a href="#contrast">contrast</a>']),
-  ];
+  const links = groups.map(
+    (g) => `<a href="#${escape(g.id)}">${escape(g.name === '' ? 'ungrouped' : g.name)}<span>${g.count}</span></a>`
+  );
   return [
     '<!doctype html>',
     '<html lang="en">',
@@ -417,7 +373,6 @@ export function emitSpecimen(resolved: ResolvedTokens): string {
     '</header>',
     '<main>',
     ...groups.map((g) => groupSection(g, resolved, modes)),
-    contrast,
     '</main>',
     '</div>',
     '</div>',

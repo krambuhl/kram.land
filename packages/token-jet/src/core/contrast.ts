@@ -1,19 +1,3 @@
-import type { Config, Modes } from './config.ts';
-import type { Token } from './flatten.ts';
-import { inferType } from './metadata.ts';
-import { resolveValue } from './references.ts';
-
-export interface ContrastResult {
-  foreground: string;
-  background: string;
-  // `base` for the values outside any mode, else the mode's name.
-  mode: string;
-  ratio?: number;
-  // Why no ratio could be computed. A result with an error never passes.
-  error?: string;
-  pass: boolean;
-}
-
 export interface Rgba {
   r: number;
   g: number;
@@ -95,47 +79,4 @@ export function contrastRatio(foreground: string, background: string): number {
   const l2 = luminance(bg);
   const ratio = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
   return Math.round(ratio * 100) / 100;
-}
-
-function resolveColor(path: string, tokens: readonly Token[], mode: string | undefined): string {
-  const token = tokens.find((t) => t.path === path);
-  if (token === undefined) throw new Error(`"${path}" does not exist`);
-  const type = inferType(token);
-  if (type !== undefined && type !== 'color') throw new Error(`"${path}" is a ${type} token, not a color`);
-  const value = String(resolveValue(path, tokens, mode));
-  if (parseColor(value) === null) {
-    throw new Error(`"${value}" is not a colour token-jet can read; write it as hex, rgb() or hsl()`);
-  }
-  return value;
-}
-
-// Every pair in the base and in every mode. A pair that cannot be measured
-// is a failing result with the reason, so one mistake does not hide the rest.
-export function checkContrast(config: Config<Modes>, tokens: readonly Token[]): ContrastResult[] {
-  const contrast = config.contrast;
-  if (contrast === undefined) return [];
-  const modes: (string | undefined)[] = [undefined, ...Object.keys(config.modes)];
-  const results: ContrastResult[] = [];
-  for (const [foreground, background] of contrast.pairs) {
-    for (const mode of modes) {
-      const result: ContrastResult = { foreground, background, mode: mode ?? 'base', pass: false };
-      try {
-        const ratio = contrastRatio(resolveColor(foreground, tokens, mode), resolveColor(background, tokens, mode));
-        results.push({ ...result, ratio, pass: ratio >= contrast.minimum });
-      } catch (error) {
-        results.push({ ...result, error: error instanceof Error ? error.message : String(error) });
-      }
-    }
-  }
-  return results;
-}
-
-export function formatContrastFailures(results: readonly ContrastResult[], minimum: number): string {
-  const failures = results.filter((r) => !r.pass);
-  const lines = failures.map((r) =>
-    r.error !== undefined
-      ? `  ${r.foreground} on ${r.background} in ${r.mode}: ${r.error}`
-      : `  ${r.foreground} on ${r.background} in ${r.mode}: ${r.ratio}, below ${minimum}`
-  );
-  return [`Contrast check failed for ${failures.length} of ${results.length} checks:`, ...lines].join('\n');
 }

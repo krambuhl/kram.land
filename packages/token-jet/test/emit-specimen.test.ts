@@ -156,36 +156,6 @@ describe('emitSpecimen', () => {
     expect(block(html, 'space.x16')).toContain('<div class="description">The default gap.</div>');
   });
 
-  test('a contrast pair is one card in its own colours with a ratio per mode', () => {
-    const c = defineConfig({
-      modes: { dark: '(prefers-color-scheme: dark)' },
-      tokens: {
-        bg: { page: { value: '#ffffff', dark: '#000000', type: 'color' } },
-        content: { regular: { value: '#000000', dark: '#ffffff', type: 'color' } },
-      },
-      contrast: { minimum: 4.5, pairs: [['content.regular', 'bg.page']] },
-    });
-    const page = emitSpecimen(loadTokens(c));
-    expect(page).toContain(
-      '<div class="pair"><p style="color: var(--content-regular); background: var(--bg-page)">content.regular on bg.page</p><ul><li>base <b>21</b></li><li>dark <b>21</b></li></ul></div>'
-    );
-    expect(page).toContain('<a href="#contrast">contrast</a>');
-  });
-
-  test('a failing pair is marked on the card and on the mode that fails', () => {
-    const c = defineConfig({
-      modes: {},
-      tokens: {
-        bg: { page: { value: '#ffffff', type: 'color' } },
-        content: { faint: { value: '#dddddd', type: 'color' } },
-      },
-      contrast: { minimum: 4.5, pairs: [['content.faint', 'bg.page']] },
-    });
-    const page = emitSpecimen(loadTokens(c));
-    expect(page).toContain('<div class="pair fail">');
-    expect(page).toContain('<li class="fail">base <b>1.36 below 4.5</b></li>');
-  });
-
   test('escapes html in values and descriptions', () => {
     const c = defineConfig({
       modes: {},

@@ -13,14 +13,13 @@ import { renameConfigKey, renameSchemaKey } from './core/rename-config.ts';
 import { findUsages, renameUsages } from './core/usage.ts';
 import { version } from './version.ts';
 
-const COMMANDS = ['generate', 'check', 'specimen', 'export', 'import', 'diff', 'usage', 'rename'] as const;
+const COMMANDS = ['generate', 'specimen', 'export', 'import', 'diff', 'usage', 'rename'] as const;
 
 function usageText(): string {
   return [
     'token-jet <command>',
     '',
     '  generate [--out <dir>]        write tokens.css, types.ts and index.ts',
-    '  check                         print the contrast ratio of every pair in every mode',
     '  specimen [--out <file>]       write an html page of every token in every mode',
     '  export --dtcg [--out <file>]  write the tokens as DTCG 2025.10 json, to stdout by default',
     '  import --dtcg <file> [--out <file>]  read DTCG json into tokens/tokens.ts text, to stdout by default',
@@ -42,19 +41,6 @@ async function generate(args: readonly string[]): Promise<string> {
   const { config } = await loadConfigFile(process.cwd());
   const written = writeFiles(resolve(outDir), generateFiles(loadTokens(config)));
   return `wrote ${written.length} files to ${relative(process.cwd(), resolve(outDir))}`;
-}
-
-async function check(): Promise<string> {
-  const { config } = await loadConfigFile(process.cwd());
-  const { contrast } = loadTokens(config);
-  if (contrast.length === 0) return 'no contrast pairs in the config';
-  const lines = contrast.map((r) =>
-    r.error !== undefined
-      ? `${r.foreground} on ${r.background} in ${r.mode}: ${r.error}`
-      : `${r.foreground} on ${r.background} in ${r.mode}: ${r.ratio} ${r.pass ? 'ok' : `below ${config.contrast?.minimum}`}`
-  );
-  if (contrast.some((r) => !r.pass)) throw new Error(lines.join('\n'));
-  return lines.join('\n');
 }
 
 async function specimen(args: readonly string[]): Promise<string> {
@@ -183,9 +169,6 @@ async function main(argv: readonly string[]): Promise<void> {
   switch (command) {
     case 'generate':
       console.log(await generate(rest));
-      return;
-    case 'check':
-      console.log(await check());
       return;
     case 'specimen':
       console.log(await specimen(rest));

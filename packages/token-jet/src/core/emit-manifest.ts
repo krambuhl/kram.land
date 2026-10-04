@@ -1,6 +1,5 @@
 import { PREVIEWS, TOKEN_TYPES } from './config.ts';
 import type { Modes, Preview, TokenType, TokenValue } from './config.ts';
-import type { ContrastResult } from './contrast.ts';
 import type { ResolvedTokens, Union } from './load.ts';
 import { inferType } from './metadata.ts';
 import { cssVariableName, cssVariableReference } from './names.ts';
@@ -27,7 +26,6 @@ export interface Manifest {
   modes: Modes;
   tokens: ManifestToken[];
   unions: Union[];
-  contrast?: { minimum: number; results: ContrastResult[] };
 }
 
 export const MANIFEST_SCHEMA_FILE = 'manifest.schema.json';
@@ -81,36 +79,12 @@ export const MANIFEST_SCHEMA = {
         },
       },
     },
-    contrast: {
-      type: 'object',
-      required: ['minimum', 'results'],
-      additionalProperties: false,
-      properties: {
-        minimum: { type: 'number' },
-        results: {
-          type: 'array',
-          items: {
-            type: 'object',
-            required: ['foreground', 'background', 'mode', 'pass'],
-            additionalProperties: false,
-            properties: {
-              foreground: { type: 'string' },
-              background: { type: 'string' },
-              mode: { type: 'string' },
-              ratio: { type: 'number' },
-              error: { type: 'string' },
-              pass: { type: 'boolean' },
-            },
-          },
-        },
-      },
-    },
   },
 } as const;
 
 // What a coding agent reads to pick a token instead of typing a raw value.
 export function emitManifest(resolved: ResolvedTokens): Manifest {
-  const { config, tokens, unions, contrast } = resolved;
+  const { config, tokens, unions } = resolved;
   const modeNames = Object.keys(config.modes);
   return {
     $schema: `./${MANIFEST_SCHEMA_FILE}`,
@@ -138,6 +112,5 @@ export function emitManifest(resolved: ResolvedTokens): Manifest {
       };
     }),
     unions,
-    ...(config.contrast !== undefined && { contrast: { minimum: config.contrast.minimum, results: contrast } }),
   };
 }

@@ -16,7 +16,6 @@ export type {
 export { TOKEN_TYPES } from './core/config.ts';
 export type {
   Config,
-  ContrastConfig,
   Modes,
   Preview,
   TokenLeaf,
@@ -25,8 +24,8 @@ export type {
   TokenType,
   TokenValue,
 } from './core/config.ts';
-export { checkContrast, contrastRatio, formatContrastFailures, parseColor } from './core/contrast.ts';
-export type { ContrastResult, Rgba } from './core/contrast.ts';
+export { contrastRatio, parseColor } from './core/contrast.ts';
+export type { Rgba } from './core/contrast.ts';
 export { DTCG_EXTENSION, toDtcg, toDtcgValue } from './core/dtcg.ts';
 export type { DtcgColor, DtcgFile, DtcgNode, DtcgUnitValue, DtcgValue } from './core/dtcg.ts';
 export { diffDtcg, formatDiff } from './core/dtcg-diff.ts';

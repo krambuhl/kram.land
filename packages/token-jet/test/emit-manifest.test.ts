@@ -4,7 +4,6 @@ import { describe, expect, test } from 'vitest';
 import { MANIFEST_SCHEMA, emitManifest } from '../src/core/emit-manifest.ts';
 import { generateFiles } from '../src/core/generate.ts';
 import { loadTokens } from '../src/core/load.ts';
-import { config as defineConfig } from './config.ts';
 import config from './fixtures/emit.config.ts';
 
 const resolved = loadTokens(config);
@@ -50,24 +49,6 @@ describe('emitManifest', () => {
       paths: ['space.x4', 'space.x16'],
     });
     expect(manifest.unions.find((u) => u.name === 'BgToken')?.source).toBe('tokens.bg');
-  });
-
-  test('contrast is present with the minimum and every result, or absent when not declared', () => {
-    expect(manifest.contrast).toBeUndefined();
-    const c = defineConfig({
-      modes: {},
-      tokens: {
-        bg: { page: { value: '#ffffff', type: 'color' } },
-        content: { regular: { value: '#000000', type: 'color' } },
-      },
-      contrast: { minimum: 4.5, pairs: [['content.regular', 'bg.page']] },
-    });
-    const m = emitManifest(loadTokens(c));
-    expect(m.contrast).toEqual({
-      minimum: 4.5,
-      results: [{ foreground: 'content.regular', background: 'bg.page', mode: 'base', ratio: 21, pass: true }],
-    });
-    expect(new Ajv().compile(MANIFEST_SCHEMA)(m)).toBe(true);
   });
 
   test('generate writes the manifest and its schema last', () => {

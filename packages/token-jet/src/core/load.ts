@@ -4,8 +4,6 @@ import { pathToFileURL } from 'node:url';
 import { Worker } from 'node:worker_threads';
 
 import type { Config, Modes } from './config.ts';
-import { checkContrast } from './contrast.ts';
-import type { ContrastResult } from './contrast.ts';
 import { flatten } from './flatten.ts';
 import type { Token } from './flatten.ts';
 import { matchGlob } from './glob.ts';
@@ -30,7 +28,6 @@ export interface ResolvedTokens {
   tokens: Token[];
   // Every group at every depth, and every tag, as a named union of token paths.
   unions: Union[];
-  contrast: ContrastResult[];
 }
 
 // The one entry point every emitter and tool reads tokens through, so they
@@ -67,7 +64,7 @@ export function loadTokens(config: Config<Modes>): ResolvedTokens {
   }
   checkTypeNameCollisions(unions);
 
-  return { config, tokens, unions, contrast: checkContrast(config, tokens) };
+  return { config, tokens, unions };
 }
 
 // Imports the file in a worker, which starts with an empty module cache, so a
