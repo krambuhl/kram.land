@@ -49,7 +49,7 @@ describe('emitManifest', () => {
       source: 'tokens.space',
       paths: ['space.x4', 'space.x16'],
     });
-    expect(manifest.unions.find((u) => u.name === 'ColorToken')?.source).toBe('types.color');
+    expect(manifest.unions.find((u) => u.name === 'BgToken')?.source).toBe('tokens.bg');
   });
 
   test('contrast is present with the minimum and every result, or absent when not declared', () => {

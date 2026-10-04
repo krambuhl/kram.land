@@ -56,9 +56,6 @@ export interface TokenTree<M extends Modes> {
   [key: string]: TokenLeaf<M> | TokenTree<M> | GroupMetadata | undefined;
 }
 
-// A union in the types block: one glob or a list of globs.
-export type TypePattern = string | string[];
-
 export interface ContrastConfig {
   minimum: number;
   pairs: readonly (readonly [foreground: string, background: string])[];
@@ -67,7 +64,6 @@ export interface ContrastConfig {
 export interface Config<M extends Modes = Modes> {
   modes: M;
   tokens: TokenTree<M>;
-  types?: Record<string, TypePattern>;
   contrast?: ContrastConfig;
 }
 

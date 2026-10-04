@@ -25,7 +25,6 @@ export type {
   TokenTree,
   TokenType,
   TokenValue,
-  TypePattern,
 } from './core/config.ts';
 export { checkContrast, contrastRatio, formatContrastFailures, parseColor } from './core/contrast.ts';
 export type { ContrastResult, Rgba } from './core/contrast.ts';

@@ -34,8 +34,4 @@ export default defineConfig({
       },
     },
   },
-  types: {
-    color: ['bg.**', 'content.**'],
-    defaultColor: '**.default',
-  },
 });

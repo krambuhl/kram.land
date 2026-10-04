@@ -24,13 +24,6 @@ describe('emitTypes', () => {
     expect(ts).toContain('export type BgToken = BgPage | BgCard;');
   });
 
-  test('a types entry is a union, with a list pattern flattened', () => {
-    expect(ts).toContain('export type SurfaceToken = BgPage | BgCard;');
-    expect(ts).toMatch(
-      /export type ColorToken = Gray50 \| Gray900 \| BgPage \| BgCard \| ContentRegular \| ContentBody;/
-    );
-  });
-
   test('AnyToken, TokenPath and TokenMap cover every leaf', () => {
     expect(ts).toMatch(/export type AnyToken = SpaceX4 \| SpaceX16 \| .* \| ContentBody;/);
     expect(ts).toContain("'space.x16' | ");

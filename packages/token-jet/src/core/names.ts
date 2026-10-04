@@ -16,8 +16,8 @@ export function typeName(path: string): string {
   return path.split('.').map(pascal).join('');
 }
 
-// Any union of tokens, whether a group or an entry in the types block, ends in
-// Token so the name says whether it is one value or a set.
+// Any union of tokens, whether a group or a tag, ends in Token so the name
+// says whether it is one value or a set.
 export function unionName(path: string): string {
   return `${typeName(path)}Token`;
 }

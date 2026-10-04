@@ -68,7 +68,7 @@ describe('token-jet generate', () => {
 
 describe('token-jet check', () => {
   const withPairs = (pairs: string) =>
-    fixture.replace('  types: {', `  contrast: { minimum: 4.5, pairs: [${pairs}] },\n  types: {`);
+    fixture.replace('  tokens: {', `  contrast: { minimum: 4.5, pairs: [${pairs}] },\n  tokens: {`);
 
   test('prints every pair in every mode with its ratio', () => {
     const out = run(project(withPairs("['content.body', 'bg.page']")), 'check');

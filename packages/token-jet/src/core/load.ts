@@ -28,8 +28,7 @@ export interface Union {
 export interface ResolvedTokens {
   config: Config<Modes>;
   tokens: Token[];
-  // Every group at every depth, and every entry in the types block, as a
-  // named union of token paths.
+  // Every group at every depth, and every tag, as a named union of token paths.
   unions: Union[];
   contrast: ContrastResult[];
 }
@@ -52,11 +51,6 @@ export function loadTokens(config: Config<Modes>): ResolvedTokens {
   }
   for (const group of groups) {
     unions.push({ name: unionName(group), source: `tokens.${group}`, paths: matchGlob(`${group}.**`, paths) });
-  }
-  for (const [name, pattern] of Object.entries(config.types ?? {})) {
-    const patterns = Array.isArray(pattern) ? pattern : [pattern];
-    const matched = [...new Set(patterns.flatMap((p) => matchGlob(p, paths)))];
-    unions.push({ name: unionName(name), source: `types.${name}`, paths: matched });
   }
   const tagged = new Map<string, string[]>();
   for (const token of tokens) {

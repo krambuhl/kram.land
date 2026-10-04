@@ -195,26 +195,6 @@
         "content.regular",
         "content.body"
       ]
-    },
-    {
-      "name": "ColorToken",
-      "source": "types.color",
-      "paths": [
-        "gray.50",
-        "gray.900",
-        "bg.page",
-        "bg.card",
-        "content.regular",
-        "content.body"
-      ]
-    },
-    {
-      "name": "SurfaceToken",
-      "source": "types.surface",
-      "paths": [
-        "bg.page",
-        "bg.card"
-      ]
     }
   ]
 }

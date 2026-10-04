@@ -33,8 +33,4 @@ export default defineConfig({
       body: { value: '{content.regular}' },
     },
   },
-  types: {
-    color: ['gray.**', 'bg.**', 'content.**'],
-    surface: 'bg.*',
-  },
 });

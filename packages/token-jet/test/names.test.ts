@@ -24,16 +24,16 @@ describe('names', () => {
     expect(() =>
       checkTypeNameCollisions([
         { name: 'ColorToken', source: 'tokens.color' },
-        { name: 'ColorToken', source: 'types.color' },
+        { name: 'ColorToken', source: 'tags.color' },
       ])
-    ).toThrow(/ColorToken.*tokens\.color.*types\.color/);
+    ).toThrow(/ColorToken.*tokens\.color.*tags\.color/);
   });
 
   test('distinct names pass', () => {
     expect(() =>
       checkTypeNameCollisions([
         { name: 'BgToken', source: 'tokens.bg' },
-        { name: 'ColorToken', source: 'types.color' },
+        { name: 'ColorToken', source: 'tags.color' },
       ])
     ).not.toThrow();
   });

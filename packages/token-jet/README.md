@@ -75,7 +75,7 @@ The CLI, the Vite adapter and the language server read `tokens/tokens.ts` when a
 
 ## Config reference
 
-`defineConfig({ modes, tokens, types?, contrast? })` returns the config unchanged; its job is to type-check it, so a mode key on a token that is not in `modes` is a compile error.
+`defineConfig({ modes, tokens, contrast? })` returns the config unchanged; its job is to type-check it, so a mode key on a token that is not in `modes` is a compile error.
 
 ### `modes`
 
@@ -100,10 +100,6 @@ A group may carry `$group: { type, role, description }`. `type` applies to every
 
 A token is addressed by its full path, `space.x16`. The custom property is `--space-x16`, the TypeScript literal type is `SpaceX16`, and every group gets a union named after it (`SpaceToken`). A group key that is not a valid identifier is quoted in the config as usual.
 
-### `types`
-
-Extra unions as globs over paths: `types: { color: ['bg.**', 'content.**'] }` emits `ColorToken`. `*` matches one segment, `**` any depth; a pattern that matches nothing is an error, as is a union name that collides with a group's.
-
 ### `contrast`
 
 ```ts
@@ -120,7 +116,7 @@ Every pair is checked in the base and in every mode with the WCAG 2.1 ratio. `ge
 `token-jet generate` writes to `generated/tokens/` (`--out` to change it):
 
 - `tokens.css`: an `@property` per token, the base values on `:where(html)`, a slot per mode with the scopes that fill or unset it, and a `var()` chain per mode token that falls through to the base. Nothing on `:root`, so a scope wrapper can nest to any depth.
-- `types.ts`: a literal type per token, a union per group and per `types` entry, `TokenPath` and `TokenMap`.
+- `types.ts`: a literal type per token, a union per group and per tag, `TokenPath` and `TokenMap`.
 - `index.ts`: `token(path)`, typed so only a known path compiles and the return type is the exact `var()` literal.
 - `manifest.json` and `manifest.schema.json`: every token with its names, values and resolved values per mode, the unions and the contrast results. The file a tool or a coding agent reads.
 
