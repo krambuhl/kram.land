@@ -32,12 +32,24 @@ export function slots<const Key extends string, Shape>(keys: readonly Key[], sha
   return Object.fromEntries(keys.map((key) => [key, shape])) as Slots<Key, Shape>;
 }
 
+export interface LeafFields {
+  value: TokenValue;
+  description?: string;
+  deprecated?: boolean | string;
+  inherits?: boolean;
+}
+
+export type ModeValues<Mode extends string> = { [K in Mode]: TokenValue };
+export type OptionalModeValues<Mode extends string> = { [K in Mode]?: TokenValue };
+
+// Named, not inlined, so a type error prints SchemaLeaf<"dark", never> instead
+// of the whole intersection. The arguments are the required and optional modes.
+export type SchemaLeaf<Required extends string, Optional extends string> = LeafFields &
+  ModeValues<Required> &
+  OptionalModeValues<Optional>;
+
 type Leaf<P, Mode extends string> =
-  P extends Pattern<TokenType, string, infer Required>
-    ? { value: TokenValue; description?: string; deprecated?: boolean | string; inherits?: boolean } & {
-        [K in Required]: TokenValue;
-      } & { [K in Exclude<Mode, Required>]?: TokenValue }
-    : never;
+  P extends Pattern<TokenType, string, infer Required> ? SchemaLeaf<Required, Exclude<Mode, Required>> : never;
 
 export type TokensFor<Shape, Mode extends string> = Shape extends Pattern
   ? Leaf<Shape, Mode>
