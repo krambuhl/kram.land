@@ -9,6 +9,7 @@ const fontWeight = pattern({ type: 'fontWeight', tags: ['font-weight'], preview:
 const fontSize = pattern({ type: 'dimension', tags: ['font-size'], preview: 'text' });
 const lineHeight = pattern({ type: 'number', tags: ['line-height'], preview: 'paragraph' });
 const letterSpacing = pattern({ type: 'dimension', tags: ['letter-spacing'] });
+const breakpoint = pattern({ type: 'dimension', tags: ['media-breakpoint'], preview: 'bar' });
 const color = <const Tags extends readonly string[]>(...tags: Tags) =>
   pattern({ type: 'color', tags: ['color', ...tags], preview: 'swatch', modes: ['dark'] });
 
@@ -73,6 +74,7 @@ export const schema = defineSchema({
       sizing
     ),
     radius: slots(['none', 'sm', 'md', 'lg', 'pill'], radius),
+    breakpoint: slots(['base', 'sm', 'md', 'lg', 'xl'], breakpoint),
 
     // typography
     heading: typeBundle(['xs', 'sm', 'md', 'lg', 'xl']),

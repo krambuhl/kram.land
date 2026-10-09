@@ -35,6 +35,13 @@ export default schema.defineTokens({
     x1792: { value: '1792px' },
     x1920: { value: '1920px' },
   },
+  breakpoint: {
+    base: { value: '0px' },
+    sm: { value: '32rem' },
+    md: { value: '48rem' },
+    lg: { value: '64rem' },
+    xl: { value: '80rem' },
+  },
   radius: {
     none: { value: '0px' },
     sm: { value: '0.25rem' },
