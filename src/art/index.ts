@@ -40,6 +40,18 @@ const FLOOR_BREATHE = 0.2;
 const CORNER_SWELL = 0.25;
 const CORNER_BREATHE = 0.5;
 const CORNER_REACH = 0.3;
+// the outer band orbits the portrait one way per field at up to ORBIT px/ms and the
+// inner field the other way at ORBIT_INNER of that. a mood eases the speed between ORBIT_CALM and full.
+const ORBIT = 0.035;
+const ORBIT_CALM = 0.3;
+const ORBIT_INNER = 0.3;
+const ORBIT_FROM = 0.5;
+// the orbit carries blobs away from the edges they flow in from, so each step tries
+// a few points just inside the margin's outer edge and adds a blob wherever one fits.
+const EDGE_ATTEMPTS = 24;
+// the field runs MARGIN px past every screen edge, so refills spawn and culls happen
+// out of sight.
+const MARGIN = 48;
 const RAINBOW = ['#5A4D9A', '#A067C3', '#CD361F', '#F07C31', '#E9AC38', '#5B9E47', '#58BABB', '#1079CB'];
 
 interface Blob {
@@ -80,12 +92,13 @@ export function createField(width: number, height: number, options: FieldOptions
   let clock = 0;
   let colorPhase = 0;
 
-  const waves = Array.from({ length: 3 }, () =>
+  const waves = Array.from({ length: 4 }, () =>
     Array.from({ length: 3 }, () => ({
       rate: (Math.PI * 2) / (MOOD_PERIOD[0] + random() * (MOOD_PERIOD[1] - MOOD_PERIOD[0])),
       offset: random() * Math.PI * 2,
     }))
   );
+  const orbitWay = random() < 0.5 ? -1 : 1;
   const mood = (k: number, at = clock) =>
     waves[k].reduce((sum, w) => sum + Math.sin(at * w.rate + w.offset), 0) / waves[k].length;
   const spinRate = (at: number) => (DRIFT / (BAND * RAINBOW.length)) * SPIN * mood(0, at);
@@ -198,11 +211,11 @@ export function createField(width: number, height: number, options: FieldOptions
       total += extent[i];
     }
     const cell = Math.max(1, (2 * total) / Math.max(1, blobs.length));
-    const columns = Math.ceil(width / cell) + 2;
-    const rows = Math.ceil(height / cell) + 2;
+    const columns = Math.ceil((width + 2 * MARGIN) / cell) + 2;
+    const rows = Math.ceil((height + 2 * MARGIN) / cell) + 2;
     const cellOf = (x: number, y: number) => {
-      const cx = Math.min(columns - 1, Math.max(0, Math.floor(x / cell) + 1));
-      const cy = Math.min(rows - 1, Math.max(0, Math.floor(y / cell) + 1));
+      const cx = Math.min(columns - 1, Math.max(0, Math.floor((x + MARGIN) / cell) + 1));
+      const cy = Math.min(rows - 1, Math.max(0, Math.floor((y + MARGIN) / cell) + 1));
       return cy * columns + cx;
     };
     if (head.length < columns * rows) head = new Int32Array(columns * rows);
@@ -254,11 +267,13 @@ export function createField(width: number, height: number, options: FieldOptions
   };
 
   const typical = SIZE + (EDGE_GROWTH[0] + EDGE_GROWTH[1]) / 4;
-  const count = Math.round((SEED_FILL * width * height) / (Math.PI * (typical + gapFor(typical) / 2) ** 2));
+  const count = Math.round(
+    (SEED_FILL * (width + 2 * MARGIN) * (height + 2 * MARGIN)) / (Math.PI * (typical + gapFor(typical) / 2) ** 2)
+  );
   // smaller blobs near the rim need proportionally more of them to cover the same area.
   for (let i = 0; i < count / RAMP_START ** 2; i++) {
-    const x = random() * width;
-    const y = random() * height;
+    const x = random() * (width + 2 * MARGIN) - MARGIN;
+    const y = random() * (height + 2 * MARGIN) - MARGIN;
     if (random() < (RAMP_START / rampAt(x, y)) ** 2) blobs.push(blob(x, y, 0, 0));
   }
   for (const b of blobs) {
@@ -314,14 +329,71 @@ export function createField(width: number, height: number, options: FieldOptions
         b.along = along(t);
         b.r += (target(b, t) * breathe(b) - b.r) * GROW;
       }
+      const turn = orbitWay * ORBIT * (ORBIT_CALM + (1 - ORBIT_CALM) * (0.5 + 0.5 * mood(3))) * elapsed;
+      for (const b of blobs) {
+        const dx = b.x - anchor.x;
+        const dy = b.y - anchor.y;
+        const away = Math.hypot(dx, dy) || 0.01;
+        const speed = turn * (-ORBIT_INNER + (1 + ORBIT_INNER) * smooth((b.along - ORBIT_FROM) / (1 - ORBIT_FROM)));
+        b.x -= (dy / away) * speed;
+        b.y += (dx / away) * speed;
+      }
       settle(RELAX);
+      // refill checks only look at the blobs near the margin's edge.
+      const edgeBand = 80;
+      const nearEdge = blobs.filter(
+        (b) =>
+          b.x < edgeBand - MARGIN ||
+          b.y < edgeBand - MARGIN ||
+          b.x > width + MARGIN - edgeBand ||
+          b.y > height + MARGIN - edgeBand
+      );
+      for (let attempt = 0; attempt < EDGE_ATTEMPTS; attempt++) {
+        const w = width + 2 * MARGIN;
+        const h = height + 2 * MARGIN;
+        const around = random() * 2 * (w + h);
+        const inset = SIZE - MARGIN;
+        const x =
+          around < w
+            ? around - MARGIN
+            : around < w + h
+              ? width + MARGIN - SIZE
+              : around < 2 * w + h
+                ? around - w - h - MARGIN
+                : inset;
+        const y =
+          around < w
+            ? inset
+            : around < w + h
+              ? around - w - MARGIN
+              : around < 2 * w + h
+                ? height + MARGIN - SIZE
+                : around - 2 * w - h - MARGIN;
+        const b = blob(x, y, 0, 0);
+        const t = travelled(b);
+        b.low = low(b);
+        b.corner = corner(b);
+        b.along = along(t);
+        b.r = target(b, t) * breathe(b);
+        const crowded = nearEdge.some(
+          (o) => (o.x - x) ** 2 + (o.y - y) ** 2 < (o.r + b.r + gapFor((o.r + b.r) / 2)) ** 2
+        );
+        if (crowded) continue;
+        const age = (Math.hypot(x - anchor.x, y - anchor.y) - anchor.r) / DRIFT;
+        b.color = colorAt(x, y, colorPhase - spinRate(clock) * age, armsAt(clock - age));
+        b.drawX = x;
+        b.drawY = y;
+        blobs.push(b);
+        nearEdge.push(b);
+      }
       for (const b of blobs) {
         b.drawX += (b.x - b.drawX) * SMOOTH;
         b.drawY += (b.y - b.drawY) * SMOOTH;
       }
       for (let i = blobs.length - 1; i >= 0; i--) {
         const { x, y } = blobs[i];
-        if (x < -60 || y < -60 || x > width + 60 || y > height + 60) blobs.splice(i, 1);
+        const out = MARGIN + 60;
+        if (x < -out || y < -out || x > width + out || y > height + out) blobs.splice(i, 1);
       }
     },
     breath: () => ({ inner, outer }),
