@@ -7,6 +7,10 @@ const GAP = 5;
 const RELAX = 8;
 const SMOOTH = 0.5;
 const SIZE = 7;
+const BAND = 50;
+const DRIFT = 0.025;
+const ARMS = 3;
+const JITTER = 1.2;
 const EDGE_GROWTH = [2, 4];
 const RAINBOW = ['#5A4D9A', '#A067C3', '#CD361F', '#F07C31', '#E9AC38', '#5B9E47', '#58BABB', '#1079CB'];
 
@@ -45,6 +49,14 @@ export function createField(width: number, height: number, options: FieldOptions
   const reachFactor = 2 ** (0.5 - 1 / exponent);
   const blobs: Blob[] = [];
   let sinceSpawn = 0;
+  let clock = 0;
+
+  const colorAt = (x: number, y: number, phase: number) => {
+    const turn = Math.atan2(y - anchor.y, x - anchor.x) / (Math.PI * 2);
+    const blur = ((random() - 0.5) * JITTER) / RAINBOW.length;
+    const k = (((turn * ARMS + phase + blur) % 1) + 1) % 1;
+    return RAINBOW[Math.floor(k * RAINBOW.length)];
+  };
 
   const edgeReach = (ux: number, uy: number) => {
     const tx = ux > 0 ? (width - anchor.x) / ux : ux < 0 ? -anchor.x / ux : Infinity;
@@ -60,14 +72,14 @@ export function createField(width: number, height: number, options: FieldOptions
     return SIZE + b.extra * travelled;
   };
 
-  const blob = (x: number, y: number): Blob => ({
+  const blob = (x: number, y: number, phase: number): Blob => ({
     x,
     y,
     drawX: x,
     drawY: y,
     r: 0,
     extra: EDGE_GROWTH[0] + random() * (EDGE_GROWTH[1] - EDGE_GROWTH[0]),
-    color: RAINBOW[Math.floor(random() * RAINBOW.length)],
+    color: colorAt(x, y, phase),
   });
 
   const cell = 2 * (SIZE + EDGE_GROWTH[1]) * reachFactor + GAP;
@@ -122,9 +134,20 @@ export function createField(width: number, height: number, options: FieldOptions
 
   const typical = SIZE + (EDGE_GROWTH[0] + EDGE_GROWTH[1]) / 4;
   const count = Math.round((width * height) / (Math.PI * (typical * reachFactor + GAP / 2) ** 2));
-  for (let i = 0; i < count; i++) blobs.push(blob(random() * width, random() * height));
+  for (let i = 0; i < count; i++) {
+    const x = random() * width;
+    const y = random() * height;
+    blobs.push(blob(x, y, 0));
+  }
   for (const b of blobs) b.r = target(b);
   for (let round = 0; round < SEED_ROUNDS && settle(10) > 0.25; round++);
+  for (const b of blobs) {
+    const dx = b.x - anchor.x;
+    const dy = b.y - anchor.y;
+    const away = Math.hypot(dx, dy) || 0.01;
+    const rim = anchor.r * extent(exponent, dx / away, dy / away);
+    b.color = colorAt(b.x, b.y, -(away - rim) / (BAND * RAINBOW.length));
+  }
   for (const b of blobs) {
     b.drawX = b.x;
     b.drawY = b.y;
@@ -134,6 +157,7 @@ export function createField(width: number, height: number, options: FieldOptions
     blobs,
     step(elapsed) {
       sinceSpawn += elapsed;
+      clock += elapsed;
       while (sinceSpawn >= SPAWN_EVERY) {
         sinceSpawn -= SPAWN_EVERY;
         for (let attempt = 0; attempt < SPAWN_ATTEMPTS; attempt++) {
@@ -147,7 +171,7 @@ export function createField(width: number, height: number, options: FieldOptions
             (b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (Math.max(b.r, SIZE) * reachFactor + GAP / 2) ** 2
           );
           if (crowded) continue;
-          blobs.push(blob(x, y));
+          blobs.push(blob(x, y, (clock * DRIFT) / (BAND * RAINBOW.length)));
           break;
         }
       }

@@ -34,6 +34,25 @@ describe.each([
     expect(Math.max(...edge.map((b) => b.r * 2))).toBeLessThanOrEqual(22);
   });
 
+  test('colours fall into bands, so most blobs share a colour with their nearest neighbour', () => {
+    const field = createField(1440, 900, { anchor: portrait, exponent: EXPONENT }, seeded(4));
+    for (let i = 0; i < 120; i++) field.step(16);
+    const sample = field.blobs.slice(0, 400);
+    const shared = sample.filter((a) => {
+      let nearest = field.blobs[0];
+      let best = Infinity;
+      for (const b of field.blobs) {
+        const d = (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
+        if (b !== a && d < best) {
+          best = d;
+          nearest = b;
+        }
+      }
+      return nearest.color === a.color;
+    });
+    expect(shared.length / sample.length).toBeGreaterThan(0.3);
+  });
+
   test('packs against the portrait with no visible overlap as new blobs push out from its rim', () => {
     const field = createField(1440, 900, { anchor: portrait, exponent: EXPONENT }, seeded(2));
     for (let i = 0; i < 300; i++) field.step(16);
