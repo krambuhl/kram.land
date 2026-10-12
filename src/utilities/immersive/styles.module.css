@@ -2,7 +2,10 @@
    darkens it because blur alone leaves the light text over the palette's brightest colours. */
 .scrim {
   position: fixed;
-  inset: 0;
+
+  /* overshoots the screen top and bottom: safari's sliding toolbars leave a fixed
+     layer short of the edge. */
+  inset: -25lvh 0;
   z-index: 0;
   margin: 0;
   opacity: 0;
