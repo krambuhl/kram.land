@@ -26,7 +26,7 @@
   --entrance-step: 0;
 
   animation: fade 900ms ease-out both;
-  animation-delay: calc(var(--entrance-start) + var(--entrance-step) * 150ms);
+  animation-delay: calc(var(--entrance-start) + var(--entrance-step) * 100ms);
 }
 
 .stagger.rise > * {
