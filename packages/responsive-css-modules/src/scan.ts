@@ -5,7 +5,7 @@ import ts from 'typescript';
 
 import type { MatchOptions } from './index.ts';
 
-export const PACKAGE = 'token-jet-responsive-css-modules';
+export const PACKAGE = 'responsive-css-modules';
 const OPTION_KEYS = ['matchMin', 'matchMax', 'matchOnly'] as const;
 const SOURCE = /\.(?:ts|tsx)$/;
 

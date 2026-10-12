@@ -35,9 +35,7 @@ export function responsive<Styles extends Readonly<Record<string, string>>>(styl
       const key = variantClass(name, match);
       const value = styles[key];
       if (value !== undefined) return value;
-      console.warn(
-        `token-jet-responsive-css-modules: no ${key} class; was the call written where the scanner can see it?`
-      );
+      console.warn(`responsive-css-modules: no ${key} class; was the call written where the scanner can see it?`);
       return '';
     };
   }

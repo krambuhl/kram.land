@@ -1,10 +1,10 @@
 {
-  "name": "token-jet-responsive-css-modules",
+  "name": "responsive-css-modules",
   "version": "0.0.0",
   "private": true,
   "description": "Responsive variants of CSS Module classes, at token-jet breakpoints, emitted only where used.",
   "bin": {
-    "token-jet-responsive-css-modules": "./bin/token-jet-responsive-css-modules.js"
+    "responsive-css-modules": "./bin/responsive-css-modules.js"
   },
   "files": [
     "bin",

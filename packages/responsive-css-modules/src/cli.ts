@@ -9,6 +9,6 @@ writeTypes(process.cwd())
     console.log(`wrote ${file} with ${scale.names.join(', ')}`);
   })
   .catch((error: unknown) => {
-    console.error(`token-jet-responsive-css-modules: ${error instanceof Error ? error.message : String(error)}`);
+    console.error(`responsive-css-modules: ${error instanceof Error ? error.message : String(error)}`);
     process.exitCode = 1;
   });

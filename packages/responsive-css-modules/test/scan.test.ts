@@ -4,7 +4,7 @@ import { scanSource } from '../src/scan.ts';
 
 const root = '/project';
 const file = '/project/src/card.tsx';
-const header = `import styles from './card.module.css';\nimport { responsive } from 'token-jet-responsive-css-modules';\n`;
+const header = `import styles from './card.module.css';\nimport { responsive } from 'responsive-css-modules';\n`;
 const scan = (body: string) =>
   scanSource(file, `${header}${body}`, root).map(({ className, match, at }) => ({ className, match, at }));
 

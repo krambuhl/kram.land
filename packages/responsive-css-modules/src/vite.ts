@@ -31,7 +31,7 @@ function inside(file: string, dir: string): boolean {
   return file === dir || file.startsWith(`${dir}${sep}`);
 }
 
-export default function tokenJetResponsive(options: ResponsiveOptions = {}): Plugin {
+export default function responsiveCssModules(options: ResponsiveOptions = {}): Plugin {
   let root = process.cwd();
   let src = root;
   let scale: Scale | undefined;

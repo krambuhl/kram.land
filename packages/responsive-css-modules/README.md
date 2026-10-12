@@ -1,4 +1,4 @@
-# token-jet-responsive-css-modules
+# responsive-css-modules
 
 Responsive variants of CSS Module classes at token-jet breakpoints. A class is written once; a variant is emitted only when a component asks for it.
 
@@ -10,7 +10,7 @@ Responsive variants of CSS Module classes at token-jet breakpoints. A class is w
 ```
 
 ```tsx
-import { responsive } from 'token-jet-responsive-css-modules';
+import { responsive } from 'responsive-css-modules';
 
 import styles from './card.module.css';
 
@@ -49,11 +49,11 @@ A wrapper passed to another component still works if the call it makes is visibl
 ```js
 // astro.config.mjs or vite.config.js
 import tokenJet from 'token-jet/vite';
-import tokenJetResponsive from 'token-jet-responsive-css-modules/vite';
+import responsiveCssModules from 'responsive-css-modules/vite';
 
-export default { plugins: [tokenJet(), tokenJetResponsive()] };
+export default { plugins: [tokenJet(), responsiveCssModules()] };
 ```
 
 Options: `src` (default `src`), `tag` (default `media-breakpoint`) and `typesFile` (default `generated/responsive/breakpoints.d.ts`).
 
-The types file registers the breakpoint names and every contiguous run, so an unknown breakpoint or a gap is a type error. The plugin writes it on start, and `token-jet-responsive-css-modules` writes it from the command line for type checks that run before a build.
+The types file registers the breakpoint names and every contiguous run, so an unknown breakpoint or a gap is a type error. The plugin writes it on start, and `responsive-css-modules` writes it from the command line for type checks that run before a build.
