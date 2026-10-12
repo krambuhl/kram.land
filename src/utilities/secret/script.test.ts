@@ -1,19 +1,15 @@
 import { describe, expect, test } from 'vitest';
 
-import { clampProgress, scrollProgress } from './script.ts';
+import { nextOpen } from './script.ts';
 
-describe('secret scroll progress', () => {
-  test('stays between the page and the portrait view', () => {
-    expect(clampProgress(-0.2)).toBe(0);
-    expect(clampProgress(0.4)).toBe(0.4);
-    expect(clampProgress(1.3)).toBe(1);
+describe('portrait view', () => {
+  test('opens once the scroll passes the threshold', () => {
+    expect(nextOpen(100, 200, false)).toBe(false);
+    expect(nextOpen(201, 200, false)).toBe(true);
   });
 
-  test('follows the scroll position through the runway at the end of the page', () => {
-    expect(scrollProgress(0, 1000, 400)).toBe(0);
-    expect(scrollProgress(600, 1000, 400)).toBe(0);
-    expect(scrollProgress(800, 1000, 400)).toBe(0.5);
-    expect(scrollProgress(1000, 1000, 400)).toBe(1);
-    expect(scrollProgress(500, 1000, 0)).toBe(0);
+  test('stays open through a small dead zone below the threshold, then closes', () => {
+    expect(nextOpen(190, 200, true)).toBe(true);
+    expect(nextOpen(180, 200, true)).toBe(false);
   });
 });
