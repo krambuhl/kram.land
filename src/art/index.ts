@@ -1,7 +1,8 @@
 const EXPONENT = 2 ** 1.35;
 const SPAWN_EVERY = 140;
 const GROW = 0.08;
-const GAP = 3;
+const GAP = 4;
+const REACH = 2 ** (0.5 - 1 / EXPONENT);
 const RELAX = 4;
 
 interface Blob {
@@ -80,7 +81,7 @@ export default function start(canvas: HTMLCanvasElement): () => void {
             const ox = b.x - a.x;
             const oy = b.y - a.y;
             const distance = Math.hypot(ox, oy) || 0.01;
-            const overlap = a.r + b.r + GAP - distance;
+            const overlap = (a.r + b.r) * REACH + GAP - distance;
             if (overlap <= 0) continue;
             const push = overlap / 2 / distance;
             a.x -= ox * push;
