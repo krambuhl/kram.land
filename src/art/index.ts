@@ -18,6 +18,8 @@ const JITTER = 3;
 const EDGE_GROWTH = [2, 4];
 const EDGE_SWELL = 3;
 const SWELL_FROM = 0.85;
+const FLOOR_SWELL = 0.2;
+const FLOOR_BREATHE = 0.2;
 const RAINBOW = ['#5A4D9A', '#A067C3', '#CD361F', '#F07C31', '#E9AC38', '#5B9E47', '#58BABB', '#1079CB'];
 
 interface Blob {
@@ -28,6 +30,7 @@ interface Blob {
   r: number;
   extra: number;
   along: number;
+  low: number;
   color: string;
 }
 
@@ -39,6 +42,8 @@ interface Anchor {
 
 export interface FieldOptions {
   anchor?: Anchor;
+  // blobs below this height grow and breathe up to 20% more toward the bottom.
+  floor?: number;
 }
 
 interface Field {
@@ -48,7 +53,7 @@ interface Field {
 }
 
 export function createField(width: number, height: number, options: FieldOptions = {}, random = Math.random): Field {
-  const { anchor = { x: width / 2, y: height / 2, r: 0 } } = options;
+  const { anchor = { x: width / 2, y: height / 2, r: 0 }, floor = height } = options;
   const blobs: Blob[] = [];
   let sinceSpawn = 0;
   let clock = 0;
@@ -100,7 +105,9 @@ export function createField(width: number, height: number, options: FieldOptions
     return Math.min(1, Math.max(0, away / edgeReach(dx / away, dy / away)));
   };
 
-  const target = (b: Blob, t: number) => SIZE + b.extra * t + EDGE_SWELL * smooth((t - SWELL_FROM) / (1 - SWELL_FROM));
+  const low = (b: Blob) => (floor < height ? smooth((b.y - floor) / (height - floor)) : 0);
+  const target = (b: Blob, t: number) =>
+    (SIZE + b.extra * t + EDGE_SWELL * smooth((t - SWELL_FROM) / (1 - SWELL_FROM))) * (1 + FLOOR_SWELL * b.low);
 
   const rimShare = anchor.r / Math.max(1, Math.min(width, height) / 2);
   const along = (t: number) => Math.min(1, Math.max(0, (t - rimShare) / Math.max(0.01, 1 - rimShare)));
@@ -113,10 +120,11 @@ export function createField(width: number, height: number, options: FieldOptions
     r: 0,
     extra: EDGE_GROWTH[0] + random() * (EDGE_GROWTH[1] - EDGE_GROWTH[0]),
     along: 0,
+    low: 0,
     color: colorAt(x, y, phase),
   });
 
-  const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) + GAP;
+  const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) * (1 + FLOOR_SWELL) + GAP;
   const columns = Math.ceil(width / cell) + 2;
   const rows = Math.ceil(height / cell) + 2;
   const cellOf = (x: number, y: number) => {
@@ -175,6 +183,7 @@ export function createField(width: number, height: number, options: FieldOptions
   }
   for (const b of blobs) {
     const t = travelled(b);
+    b.low = low(b);
     b.r = target(b, t);
     b.along = along(t);
   }
@@ -214,6 +223,7 @@ export function createField(width: number, height: number, options: FieldOptions
       }
       for (const b of blobs) {
         const t = travelled(b);
+        b.low = low(b);
         b.r += (target(b, t) - b.r) * GROW;
         b.along = along(t);
       }
@@ -233,6 +243,7 @@ export function createField(width: number, height: number, options: FieldOptions
 
 export interface StartOptions {
   anchor?: () => Anchor;
+  floor?: () => number;
 }
 
 export default function start(canvas: HTMLCanvasElement, options: StartOptions = {}): () => void {
@@ -251,7 +262,7 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     height = canvas.clientHeight;
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
-    field = createField(width, height, { anchor: options.anchor?.() });
+    field = createField(width, height, { anchor: options.anchor?.(), floor: options.floor?.() });
   };
 
   const draw = () => {
@@ -263,7 +274,8 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     const center = options.anchor?.() ?? { x: width / 2, y: height / 2 };
     for (const blob of field.blobs) {
       const t = blob.along;
-      const r = blob.r * (1 + INNER_BREATHE * inner * (1 - t) + OUTER_BREATHE * outer * t);
+      const r =
+        blob.r * (1 + INNER_BREATHE * inner * (1 - t) + OUTER_BREATHE * (1 + FLOOR_BREATHE * blob.low) * outer * t);
       const dx = blob.drawX - center.x;
       const dy = blob.drawY - center.y;
       const away = Math.hypot(dx, dy) || 1;

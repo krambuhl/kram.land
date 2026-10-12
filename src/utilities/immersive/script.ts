@@ -5,6 +5,7 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   const html = document.documentElement;
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let anchor = { x: 0, y: 0, r: 0 };
+  let floor = window.innerHeight;
   let stopArt: (() => void) | undefined;
   let closing: ReturnType<typeof setTimeout> | undefined;
 
@@ -21,7 +22,9 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
     html.setAttribute('data-immersive', '');
     image.getBoundingClientRect();
     html.removeAttribute('data-measuring');
-    canvas.style.setProperty('--travel', `${Math.max(0, rect.top - opened.top)}px`);
+    const travel = Math.max(0, rect.top - opened.top);
+    canvas.style.setProperty('--travel', `${travel}px`);
+    floor = canvas.clientHeight - travel;
     anchor = {
       x: rect.left + rect.width / 2 - frame.left,
       y: rect.top + rect.height / 2 - frame.top,
@@ -70,7 +73,7 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
 
   measure();
   import('../../art/index.ts').then(({ default: start }) => {
-    stopArt = start(canvas, { anchor: () => anchor });
+    stopArt = start(canvas, { anchor: () => anchor, floor: () => floor });
     html.setAttribute('data-art', '');
   });
   image.addEventListener('click', onClick);

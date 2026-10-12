@@ -69,4 +69,22 @@ describe('createField', () => {
     }
     expect(worst).toBeLessThanOrEqual(1);
   });
+
+  test('blobs below the floor grow larger toward the bottom and still keep their gap', () => {
+    const field = createField(1440, 1150, { anchor: portrait, floor: 900 }, seeded(5));
+    for (let i = 0; i < 200; i++) field.step(16);
+    const mean = (list: typeof field.blobs) => list.reduce((sum, b) => sum + b.r * 2, 0) / list.length;
+    const top = field.blobs.filter((b) => b.y < 20);
+    const bottom = field.blobs.filter((b) => b.y > 1130);
+    expect(mean(bottom)).toBeGreaterThan(mean(top) * 1.08);
+    let worst = -Infinity;
+    for (let i = 0; i < field.blobs.length; i++) {
+      for (let j = i + 1; j < field.blobs.length; j++) {
+        const a = field.blobs[i];
+        const b = field.blobs[j];
+        worst = Math.max(worst, a.r + b.r - Math.hypot(a.drawX - b.drawX, a.drawY - b.drawY));
+      }
+    }
+    expect(worst).toBeLessThanOrEqual(1);
+  });
 });
