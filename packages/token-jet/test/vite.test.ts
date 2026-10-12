@@ -72,6 +72,36 @@ describe('vite adapter', () => {
     }
   });
 
+  test('a token change during dev reaches a stylesheet that did not change', async () => {
+    const dir = project();
+    const server = await createServer({
+      root: dir,
+      logLevel: 'silent',
+      plugins: [tokenJet()],
+      server: { watch: null },
+    });
+    const change = async (tokens: string) => {
+      writeFileSync(join(dir, 'tokens/tokens.ts'), tokens);
+      await server.watcher.emit('change', join(dir, 'tokens/tokens.ts'));
+    };
+    const transform = () => server.environments.client.transformRequest('/card.module.css');
+    const withoutX16 = fixture.replace("['x4', 'x16']", "['x4']").replace(/^ +x16: .*\n/m, '');
+    try {
+      await server.listen();
+      await expect(transform()).resolves.toMatchObject({ code: expect.stringContaining('var(--space-x16)') });
+
+      await change(withoutX16);
+      await expect
+        .poll(() => transform().then(() => 'ok', String), { timeout: 2000 })
+        .toMatch(/Unknown token "space\.x16"/);
+
+      await change(fixture);
+      await expect.poll(() => transform().then(() => 'ok', String), { timeout: 2000 }).toBe('ok');
+    } finally {
+      await server.close();
+    }
+  });
+
   test('a config error fails the build with the message', async () => {
     const dir = project();
     writeFileSync(join(dir, 'tokens/tokens.ts'), fixture.replace("dark: '{gray.900}'", "dark: '{gray.999}'"));

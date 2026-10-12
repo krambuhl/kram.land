@@ -64,7 +64,14 @@ export default function tokenJet(options: TokenJetViteOptions = {}): Plugin {
         const changed = resolve(file);
         if (changed !== watchPath && !changed.startsWith(`${watchPath}${sep}`)) return;
         regenerate()
-          .then(() => server.ws.send({ type: 'full-reload' }))
+          .then(() => {
+            // Vite keeps a stylesheet's transform until its file changes, and a token
+            // change alters the result for stylesheets that did not change.
+            for (const environment of Object.values(server.environments)) {
+              environment.moduleGraph.invalidateAll();
+              environment.hot.send({ type: 'full-reload' });
+            }
+          })
           .catch((error: unknown) =>
             server.config.logger.error(`token-jet: ${error instanceof Error ? error.message : String(error)}`)
           );
