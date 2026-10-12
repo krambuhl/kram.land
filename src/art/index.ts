@@ -44,7 +44,7 @@ const CORNER_REACH = 0.3;
 // inner field the other way at ORBIT_INNER of that. a mood eases the speed between ORBIT_CALM and full.
 const ORBIT = 0.035;
 const ORBIT_CALM = 0.3;
-const ORBIT_INNER = 0.3;
+const ORBIT_INNER = 0.1;
 const ORBIT_FROM = 0.5;
 // the orbit carries blobs away from the edges they flow in from, so each step tries
 // a few points just inside the margin's outer edge and adds a blob wherever one fits.
