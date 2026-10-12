@@ -17,12 +17,27 @@ interface Blob {
   color: string;
 }
 
+export interface Anchor {
+  x: number;
+  y: number;
+  r: number;
+}
+
+function extent(ux: number, uy: number): number {
+  return (Math.abs(ux) ** EXPONENT + Math.abs(uy) ** EXPONENT) ** (-1 / EXPONENT);
+}
+
 interface Field {
   blobs: Blob[];
   step(elapsed: number): void;
 }
 
-export function createField(width: number, height: number, random = Math.random): Field {
+export function createField(
+  width: number,
+  height: number,
+  anchor: Anchor = { x: width / 2, y: height / 2, r: 0 },
+  random = Math.random
+): Field {
   const blobs: Blob[] = [];
   let sinceSpawn = 0;
 
@@ -49,6 +64,14 @@ export function createField(width: number, height: number, random = Math.random)
     for (const b of blobs) grid[cellOf(b.x, b.y)].push(b);
     for (let pass = 0; pass < passes; pass++) {
       for (const a of blobs) {
+        const ax = a.x - anchor.x;
+        const ay = a.y - anchor.y;
+        const away = Math.hypot(ax, ay) || 0.01;
+        const clear = anchor.r * extent(ax / away, ay / away) + a.r * REACH + GAP;
+        if (away < clear) {
+          a.x = anchor.x + (ax / away) * clear;
+          a.y = anchor.y + (ay / away) * clear;
+        }
         const home = cellOf(a.x, a.y);
         const hx = home % columns;
         const hy = (home - hx) / columns;
@@ -89,7 +112,10 @@ export function createField(width: number, height: number, random = Math.random)
       while (sinceSpawn >= SPAWN_EVERY) {
         sinceSpawn -= SPAWN_EVERY;
         const angle = random() * Math.PI * 2;
-        blobs.push(blob(width / 2 + Math.cos(angle), height / 2 + Math.sin(angle), false));
+        const ux = Math.cos(angle);
+        const uy = Math.sin(angle);
+        const rim = anchor.r * extent(ux, uy) + GAP + 1;
+        blobs.push(blob(anchor.x + ux * rim, anchor.y + uy * rim, false));
       }
       for (const b of blobs) b.r += (SIZE - b.r) * GROW;
       settle(RELAX);
@@ -97,9 +123,9 @@ export function createField(width: number, height: number, random = Math.random)
         b.drawX += (b.x - b.drawX) * SMOOTH;
         b.drawY += (b.y - b.drawY) * SMOOTH;
       }
-      const reach = Math.hypot(width, height) / 2 + 60;
       for (let i = blobs.length - 1; i >= 0; i--) {
-        if (Math.hypot(blobs[i].x - width / 2, blobs[i].y - height / 2) > reach) blobs.splice(i, 1);
+        const { x, y } = blobs[i];
+        if (x < -60 || y < -60 || x > width + 60 || y > height + 60) blobs.splice(i, 1);
       }
     },
   };
@@ -121,7 +147,11 @@ function unitShape(): Path2D {
   return path;
 }
 
-export default function start(canvas: HTMLCanvasElement): () => void {
+export interface StartOptions {
+  anchor?: () => Anchor;
+}
+
+export default function start(canvas: HTMLCanvasElement, options: StartOptions = {}): () => void {
   const context = canvas.getContext('2d');
   if (context === null) return () => {};
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -138,7 +168,7 @@ export default function start(canvas: HTMLCanvasElement): () => void {
     height = canvas.clientHeight;
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
-    field = createField(width, height);
+    field = createField(width, height, options.anchor?.());
   };
 
   const draw = () => {

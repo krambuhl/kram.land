@@ -26,6 +26,7 @@ export function secretScroll(
   const coarse = window.matchMedia('(pointer: coarse)');
   let open = false;
   let progress = 0;
+  let anchor = { x: 0, y: 0, r: 0 };
   let runway = 0;
   let returnY = 0;
   let stopArt: (() => void) | undefined;
@@ -36,7 +37,7 @@ export function secretScroll(
     artTimer = setTimeout(async () => {
       const { default: start } = await import('../../art/index.ts');
       if (!open) return;
-      stopArt ??= start(canvas);
+      stopArt ??= start(canvas, { anchor: () => anchor });
       root.setAttribute('data-art', '');
     }, ART_DELAY);
   };
@@ -69,8 +70,11 @@ export function secretScroll(
     runway = track.offsetHeight - stage.offsetHeight;
 
     const rect = image.getBoundingClientRect();
+    const frame = canvas.getBoundingClientRect();
     const shift = progress * (Number.parseFloat(root.style.getPropertyValue('--secret-shift')) || 0);
-    root.style.setProperty('--secret-shift', `${window.innerHeight / 2 - (rect.top + rect.height / 2 - shift)}px`);
+    const target = frame.top + frame.height / 2;
+    root.style.setProperty('--secret-shift', `${target - (rect.top + rect.height / 2 - shift)}px`);
+    anchor = { x: rect.left + rect.width / 2 - frame.left, y: frame.height / 2, r: rect.width / 2 };
   };
 
   const bottom = () => document.documentElement.scrollHeight - window.innerHeight;

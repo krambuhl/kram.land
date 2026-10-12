@@ -9,26 +9,34 @@ function seeded(seed: number) {
   };
 }
 
-const REACH = 2 ** (0.5 - 1 / 2 ** 1.35);
+const EXPONENT = 2 ** 1.35;
+const REACH = 2 ** (0.5 - 1 / EXPONENT);
+const portrait = { x: 720, y: 450, r: 96 };
 
 describe('createField', () => {
   test('starts with the screen already covered', () => {
-    const field = createField(1440, 900, seeded(1));
+    const field = createField(1440, 900, portrait, seeded(1));
     const covered = field.blobs.reduce((sum, b) => sum + Math.PI * b.r ** 2, 0);
     expect(covered / (1440 * 900)).toBeGreaterThan(0.4);
   });
 
-  test('keeps visible blobs from touching while new ones push out from under the portrait', () => {
-    const field = createField(1440, 900, seeded(2));
+  test('packs against the portrait and keeps a gutter between blobs as new ones push out from its rim', () => {
+    const field = createField(1440, 900, portrait, seeded(2));
     for (let i = 0; i < 300; i++) field.step(16);
+    const blobs = field.blobs;
     let worst = -Infinity;
-    const visible = field.blobs.filter((b) => Math.hypot(b.drawX - 720, b.drawY - 450) > 96);
-    for (let i = 0; i < visible.length; i++) {
-      for (let j = i + 1; j < visible.length; j++) {
-        const a = visible[i];
-        const b = visible[j];
-        const overlap = (a.r + b.r) * REACH - Math.hypot(a.drawX - b.drawX, a.drawY - b.drawY);
-        worst = Math.max(worst, overlap);
+    for (const b of blobs) {
+      const dx = b.x - portrait.x;
+      const dy = b.y - portrait.y;
+      const away = Math.hypot(dx, dy);
+      const edge = portrait.r * (Math.abs(dx / away) ** EXPONENT + Math.abs(dy / away) ** EXPONENT) ** (-1 / EXPONENT);
+      worst = Math.max(worst, edge + b.r - away);
+    }
+    for (let i = 0; i < blobs.length; i++) {
+      for (let j = i + 1; j < blobs.length; j++) {
+        const a = blobs[i];
+        const b = blobs[j];
+        worst = Math.max(worst, (a.r + b.r) * REACH - Math.hypot(a.drawX - b.drawX, a.drawY - b.drawY));
       }
     }
     expect(worst).toBeLessThanOrEqual(0);
