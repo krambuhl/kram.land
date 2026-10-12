@@ -105,6 +105,8 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   };
 
   measure();
+  // the open layout depends on the text, so it's measured again once the web fonts load.
+  void document.fonts?.ready.then(measure);
   import('../../art/index.ts').then(({ default: start }) => {
     startArt = () => start(canvas, { anchor: () => anchor, floor: () => floor });
     stopArt = startArt();
