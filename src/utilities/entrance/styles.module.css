@@ -1,4 +1,7 @@
 .root {
+  --entrance-rise: 12px;
+  --entrance-start: 0ms;
+
   animation: fade 500ms ease-out both;
 }
 
@@ -8,7 +11,70 @@
 }
 
 .second {
-  animation-delay: 400ms;
+  --entrance-start: 400ms;
+
+  animation-delay: var(--entrance-start);
+}
+
+.stagger {
+  --entrance-rise: 6px;
+
+  animation: none;
+}
+
+.stagger > * {
+  --entrance-step: 0;
+
+  animation: fade 900ms ease-out both;
+  animation-delay: calc(var(--entrance-start) + var(--entrance-step) * 150ms);
+}
+
+.stagger.rise > * {
+  animation-name: rise;
+}
+
+.stagger > :nth-child(2) {
+  --entrance-step: 1;
+}
+
+.stagger > :nth-child(3) {
+  --entrance-step: 2;
+}
+
+.stagger > :nth-child(4) {
+  --entrance-step: 3;
+}
+
+.stagger > :nth-child(5) {
+  --entrance-step: 4;
+}
+
+.stagger > :nth-child(6) {
+  --entrance-step: 5;
+}
+
+.stagger > :nth-child(7) {
+  --entrance-step: 6;
+}
+
+.stagger > :nth-child(8) {
+  --entrance-step: 7;
+}
+
+.stagger > :nth-child(9) {
+  --entrance-step: 8;
+}
+
+.stagger > :nth-child(10) {
+  --entrance-step: 9;
+}
+
+.stagger > :nth-child(11) {
+  --entrance-step: 10;
+}
+
+.stagger > :nth-child(12) {
+  --entrance-step: 11;
 }
 
 @keyframes fade {
@@ -20,12 +86,13 @@
 @keyframes rise {
   from {
     opacity: 0;
-    translate: 0 12px;
+    translate: 0 var(--entrance-rise);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .rise {
+  .rise,
+  .stagger.rise > * {
     animation-name: fade;
   }
 }

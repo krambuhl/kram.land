@@ -24,7 +24,12 @@ import ikea from '../assets/ikea.png';
       class:list={[superellipse(), entrance({ motion: 'rise' })]}
     />
 
-    <div class:list={[stack({ gap: token('space.x24'), align: 'center' }), entrance({ order: 'second' })]}>
+    <div
+      class:list={[
+        stack({ gap: token('space.x24'), align: 'center' }),
+        entrance({ motion: 'rise', order: 'second', stagger: true }),
+      ]}
+    >
       <h1 class={headingText({ size: 'xl' })}>oh hi. hello!</h1>
 
       <p class={bodyText()}>
