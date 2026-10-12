@@ -6,30 +6,24 @@ import Layout from 'layouts/Layout.astro';
 import { token } from 'generated/tokens';
 import { area } from 'utilities/area';
 import { entrance } from 'utilities/entrance';
-import { secret } from 'utilities/secret';
+import { immersive } from 'utilities/immersive';
 import { stack } from 'utilities/stack';
 import { superellipse } from 'utilities/superellipse';
 import { bodyText, headingText } from 'utilities/text';
 import ikea from '../assets/ikea.png';
 ---
 
-<Layout>
-  <div
-    data-secret-root
-    class:list={[
-      area({ width: token('size.x384') }),
-      stack({ gap: token('space.x48'), align: 'center' }),
-      secret({ part: 'root' }),
-    ]}
-  >
-    <canvas data-secret-art aria-hidden="true" class={secret({ part: 'art' })}></canvas>
+<Layout immersive>
+  <div class:list={[area({ width: token('size.x384') }), stack({ gap: token('space.x48'), align: 'center' })]}>
+    <canvas data-immersive-art aria-hidden="true" class={immersive({ part: 'art' })}></canvas>
 
     <button
       type="button"
-      aria-label="portrait view"
-      aria-pressed="false"
-      data-secret-image
-      class={secret({ part: 'image' })}
+      aria-label="about evan"
+      aria-expanded="false"
+      aria-controls="about"
+      data-immersive-image
+      class={immersive({ part: 'image' })}
     >
       <Image
         src={ikea}
@@ -43,11 +37,12 @@ import ikea from '../assets/ikea.png';
     </button>
 
     <div
-      data-secret-text
+      id="about"
+      data-immersive-text
       class:list={[
         stack({ gap: token('space.x24'), align: 'center' }),
         entrance({ motion: 'rise', order: 'second', stagger: true }),
-        secret({ part: 'text' }),
+        immersive({ part: 'text' }),
       ]}
     >
       <h1 class={headingText({ size: 'xl' })}>oh hi. hello!</h1>
@@ -88,11 +83,10 @@ import ikea from '../assets/ikea.png';
 </Layout>
 
 <script>
-  import { secretScroll } from 'utilities/secret/script';
+  import { immersive } from 'utilities/immersive/script';
 
-  const root = document.querySelector<HTMLElement>('[data-secret-root]');
-  const image = document.querySelector<HTMLElement>('[data-secret-image]');
-  const text = document.querySelector<HTMLElement>('[data-secret-text]');
-  const art = document.querySelector<HTMLCanvasElement>('[data-secret-art]');
-  if (root && image && text && art) secretScroll(root, image, text, art);
+  const image = document.querySelector<HTMLElement>('[data-immersive-image]');
+  const text = document.querySelector<HTMLElement>('[data-immersive-text]');
+  const art = document.querySelector<HTMLCanvasElement>('[data-immersive-art]');
+  if (image && text && art) immersive(image, text, art);
 </script>

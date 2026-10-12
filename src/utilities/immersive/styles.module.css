@@ -1,0 +1,50 @@
+.image {
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+  border-radius: 50%;
+}
+
+.image,
+.image > img {
+  display: block;
+}
+
+.image:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 6px;
+}
+
+.text {
+  position: relative;
+  z-index: 1;
+  transition: opacity 200ms ease-out;
+}
+
+:root[data-immersive] .text {
+  display: none;
+}
+
+:root[data-closing] .text {
+  opacity: 0;
+}
+
+.art {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 600ms ease-out;
+}
+
+:root[data-art][data-immersive] .art {
+  opacity: 1;
+}
+
+:root[data-art]:not([data-immersive]) .art {
+  opacity: 0.25;
+}
