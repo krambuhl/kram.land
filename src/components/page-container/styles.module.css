@@ -1,11 +1,11 @@
 .root {
-  --optical-offset: 2.5dvh;
+  --optical-offset: 2.5svh;
 
   display: flex;
   flex-direction: column;
   justify-content: center;
   width: 100%;
-  min-height: 100dvh;
+  min-height: 100svh;
   gap: token('space.x32');
   padding: token('space.x24');
   text-align: center;
