@@ -5,6 +5,7 @@ import { Rule } from 'components/rule';
 import Layout from 'layouts/Layout.astro';
 import { token } from 'generated/tokens';
 import { area } from 'utilities/area';
+import { entrance } from 'utilities/entrance';
 import { stack } from 'utilities/stack';
 import { superellipse } from 'utilities/superellipse';
 import { bodyText, headingText } from 'utilities/text';
@@ -13,9 +14,17 @@ import ikea from '../assets/ikea.png';
 
 <Layout>
   <div class:list={[area({ width: token('size.x384') }), stack({ gap: token('space.x48'), align: 'center' })]}>
-    <Image src={ikea} alt="" width={192} height={192} densities={[1, 2, 3]} priority class={superellipse()} />
+    <Image
+      src={ikea}
+      alt=""
+      width={192}
+      height={192}
+      densities={[1, 2, 3]}
+      priority
+      class:list={[superellipse(), entrance({ motion: 'rise' })]}
+    />
 
-    <div class={stack({ gap: token('space.x24'), align: 'center' })}>
+    <div class:list={[stack({ gap: token('space.x24'), align: 'center' }), entrance({ order: 'second' })]}>
       <h1 class={headingText({ size: 'xl' })}>oh hi. hello!</h1>
 
       <p class={bodyText()}>

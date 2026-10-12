@@ -1,0 +1,31 @@
+.root {
+  animation: fade 500ms ease-out both;
+}
+
+.rise {
+  animation-name: rise;
+  animation-duration: 700ms;
+}
+
+.second {
+  animation-delay: 400ms;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise {
+    animation-name: fade;
+  }
+}
