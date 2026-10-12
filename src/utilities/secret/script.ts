@@ -1,10 +1,10 @@
 import styles from './styles.module.css';
 
-const OPEN_AT = 0.4;
-const DEAD_ZONE = 16;
+const OPEN_AT = 0.5;
+const DEAD_ZONE = 0.25;
 
-export function nextOpen(scrollY: number, openAt: number, open: boolean): boolean {
-  return open ? scrollY > openAt - DEAD_ZONE : scrollY > openAt;
+export function nextOpen(scrollY: number, openAt: number, deadZone: number, open: boolean): boolean {
+  return open ? scrollY > openAt - deadZone : scrollY > openAt;
 }
 
 export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLElement): () => void {
@@ -14,6 +14,7 @@ export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLEl
 
   let open = false;
   let openAt = 0;
+  let deadZone = 0;
   let returnY = 0;
 
   const render = (next: boolean) => {
@@ -28,6 +29,7 @@ export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLEl
     stage.style.setProperty('--stage-top', `${Math.min(0, window.innerHeight - stage.offsetHeight)}px`);
     const runway = track.offsetHeight - stage.offsetHeight;
     openAt = Math.max(0, stage.offsetHeight - window.innerHeight) + runway * OPEN_AT;
+    deadZone = runway * DEAD_ZONE;
 
     const rect = image.getBoundingClientRect();
     const shift = open ? Number.parseFloat(root.style.getPropertyValue('--secret-shift')) || 0 : 0;
@@ -35,7 +37,7 @@ export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLEl
   };
 
   const onScroll = () => {
-    const next = nextOpen(window.scrollY, openAt, open);
+    const next = nextOpen(window.scrollY, openAt, deadZone, open);
     if (next === open) return;
     if (next) measure();
     render(next);
@@ -43,7 +45,7 @@ export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLEl
 
   const onClick = () => {
     if (!open) returnY = window.scrollY;
-    const top = open ? Math.min(returnY, openAt - DEAD_ZONE - 1) : document.documentElement.scrollHeight;
+    const top = open ? Math.min(returnY, openAt - deadZone - 1) : document.documentElement.scrollHeight;
     window.scrollTo({ top, behavior: 'smooth' });
   };
 
