@@ -70,6 +70,12 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   const onKey = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && !html.hasAttribute('data-immersive')) close();
   };
+  // a click on the scrim around the content closes it, unless it ends a text selection.
+  const onOutside = (event: MouseEvent) => {
+    if (html.hasAttribute('data-immersive') || html.hasAttribute('data-closing')) return;
+    if (block.contains(event.target as Node) || !window.getSelection()?.isCollapsed) return;
+    close();
+  };
 
   measure();
   import('../../art/index.ts').then(({ default: start }) => {
@@ -78,11 +84,13 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   });
   image.addEventListener('click', onClick);
   window.addEventListener('keydown', onKey);
+  document.addEventListener('click', onOutside);
   window.addEventListener('resize', measure);
   return () => {
     stopArt?.();
     image.removeEventListener('click', onClick);
     window.removeEventListener('keydown', onKey);
+    document.removeEventListener('click', onOutside);
     window.removeEventListener('resize', measure);
   };
 }
