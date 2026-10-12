@@ -30,7 +30,8 @@
 }
 
 .stagger.rise > * {
-  animation-name: rise;
+  animation-name: fade, lift;
+  animation-duration: 450ms, 900ms;
 }
 
 .stagger > :nth-child(2) {
@@ -83,6 +84,12 @@
   }
 }
 
+@keyframes lift {
+  from {
+    translate: 0 var(--entrance-rise);
+  }
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -94,5 +101,6 @@
   .rise,
   .stagger.rise > * {
     animation-name: fade;
+    animation-duration: 700ms;
   }
 }
