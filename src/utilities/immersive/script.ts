@@ -10,12 +10,16 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   // rests LIFT px down with art above it. if the scroll doesn't take, the padding is removed.
   const lift = window.matchMedia('(pointer: coarse)').matches ? LIFT : 0;
   const rest = () => (html.hasAttribute('data-lifted') ? lift : 0);
-  if (lift > 0) {
-    history.scrollRestoration = 'manual';
+  const settle = () => {
+    if (lift === 0 || !html.hasAttribute('data-immersive')) return;
     html.setAttribute('data-lifted', '');
     window.scrollTo(0, lift);
-    if (window.scrollY < lift - 1) html.removeAttribute('data-lifted');
-  }
+    requestAnimationFrame(() => {
+      if (html.hasAttribute('data-immersive') && window.scrollY < lift - 1) html.removeAttribute('data-lifted');
+    });
+  };
+  if (lift > 0) history.scrollRestoration = 'manual';
+  settle();
   let anchor = { x: 0, y: 0, r: 0 };
   let floor = window.innerHeight;
   let stopArt: (() => void) | undefined;
@@ -128,6 +132,7 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   window.addEventListener('keydown', onKey);
   document.addEventListener('click', onOutside);
   window.addEventListener('resize', measure);
+  window.addEventListener('pageshow', settle);
   return () => {
     clearTimeout(reseedTimer);
     stopArt?.();
@@ -135,5 +140,6 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
     window.removeEventListener('keydown', onKey);
     document.removeEventListener('click', onOutside);
     window.removeEventListener('resize', measure);
+    window.removeEventListener('pageshow', settle);
   };
 }
