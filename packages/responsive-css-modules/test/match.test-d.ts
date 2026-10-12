@@ -6,19 +6,18 @@ import type { Match } from '../src/index.ts';
 declare module '../src/index.ts' {
   interface ResponsiveRegister {
     breakpoint: 'base' | 'sm' | 'md';
-    range: readonly ['base'] | readonly ['base', 'sm'] | readonly ['sm'] | readonly ['sm', 'md'] | readonly ['md'];
   }
 }
 
 describe('Match', () => {
-  test('accepts one option with a known breakpoint or a contiguous run', () => {
+  test('accepts one option with known breakpoints, in any order', () => {
     expectTypeOf({ matchMin: 'sm' } as const).toExtend<Match>();
-    expectTypeOf({ matchOnly: ['sm', 'md'] } as const).toExtend<Match>();
+    expectTypeOf({ matchOnly: ['md', 'base'] } as const).toExtend<Match>();
   });
 
-  test('rejects an unknown breakpoint, a gap and two options at once', () => {
+  test('rejects an unknown breakpoint and two options at once', () => {
     expectTypeOf({ matchMin: 'xl' } as const).not.toExtend<Match>();
-    expectTypeOf({ matchOnly: ['base', 'md'] } as const).not.toExtend<Match>();
+    expectTypeOf({ matchOnly: ['base', 'xl'] } as const).not.toExtend<Match>();
     expectTypeOf({ matchMin: 'sm', matchMax: 'md' } as const).not.toExtend<Match>();
   });
 

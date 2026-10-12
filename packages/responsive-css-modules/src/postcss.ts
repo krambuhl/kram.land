@@ -3,7 +3,8 @@ import { relative } from 'node:path';
 import type { ChildNode, Plugin } from 'postcss';
 
 import { variantClass } from './index.ts';
-import { mediaQuery, rangeOf } from './scale.ts';
+import { mediaQuery, rangesOf } from './scale.ts';
+import type { Range } from './scale.ts';
 import type { Scale } from './scale.ts';
 import { PACKAGE, realPath } from './scan.ts';
 import type { Usage } from './scan.ts';
@@ -33,9 +34,9 @@ export function responsivePostcss(state: () => ResponsiveState | undefined): Plu
         const variant = variantClass(usage.className, usage.match);
         if (done.has(variant)) continue;
         done.add(variant);
-        let range: [number, number];
+        let ranges: Range[];
         try {
-          range = rangeOf(usage.match, current.scale);
+          ranges = rangesOf(usage.match, current.scale);
         } catch (error) {
           throw new Error(`${usage.at}: ${(error as Error).message}`, { cause: error });
         }
@@ -54,7 +55,7 @@ export function responsivePostcss(state: () => ResponsiveState | undefined): Plu
         if (clones.length === 0) {
           throw new Error(`${usage.at}: .${usage.className} is not in ${relative(process.cwd(), file)}.`);
         }
-        const query = mediaQuery(range, current.scale);
+        const query = mediaQuery(ranges, current.scale);
         additions.push(
           ...(query === null
             ? clones

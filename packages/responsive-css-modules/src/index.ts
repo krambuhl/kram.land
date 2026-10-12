@@ -3,12 +3,11 @@ export interface ResponsiveRegister {}
 type Registered<Key extends string, Fallback> = ResponsiveRegister extends Record<Key, infer T> ? T : Fallback;
 
 export type Breakpoint = Registered<'breakpoint', string>;
-export type BreakpointRange = Registered<'range', readonly string[]>;
 
 export type Match =
   | { matchMin: Breakpoint; matchMax?: never; matchOnly?: never }
   | { matchMax: Breakpoint; matchMin?: never; matchOnly?: never }
-  | { matchOnly: Breakpoint | BreakpointRange; matchMin?: never; matchMax?: never };
+  | { matchOnly: Breakpoint | readonly Breakpoint[]; matchMin?: never; matchMax?: never };
 
 export type MatchOptions =
   | { matchMin: string; matchMax?: never; matchOnly?: never }
@@ -21,7 +20,7 @@ export function variantSuffix(match: MatchOptions): string {
   if (match.matchMin !== undefined) return `min-${match.matchMin}`;
   if (match.matchMax !== undefined) return `max-${match.matchMax}`;
   const only: readonly string[] = typeof match.matchOnly === 'string' ? [match.matchOnly] : match.matchOnly;
-  return only.length === 1 ? `only-${only[0]}` : `only-${only[0]}-${only[only.length - 1]}`;
+  return `only-${only.join('-')}`;
 }
 
 export function variantClass(name: string, match: MatchOptions): string {

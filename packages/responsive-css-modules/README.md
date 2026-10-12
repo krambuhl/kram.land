@@ -20,7 +20,8 @@ const r = responsive(styles);
 <div className={r.cn({ matchMin: 'sm' })} />; // sm and wider
 <div className={r.cn({ matchMax: 'sm' })} />; // up to and including sm
 <div className={r.cn({ matchOnly: 'md' })} />; // md only
-<div className={r.cn({ matchOnly: ['sm', 'md'] })} />; // sm through md
+<div className={r.cn({ matchOnly: ['sm', 'md'] })} />; // sm and md
+<div className={r.cn({ matchOnly: ['base', 'lg'] })} />; // base and lg, not between
 ```
 
 A call returns only the variant class, so `r.cn({ matchMin: 'sm' })` styles nothing below `sm`. Combine it with other classes as usual.
@@ -29,14 +30,15 @@ A call returns only the variant class, so `r.cn({ matchMin: 'sm' })` styles noth
 
 Breakpoints are an ordered list of `{ name, width }`, where `width` is where the breakpoint starts; the first one's width is ignored. `@media` cannot read custom properties, so the widths are written into the queries at build time.
 
-| option                    | query                |
-| ------------------------- | -------------------- |
-| `matchMin: 'sm'`          | `(width >= sm)`      |
-| `matchMax: 'sm'`          | `(width < md)`       |
-| `matchOnly: 'sm'`         | `(sm <= width < md)` |
-| `matchOnly: ['sm', 'md']` | `(sm <= width < lg)` |
+| option                      | query                              |
+| --------------------------- | ---------------------------------- |
+| `matchMin: 'sm'`            | `(width >= sm)`                    |
+| `matchMax: 'sm'`            | `(width < md)`                     |
+| `matchOnly: 'sm'`           | `(sm <= width < md)`               |
+| `matchOnly: ['sm', 'md']`   | `(sm <= width < lg)`               |
+| `matchOnly: ['base', 'md']` | `(width < sm), (md <= width < lg)` |
 
-A `matchOnly` list must be a contiguous run. A range that covers every breakpoint emits no query.
+A `matchOnly` list can name any breakpoints in any order; neighbours merge into one range and gaps become a list of queries. The class name follows the list as written, so `['md', 'sm']` and `['sm', 'md']` are two classes with the same CSS. A list that covers every breakpoint emits no query.
 
 ## How variants are found
 
@@ -83,4 +85,4 @@ export default { plugins: [tokenJet(), responsiveCssModules({ breakpoints: fromT
 
 ## Types
 
-The types file registers the breakpoint names and every contiguous run, so an unknown breakpoint or a gap is a type error. The plugin writes it on start. For a type check that runs before any build, `responsive-css-modules --token-jet [--tag <tag>]` writes it from the command line.
+The types file registers the breakpoint names, so an unknown breakpoint is a type error. The plugin writes it on start. For a type check that runs before any build, `responsive-css-modules --token-jet [--tag <tag>]` writes it from the command line.

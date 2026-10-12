@@ -8,7 +8,8 @@ describe('variantClass', () => {
     expect(variantClass('cn', { matchMax: 'md' })).toBe('cn--max-md');
     expect(variantClass('cn', { matchOnly: 'base' })).toBe('cn--only-base');
     expect(variantClass('cn', { matchOnly: ['sm'] })).toBe('cn--only-sm');
-    expect(variantClass('cn', { matchOnly: ['sm', 'md', 'lg'] })).toBe('cn--only-sm-lg');
+    expect(variantClass('cn', { matchOnly: ['sm', 'md', 'lg'] })).toBe('cn--only-sm-md-lg');
+    expect(variantClass('cn', { matchOnly: ['lg', 'base'] })).toBe('cn--only-lg-base');
   });
 });
 
