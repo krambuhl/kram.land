@@ -1,6 +1,8 @@
 const SPAWN_EVERY = 3;
 const SPAWN_ATTEMPTS = 32;
-const SEED_ROUNDS = 20;
+const SEED_ROUNDS = 6;
+// circles can't tile the plane, so seeding a full area's worth overfills the screen.
+const SEED_FILL = 0.8;
 const GROW = 0.08;
 const GAP = 5;
 const RELAX = 8;
@@ -188,7 +190,7 @@ export function createField(width: number, height: number, options: FieldOptions
   };
 
   const typical = SIZE + (EDGE_GROWTH[0] + EDGE_GROWTH[1]) / 4;
-  const count = Math.round((width * height) / (Math.PI * (typical + GAP / 2) ** 2));
+  const count = Math.round((SEED_FILL * width * height) / (Math.PI * (typical + GAP / 2) ** 2));
   for (let i = 0; i < count; i++) {
     const x = random() * width;
     const y = random() * height;
