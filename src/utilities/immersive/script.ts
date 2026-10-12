@@ -20,7 +20,7 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
     if (!html.hasAttribute('data-immersive')) return;
     html.setAttribute('data-measuring', '');
     const rect = image.getBoundingClientRect();
-    const frame = canvas.getBoundingClientRect();
+    const area = canvas.getBoundingClientRect();
     html.removeAttribute('data-immersive');
     const opened = image.getBoundingClientRect();
     const scrolls = Math.max(0, document.body.offsetHeight - window.innerHeight);
@@ -28,12 +28,13 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
     image.getBoundingClientRect();
     html.removeAttribute('data-measuring');
     const travel = Math.max(0, rect.top - opened.top);
-    canvas.style.setProperty('--travel', `${travel}px`);
-    canvas.style.setProperty('--scrolls', `${scrolls}px`);
-    floor = canvas.clientHeight - travel - scrolls;
+    html.style.setProperty('--travel', `${travel}px`);
+    html.style.setProperty('--scrolls', `${scrolls}px`);
+    // the floor is where the closed screen ends, in canvas coordinates.
+    floor = window.innerHeight - area.top;
     anchor = {
-      x: rect.left + rect.width / 2 - frame.left,
-      y: rect.top + rect.height / 2 - frame.top,
+      x: rect.left + rect.width / 2 - area.left,
+      y: rect.top + rect.height / 2 - area.top,
       r: rect.width / 2,
     };
   };

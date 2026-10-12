@@ -1,23 +1,3 @@
-/* blurs the art behind the open page into a soft grain of colour. brightness(0.55)
-   darkens it because blur alone leaves the light text over the palette's brightest colours. */
-.scrim {
-  position: fixed;
-
-  /* overshoots the screen top and bottom: safari's sliding toolbars leave a fixed
-     layer short of the edge. */
-  inset: -25lvh 0;
-  z-index: 0;
-  margin: 0;
-  opacity: 0;
-  pointer-events: none;
-  backdrop-filter: blur(14px) brightness(0.55);
-  transition: opacity 600ms ease-out;
-}
-
-:root:not([data-immersive], [data-closing]) .scrim {
-  opacity: 1;
-}
-
 .image {
   position: relative;
   z-index: 2;
@@ -61,25 +41,46 @@
   background-color: #000;
 }
 
-/* the art sits on the page, not the screen, so it scrolls with the open content. */
-.art {
+/* the frame sits on the page, not the screen, so the art scrolls with the open content.
+   it clips the canvas, which bleeds past every side so the open blur's soft edge is cut off. */
+.frame {
   position: absolute;
   top: 0;
   left: 0;
   z-index: 0;
   width: 100%;
-  height: calc(100vh + var(--travel, 0px) + var(--scrolls, 0px));
-  height: calc(100lvh + var(--travel, 0px) + var(--scrolls, 0px));
+  height: calc(100vh + var(--scrolls, 0px));
+  height: calc(100lvh + var(--scrolls, 0px));
+  margin: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.art {
+  --bleed: 32px;
+
+  position: absolute;
+  top: calc(-1 * var(--bleed));
+  left: calc(-1 * var(--bleed));
+  width: calc(100% + 2 * var(--bleed));
+  height: calc(100% + 2 * var(--bleed) + var(--travel, 0px));
   background: #000;
   opacity: 0;
-  pointer-events: none;
   transition:
     opacity 600ms ease-out,
+    filter 600ms ease-out,
     transform 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 :root:not([data-immersive]) .art {
   transform: translateY(calc(-1 * var(--travel, 0px)));
+}
+
+/* the blur is on the canvas itself, so it reaches wherever the art does. brightness
+   darkens it because blur alone leaves the light text hard to read over the palette's
+   brightest colours. */
+:root:not([data-immersive], [data-closing]) .art {
+  filter: blur(14px) brightness(0.55);
 }
 
 :root[data-measuring] .art,
