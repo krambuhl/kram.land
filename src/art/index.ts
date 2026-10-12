@@ -1,6 +1,7 @@
 const SUPERELLIPSE = 2 ** 1.35;
-const SPAWN_EVERY = 6;
-const SPAWN_ATTEMPTS = 4;
+const SPAWN_EVERY = 3;
+const SPAWN_ATTEMPTS = 32;
+const SEED_ROUNDS = 20;
 const GROW = 0.08;
 const GAP = 5;
 const RELAX = 8;
@@ -78,7 +79,8 @@ export function createField(width: number, height: number, options: FieldOptions
     return cy * columns + cx;
   };
 
-  const settle = (passes: number) => {
+  const settle = (passes: number): number => {
+    let moved = 0;
     const grid: Blob[][] = Array.from({ length: columns * rows }, () => []);
     for (const b of blobs) grid[cellOf(b.x, b.y)].push(b);
     for (let pass = 0; pass < passes; pass++) {
@@ -105,6 +107,7 @@ export function createField(width: number, height: number, options: FieldOptions
               if (squared >= reach * reach) continue;
               const distance = Math.sqrt(squared) || 0.01;
               const push = (reach - distance) / 2 / distance;
+              moved = Math.max(moved, reach - distance);
               a.x -= ox * push;
               a.y -= oy * push;
               b.x += ox * push;
@@ -114,12 +117,14 @@ export function createField(width: number, height: number, options: FieldOptions
         }
       }
     }
+    return moved;
   };
 
-  const count = Math.round((width * height) / (Math.PI * (SIZE * reachFactor + GAP / 2) ** 2));
+  const typical = SIZE + (EDGE_GROWTH[0] + EDGE_GROWTH[1]) / 4;
+  const count = Math.round((width * height) / (Math.PI * (typical * reachFactor + GAP / 2) ** 2));
   for (let i = 0; i < count; i++) blobs.push(blob(random() * width, random() * height));
   for (const b of blobs) b.r = target(b);
-  settle(60);
+  for (let round = 0; round < SEED_ROUNDS && settle(10) > 0.25; round++);
   for (const b of blobs) {
     b.drawX = b.x;
     b.drawY = b.y;
@@ -138,7 +143,9 @@ export function createField(width: number, height: number, options: FieldOptions
           const rim = anchor.r * extent(exponent, ux, uy) + GAP + 1;
           const x = anchor.x + ux * rim;
           const y = anchor.y + uy * rim;
-          const crowded = blobs.some((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r * reachFactor) ** 2);
+          const crowded = blobs.some(
+            (b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (Math.max(b.r, SIZE) * reachFactor + GAP / 2) ** 2
+          );
           if (crowded) continue;
           blobs.push(blob(x, y));
           break;
