@@ -71,7 +71,6 @@ export function secretScroll(
     const rect = image.getBoundingClientRect();
     const shift = progress * (Number.parseFloat(root.style.getPropertyValue('--secret-shift')) || 0);
     root.style.setProperty('--secret-shift', `${window.innerHeight / 2 - (rect.top + rect.height / 2 - shift)}px`);
-    root.style.setProperty('--secret-radius', `${rect.width / 2}px`);
   };
 
   const bottom = () => document.documentElement.scrollHeight - window.innerHeight;

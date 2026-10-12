@@ -1,7 +1,7 @@
 import styles from './styles.module.css';
 
 export interface SecretOptions {
-  part: 'root' | 'image' | 'text' | 'art' | 'scrim';
+  part: 'root' | 'image' | 'text' | 'art';
 }
 
 export function secret({ part }: SecretOptions) {
