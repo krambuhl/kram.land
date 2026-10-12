@@ -64,10 +64,9 @@ describe('vite adapter', () => {
       writeFileSync(join(dir, 'tokens/tokens.ts'), fixture.replace("x16: { value: '16px'", "x16: { value: '18px'"));
       // Drive the watcher directly: server.watch is off so the test is deterministic.
       await server.watcher.emit('change', join(dir, 'tokens/tokens.ts'));
-      await new Promise((r) => setTimeout(r, 200));
-
-      const after = readFileSync(join(dir, 'generated/tokens/tokens.css'), 'utf8');
-      expect(after).toContain('--space-x16: 18px;');
+      await expect
+        .poll(() => readFileSync(join(dir, 'generated/tokens/tokens.css'), 'utf8'), { timeout: 5000 })
+        .toContain('--space-x16: 18px;');
     } finally {
       await server.close();
     }
