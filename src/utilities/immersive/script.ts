@@ -1,5 +1,3 @@
-import { superellipseExponent } from '../superellipse/index.ts';
-
 const MOVE = 450;
 const FADE = 200;
 
@@ -60,7 +58,7 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
 
   measure();
   import('../../art/index.ts').then(({ default: start }) => {
-    stopArt = start(canvas, { anchor: () => anchor, exponent: superellipseExponent() });
+    stopArt = start(canvas, { anchor: () => anchor });
     html.setAttribute('data-art', '');
   });
   image.addEventListener('click', onClick);

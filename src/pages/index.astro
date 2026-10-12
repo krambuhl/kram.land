@@ -8,7 +8,7 @@ import { area } from 'utilities/area';
 import { entrance } from 'utilities/entrance';
 import { immersive } from 'utilities/immersive';
 import { stack } from 'utilities/stack';
-import { superellipse } from 'utilities/superellipse';
+import { circle } from 'utilities/circle';
 import { bodyText, headingText } from 'utilities/text';
 import ikea from '../assets/ikea.png';
 ---
@@ -32,7 +32,7 @@ import ikea from '../assets/ikea.png';
         height={192}
         densities={[1, 2, 3]}
         priority
-        class:list={[superellipse(), entrance({ motion: 'rise' })]}
+        class:list={[circle(), entrance({ motion: 'rise' })]}
       />
     </button>
 

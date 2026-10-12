@@ -11,20 +11,15 @@ function seeded(seed: number) {
 
 const portrait = { x: 720, y: 450, r: 96 };
 
-describe.each([
-  ['superellipse', 2 ** 1.35],
-  ['circle', 2],
-])('createField with a %s portrait', (_, EXPONENT) => {
-  const REACH = 2 ** (0.5 - 1 / EXPONENT);
-
+describe('createField', () => {
   test('starts with the screen already covered', () => {
-    const field = createField(1440, 900, { anchor: portrait, exponent: EXPONENT }, seeded(1));
+    const field = createField(1440, 900, { anchor: portrait }, seeded(1));
     const covered = field.blobs.reduce((sum, b) => sum + Math.PI * b.r ** 2, 0);
     expect(covered / (1440 * 900)).toBeGreaterThan(0.4);
   });
 
   test('blobs grow on their way from the portrait to the edge, and swell more right at the edge', () => {
-    const field = createField(1440, 900, { anchor: portrait, exponent: EXPONENT }, seeded(3));
+    const field = createField(1440, 900, { anchor: portrait }, seeded(3));
     for (let i = 0; i < 120; i++) field.step(16);
     const near = field.blobs.filter((b) => Math.hypot(b.x - portrait.x, b.y - portrait.y) < portrait.r + 40);
     const edge = field.blobs.filter((b) => b.x < 20 || b.x > 1420 || b.y < 20 || b.y > 880);
@@ -35,7 +30,7 @@ describe.each([
   });
 
   test('colours fall into bands, so most blobs share a colour with their nearest neighbour', () => {
-    const field = createField(1440, 900, { anchor: portrait, exponent: EXPONENT }, seeded(4));
+    const field = createField(1440, 900, { anchor: portrait }, seeded(4));
     for (let i = 0; i < 120; i++) field.step(16);
     const sample = field.blobs.slice(0, 400);
     const shared = sample.filter((a) => {
@@ -54,7 +49,7 @@ describe.each([
   });
 
   test('packs against the portrait with no visible overlap as new blobs push out from its rim', () => {
-    const field = createField(1440, 900, { anchor: portrait, exponent: EXPONENT }, seeded(2));
+    const field = createField(1440, 900, { anchor: portrait }, seeded(2));
     for (let i = 0; i < 300; i++) field.step(16);
     const blobs = field.blobs;
     let worst = -Infinity;
@@ -62,14 +57,14 @@ describe.each([
       const dx = b.x - portrait.x;
       const dy = b.y - portrait.y;
       const away = Math.hypot(dx, dy);
-      const edge = portrait.r * (Math.abs(dx / away) ** EXPONENT + Math.abs(dy / away) ** EXPONENT) ** (-1 / EXPONENT);
+      const edge = portrait.r;
       worst = Math.max(worst, edge + b.r - away);
     }
     for (let i = 0; i < blobs.length; i++) {
       for (let j = i + 1; j < blobs.length; j++) {
         const a = blobs[i];
         const b = blobs[j];
-        worst = Math.max(worst, (a.r + b.r) * REACH - Math.hypot(a.drawX - b.drawX, a.drawY - b.drawY));
+        worst = Math.max(worst, a.r + b.r - Math.hypot(a.drawX - b.drawX, a.drawY - b.drawY));
       }
     }
     expect(worst).toBeLessThanOrEqual(1);

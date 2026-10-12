@@ -1,5 +1,4 @@
 .root {
   border-radius: 50%;
-  corner-shape: superellipse(1.35);
   overflow: hidden;
 }

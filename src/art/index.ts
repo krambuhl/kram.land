@@ -1,4 +1,3 @@
-const SUPERELLIPSE = 2 ** 1.35;
 const SPAWN_EVERY = 3;
 const SPAWN_ATTEMPTS = 32;
 const SEED_ROUNDS = 20;
@@ -37,13 +36,8 @@ interface Anchor {
   r: number;
 }
 
-function extent(exponent: number, ux: number, uy: number): number {
-  return (Math.abs(ux) ** exponent + Math.abs(uy) ** exponent) ** (-1 / exponent);
-}
-
 export interface FieldOptions {
   anchor?: Anchor;
-  exponent?: number;
 }
 
 interface Field {
@@ -53,8 +47,7 @@ interface Field {
 }
 
 export function createField(width: number, height: number, options: FieldOptions = {}, random = Math.random): Field {
-  const { anchor = { x: width / 2, y: height / 2, r: 0 }, exponent = SUPERELLIPSE } = options;
-  const reachFactor = 2 ** (0.5 - 1 / exponent);
+  const { anchor = { x: width / 2, y: height / 2, r: 0 } } = options;
   const blobs: Blob[] = [];
   let sinceSpawn = 0;
   let clock = 0;
@@ -122,7 +115,7 @@ export function createField(width: number, height: number, options: FieldOptions
     color: colorAt(x, y, phase),
   });
 
-  const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) * reachFactor + GAP;
+  const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) + GAP;
   const columns = Math.ceil(width / cell) + 2;
   const rows = Math.ceil(height / cell) + 2;
   const cellOf = (x: number, y: number) => {
@@ -140,7 +133,7 @@ export function createField(width: number, height: number, options: FieldOptions
         const ax = a.x - anchor.x;
         const ay = a.y - anchor.y;
         const away = Math.hypot(ax, ay) || 0.01;
-        const clear = anchor.r * extent(exponent, ax / away, ay / away) + a.r * reachFactor + GAP;
+        const clear = anchor.r + a.r + GAP;
         if (away < clear) {
           a.x = anchor.x + (ax / away) * clear;
           a.y = anchor.y + (ay / away) * clear;
@@ -154,7 +147,7 @@ export function createField(width: number, height: number, options: FieldOptions
               if (b === a) continue;
               const ox = b.x - a.x;
               const oy = b.y - a.y;
-              const reach = (a.r + b.r) * reachFactor + GAP;
+              const reach = a.r + b.r + GAP;
               const squared = ox * ox + oy * oy;
               if (squared >= reach * reach) continue;
               const distance = Math.sqrt(squared) || 0.01;
@@ -173,7 +166,7 @@ export function createField(width: number, height: number, options: FieldOptions
   };
 
   const typical = SIZE + (EDGE_GROWTH[0] + EDGE_GROWTH[1]) / 4;
-  const count = Math.round((width * height) / (Math.PI * (typical * reachFactor + GAP / 2) ** 2));
+  const count = Math.round((width * height) / (Math.PI * (typical + GAP / 2) ** 2));
   for (let i = 0; i < count; i++) {
     const x = random() * width;
     const y = random() * height;
@@ -189,7 +182,7 @@ export function createField(width: number, height: number, options: FieldOptions
     const dx = b.x - anchor.x;
     const dy = b.y - anchor.y;
     const away = Math.hypot(dx, dy) || 0.01;
-    const rim = anchor.r * extent(exponent, dx / away, dy / away);
+    const rim = anchor.r;
     b.color = colorAt(b.x, b.y, phaseAgo((away - rim) / DRIFT));
   }
   for (const b of blobs) {
@@ -209,12 +202,10 @@ export function createField(width: number, height: number, options: FieldOptions
           const angle = random() * Math.PI * 2;
           const ux = Math.cos(angle);
           const uy = Math.sin(angle);
-          const rim = anchor.r * extent(exponent, ux, uy) + GAP + 1;
+          const rim = anchor.r + GAP + 1;
           const x = anchor.x + ux * rim;
           const y = anchor.y + uy * rim;
-          const crowded = blobs.some(
-            (b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (Math.max(b.r, SIZE) * reachFactor + GAP / 2) ** 2
-          );
+          const crowded = blobs.some((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (Math.max(b.r, SIZE) + GAP * 0.75) ** 2);
           if (crowded) continue;
           blobs.push(blob(x, y, colorPhase));
           break;
@@ -239,33 +230,14 @@ export function createField(width: number, height: number, options: FieldOptions
   };
 }
 
-function unitShape(exponent: number): Path2D {
-  const path = new Path2D();
-  const steps = 64;
-  for (let i = 0; i <= steps; i++) {
-    const t = (i / steps) * Math.PI * 2;
-    const c = Math.cos(t);
-    const s = Math.sin(t);
-    const x = Math.sign(c) * Math.abs(c) ** (2 / exponent);
-    const y = Math.sign(s) * Math.abs(s) ** (2 / exponent);
-    if (i === 0) path.moveTo(x, y);
-    else path.lineTo(x, y);
-  }
-  path.closePath();
-  return path;
-}
-
 export interface StartOptions {
   anchor?: () => Anchor;
-  exponent?: number;
 }
 
 export default function start(canvas: HTMLCanvasElement, options: StartOptions = {}): () => void {
   const context = canvas.getContext('2d');
   if (context === null) return () => {};
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const exponent = options.exponent ?? SUPERELLIPSE;
-  const shape = unitShape(exponent);
   let field: Field;
   let width = 0;
   let height = 0;
@@ -278,7 +250,7 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     height = canvas.clientHeight;
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
-    field = createField(width, height, { anchor: options.anchor?.(), exponent });
+    field = createField(width, height, { anchor: options.anchor?.() });
   };
 
   const draw = () => {
@@ -297,9 +269,10 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
       const shift = (SHIFT * (inner - outer) * Math.sin(Math.PI * t)) / away;
       const x = blob.drawX + dx * shift;
       const y = blob.drawY + dy * shift;
-      context.setTransform(ratio * r, 0, 0, ratio * r, ratio * x, ratio * y);
       context.fillStyle = blob.color;
-      context.fill(shape);
+      context.beginPath();
+      context.arc(x, y, r, 0, Math.PI * 2);
+      context.fill();
     }
   };
 
