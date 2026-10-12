@@ -23,15 +23,15 @@ describe.each([
     expect(covered / (1440 * 900)).toBeGreaterThan(0.4);
   });
 
-  test('blobs grow by 4px to 8px across on their way from the portrait to the edge', () => {
+  test('blobs grow on their way from the portrait to the edge, and swell more right at the edge', () => {
     const field = createField(1440, 900, { anchor: portrait, exponent: EXPONENT }, seeded(3));
     for (let i = 0; i < 120; i++) field.step(16);
     const near = field.blobs.filter((b) => Math.hypot(b.x - portrait.x, b.y - portrait.y) < portrait.r + 40);
     const edge = field.blobs.filter((b) => b.x < 20 || b.x > 1420 || b.y < 20 || b.y > 880);
     const mean = (list: typeof near) => list.reduce((sum, b) => sum + b.r * 2, 0) / list.length;
     expect(mean(near)).toBeLessThan(16);
-    expect(mean(edge)).toBeGreaterThan(17);
-    expect(Math.max(...edge.map((b) => b.r * 2))).toBeLessThanOrEqual(22);
+    expect(mean(edge)).toBeGreaterThan(20);
+    expect(Math.max(...edge.map((b) => b.r * 2))).toBeLessThanOrEqual(28);
   });
 
   test('colours fall into bands, so most blobs share a colour with their nearest neighbour', () => {

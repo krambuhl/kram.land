@@ -12,6 +12,8 @@ const DRIFT = 0.025;
 const ARMS = 3;
 const JITTER = 1.2;
 const EDGE_GROWTH = [2, 4];
+const EDGE_SWELL = 3;
+const SWELL_FROM = 0.85;
 const RAINBOW = ['#5A4D9A', '#A067C3', '#CD361F', '#F07C31', '#E9AC38', '#5B9E47', '#58BABB', '#1079CB'];
 
 interface Blob {
@@ -69,7 +71,8 @@ export function createField(width: number, height: number, options: FieldOptions
     const dy = b.y - anchor.y;
     const away = Math.hypot(dx, dy) || 0.01;
     const travelled = Math.min(1, Math.max(0, away / edgeReach(dx / away, dy / away)));
-    return SIZE + b.extra * travelled;
+    const swell = Math.min(1, Math.max(0, (travelled - SWELL_FROM) / (1 - SWELL_FROM)));
+    return SIZE + b.extra * travelled + EDGE_SWELL * swell * swell * (3 - 2 * swell);
   };
 
   const blob = (x: number, y: number, phase: number): Blob => ({
@@ -82,7 +85,7 @@ export function createField(width: number, height: number, options: FieldOptions
     color: colorAt(x, y, phase),
   });
 
-  const cell = 2 * (SIZE + EDGE_GROWTH[1]) * reachFactor + GAP;
+  const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) * reachFactor + GAP;
   const columns = Math.ceil(width / cell) + 2;
   const rows = Math.ceil(height / cell) + 2;
   const cellOf = (x: number, y: number) => {
