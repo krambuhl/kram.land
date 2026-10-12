@@ -1,8 +1,7 @@
-const EXPONENT = 2 ** 1.35;
+const SUPERELLIPSE = 2 ** 1.35;
 const SPAWN_EVERY = 9;
 const GROW = 0.08;
 const GAP = 5;
-const REACH = 2 ** (0.5 - 1 / EXPONENT);
 const RELAX = 6;
 const SMOOTH = 0.5;
 const SIZE = 7;
@@ -17,14 +16,19 @@ interface Blob {
   color: string;
 }
 
-export interface Anchor {
+interface Anchor {
   x: number;
   y: number;
   r: number;
 }
 
-function extent(ux: number, uy: number): number {
-  return (Math.abs(ux) ** EXPONENT + Math.abs(uy) ** EXPONENT) ** (-1 / EXPONENT);
+function extent(exponent: number, ux: number, uy: number): number {
+  return (Math.abs(ux) ** exponent + Math.abs(uy) ** exponent) ** (-1 / exponent);
+}
+
+export interface FieldOptions {
+  anchor?: Anchor;
+  exponent?: number;
 }
 
 interface Field {
@@ -32,12 +36,9 @@ interface Field {
   step(elapsed: number): void;
 }
 
-export function createField(
-  width: number,
-  height: number,
-  anchor: Anchor = { x: width / 2, y: height / 2, r: 0 },
-  random = Math.random
-): Field {
+export function createField(width: number, height: number, options: FieldOptions = {}, random = Math.random): Field {
+  const { anchor = { x: width / 2, y: height / 2, r: 0 }, exponent = SUPERELLIPSE } = options;
+  const reachFactor = 2 ** (0.5 - 1 / exponent);
   const blobs: Blob[] = [];
   let sinceSpawn = 0;
 
@@ -50,7 +51,7 @@ export function createField(
     color: RAINBOW[Math.floor(random() * RAINBOW.length)],
   });
 
-  const cell = 2 * SIZE * REACH + GAP;
+  const cell = 2 * SIZE * reachFactor + GAP;
   const columns = Math.ceil(width / cell) + 2;
   const rows = Math.ceil(height / cell) + 2;
   const cellOf = (x: number, y: number) => {
@@ -67,7 +68,7 @@ export function createField(
         const ax = a.x - anchor.x;
         const ay = a.y - anchor.y;
         const away = Math.hypot(ax, ay) || 0.01;
-        const clear = anchor.r * extent(ax / away, ay / away) + a.r * REACH + GAP;
+        const clear = anchor.r * extent(exponent, ax / away, ay / away) + a.r * reachFactor + GAP;
         if (away < clear) {
           a.x = anchor.x + (ax / away) * clear;
           a.y = anchor.y + (ay / away) * clear;
@@ -81,7 +82,7 @@ export function createField(
               if (b === a) continue;
               const ox = b.x - a.x;
               const oy = b.y - a.y;
-              const reach = (a.r + b.r) * REACH + GAP;
+              const reach = (a.r + b.r) * reachFactor + GAP;
               const squared = ox * ox + oy * oy;
               if (squared >= reach * reach) continue;
               const distance = Math.sqrt(squared) || 0.01;
@@ -97,7 +98,7 @@ export function createField(
     }
   };
 
-  const count = Math.round((width * height) / (Math.PI * (SIZE * REACH + GAP / 2) ** 2));
+  const count = Math.round((width * height) / (Math.PI * (SIZE * reachFactor + GAP / 2) ** 2));
   for (let i = 0; i < count; i++) blobs.push(blob(random() * width, random() * height, true));
   settle(60);
   for (const b of blobs) {
@@ -114,7 +115,7 @@ export function createField(
         const angle = random() * Math.PI * 2;
         const ux = Math.cos(angle);
         const uy = Math.sin(angle);
-        const rim = anchor.r * extent(ux, uy) + GAP + 1;
+        const rim = anchor.r * extent(exponent, ux, uy) + GAP + 1;
         blobs.push(blob(anchor.x + ux * rim, anchor.y + uy * rim, false));
       }
       for (const b of blobs) b.r += (SIZE - b.r) * GROW;
@@ -131,15 +132,15 @@ export function createField(
   };
 }
 
-function unitShape(): Path2D {
+function unitShape(exponent: number): Path2D {
   const path = new Path2D();
   const steps = 64;
   for (let i = 0; i <= steps; i++) {
     const t = (i / steps) * Math.PI * 2;
     const c = Math.cos(t);
     const s = Math.sin(t);
-    const x = Math.sign(c) * Math.abs(c) ** (2 / EXPONENT);
-    const y = Math.sign(s) * Math.abs(s) ** (2 / EXPONENT);
+    const x = Math.sign(c) * Math.abs(c) ** (2 / exponent);
+    const y = Math.sign(s) * Math.abs(s) ** (2 / exponent);
     if (i === 0) path.moveTo(x, y);
     else path.lineTo(x, y);
   }
@@ -149,13 +150,15 @@ function unitShape(): Path2D {
 
 export interface StartOptions {
   anchor?: () => Anchor;
+  exponent?: number;
 }
 
 export default function start(canvas: HTMLCanvasElement, options: StartOptions = {}): () => void {
   const context = canvas.getContext('2d');
   if (context === null) return () => {};
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const shape = unitShape();
+  const exponent = options.exponent ?? SUPERELLIPSE;
+  const shape = unitShape(exponent);
   let field: Field;
   let width = 0;
   let height = 0;
@@ -168,7 +171,7 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     height = canvas.clientHeight;
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
-    field = createField(width, height, options.anchor?.());
+    field = createField(width, height, { anchor: options.anchor?.(), exponent });
   };
 
   const draw = () => {

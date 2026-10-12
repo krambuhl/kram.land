@@ -1,3 +1,5 @@
+import { superellipseExponent } from '../superellipse/index.ts';
+
 import styles from './styles.module.css';
 
 const OPEN_AT = 0.5;
@@ -37,7 +39,7 @@ export function secretScroll(
     artTimer = setTimeout(async () => {
       const { default: start } = await import('../../art/index.ts');
       if (!open) return;
-      stopArt ??= start(canvas, { anchor: () => anchor });
+      stopArt ??= start(canvas, { anchor: () => anchor, exponent: superellipseExponent() });
       root.setAttribute('data-art', '');
     }, ART_DELAY);
   };
