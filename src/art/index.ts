@@ -13,7 +13,9 @@ const OUTER_BREATHE = 0.15;
 const SHIFT = 16;
 const BAND = 50;
 const DRIFT = 0.025;
-const ARMS = 3;
+const ARM_COUNTS = [3, 2, 3, 5];
+const ARM_HOLD = 40000;
+const ARM_BLEND = 8000;
 const JITTER = 3;
 const EDGE_GROWTH = [2, 4];
 const EDGE_SWELL = 3;
@@ -80,10 +82,21 @@ export function createField(width: number, height: number, options: FieldOptions
     return history[index];
   };
 
-  const colorAt = (x: number, y: number, phase: number) => {
+  // the arm count steps through ARM_COUNTS, and newborns dither between
+  // the old and new count over ARM_BLEND so the change ripples out softly.
+  const armsOrigin = random() * ARM_HOLD * ARM_COUNTS.length;
+  const armsAt = (at: number) => {
+    const t = at + armsOrigin;
+    const stage = Math.floor(t / ARM_HOLD);
+    const into = t - stage * ARM_HOLD;
+    const pick = (n: number) => ARM_COUNTS[((n % ARM_COUNTS.length) + ARM_COUNTS.length) % ARM_COUNTS.length];
+    return random() < smooth((into - (ARM_HOLD - ARM_BLEND)) / ARM_BLEND) ? pick(stage + 1) : pick(stage);
+  };
+
+  const colorAt = (x: number, y: number, phase: number, arms: number) => {
     const turn = Math.atan2(y - anchor.y, x - anchor.x) / (Math.PI * 2);
     const blur = ((random() - 0.5) * JITTER) / RAINBOW.length;
-    const k = (((turn * ARMS + phase + blur) % 1) + 1) % 1;
+    const k = (((turn * arms + phase + blur) % 1) + 1) % 1;
     return RAINBOW[Math.floor(k * RAINBOW.length)];
   };
 
@@ -112,7 +125,7 @@ export function createField(width: number, height: number, options: FieldOptions
   const rimShare = anchor.r / Math.max(1, Math.min(width, height) / 2);
   const along = (t: number) => Math.min(1, Math.max(0, (t - rimShare) / Math.max(0.01, 1 - rimShare)));
 
-  const blob = (x: number, y: number, phase: number): Blob => ({
+  const blob = (x: number, y: number, phase: number, arms: number): Blob => ({
     x,
     y,
     drawX: x,
@@ -121,7 +134,7 @@ export function createField(width: number, height: number, options: FieldOptions
     extra: EDGE_GROWTH[0] + random() * (EDGE_GROWTH[1] - EDGE_GROWTH[0]),
     along: 0,
     low: 0,
-    color: colorAt(x, y, phase),
+    color: colorAt(x, y, phase, arms),
   });
 
   const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) * (1 + FLOOR_SWELL) + GAP;
@@ -179,7 +192,7 @@ export function createField(width: number, height: number, options: FieldOptions
   for (let i = 0; i < count; i++) {
     const x = random() * width;
     const y = random() * height;
-    blobs.push(blob(x, y, 0));
+    blobs.push(blob(x, y, 0, 0));
   }
   for (const b of blobs) {
     const t = travelled(b);
@@ -193,7 +206,8 @@ export function createField(width: number, height: number, options: FieldOptions
     const dy = b.y - anchor.y;
     const away = Math.hypot(dx, dy) || 0.01;
     const rim = anchor.r;
-    b.color = colorAt(b.x, b.y, phaseAgo((away - rim) / DRIFT));
+    const age = (away - rim) / DRIFT;
+    b.color = colorAt(b.x, b.y, phaseAgo(age), armsAt(-age));
   }
   for (const b of blobs) {
     b.drawX = b.x;
@@ -217,7 +231,7 @@ export function createField(width: number, height: number, options: FieldOptions
           const y = anchor.y + uy * rim;
           const crowded = blobs.some((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (Math.max(b.r, SIZE) + GAP * 0.75) ** 2);
           if (crowded) continue;
-          blobs.push(blob(x, y, colorPhase));
+          blobs.push(blob(x, y, colorPhase, armsAt(clock)));
           break;
         }
       }
