@@ -453,7 +453,8 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
   // a resize reshapes the running field instead of restarting it, and a resize that
   // leaves the canvas size unchanged does nothing.
   const resize = () => {
-    const ratio = window.devicePixelRatio || 1;
+    // cap at 2x: each step above that multiplies the pixels filled per frame.
+    const ratio = Math.min(2, window.devicePixelRatio || 1);
     const nextWidth = canvas.clientWidth;
     const nextHeight = canvas.clientHeight;
     if (nextWidth === width && nextHeight === height && canvas.width === Math.round(width * ratio)) return;
@@ -485,17 +486,22 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     context.fillRect(0, 0, width, height);
     const { inner, outer } = field.breath();
     const center = options.anchor?.() ?? { x: width / 2, y: height / 2 };
-    for (const blob of field.blobs) {
-      const t = blob.along;
-      const dx = blob.drawX - center.x;
-      const dy = blob.drawY - center.y;
-      const away = Math.hypot(dx, dy) || 1;
-      const shift = (SHIFT * (inner - outer) * Math.sin(Math.PI * t)) / away;
-      const x = blob.drawX + dx * shift;
-      const y = blob.drawY + dy * shift;
-      context.fillStyle = blob.color;
+    // one path and one fill per colour instead of a fill per blob.
+    for (const color of RAINBOW) {
+      context.fillStyle = color;
       context.beginPath();
-      context.arc(x, y, blob.r, 0, Math.PI * 2);
+      for (const blob of field.blobs) {
+        if (blob.color !== color) continue;
+        const t = blob.along;
+        const dx = blob.drawX - center.x;
+        const dy = blob.drawY - center.y;
+        const away = Math.hypot(dx, dy) || 1;
+        const shift = (SHIFT * (inner - outer) * Math.sin(Math.PI * t)) / away;
+        const x = blob.drawX + dx * shift;
+        const y = blob.drawY + dy * shift;
+        context.moveTo(x + blob.r, y);
+        context.arc(x, y, blob.r, 0, Math.PI * 2);
+      }
       context.fill();
     }
   };
