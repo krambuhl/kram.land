@@ -6,8 +6,8 @@ const SEED_FILL = 0.8;
 const GROW = 0.08;
 const GAP = 5;
 // small pairs sit GAP·GAP_LOOSE apart, large pairs (GAP_LARGE radius) GAP·GAP_TIGHT.
-const GAP_LOOSE = 1.25;
-const GAP_TIGHT = 0.75;
+const GAP_LOOSE = 1.1;
+const GAP_TIGHT = 0.9;
 const GAP_LARGE = 16;
 const RELAX = 8;
 const SMOOTH = 0.5;
@@ -26,6 +26,11 @@ const JITTER = 3;
 const EDGE_GROWTH = [2, 4];
 const EDGE_SWELL = 3;
 const SWELL_FROM = 0.85;
+// blobs start at RAMP_START of their size on the portrait's rim and grow
+// linearly to full size over RAMP_SHARE of the screen width, at least RAMP_MIN px.
+const RAMP_START = 0.75;
+const RAMP_SHARE = 0.25;
+const RAMP_MIN = 100;
 const FLOOR_SWELL = 0.4;
 const FLOOR_BREATHE = 0.2;
 const CORNER_SWELL = 0.25;
@@ -132,7 +137,14 @@ export function createField(width: number, height: number, options: FieldOptions
   // distance from a top corner over which blobs swell: CORNER_REACH of the short side, at least 160px.
   const cornerReach = Math.max(160, CORNER_REACH * Math.min(width, height));
   const corner = (b: Blob) => smooth(1 - Math.min(Math.hypot(b.x, b.y), Math.hypot(width - b.x, b.y)) / cornerReach);
+  const rampLength = Math.max(RAMP_MIN, RAMP_SHARE * width);
+  const rampAt = (x: number, y: number) => {
+    const off = Math.hypot(x - anchor.x, y - anchor.y) - anchor.r;
+    return RAMP_START + (1 - RAMP_START) * Math.min(1, Math.max(0, off / rampLength));
+  };
+  const ramp = (b: Blob) => rampAt(b.x, b.y);
   const target = (b: Blob, t: number) =>
+    ramp(b) *
     (SIZE + b.extra * t + EDGE_SWELL * smooth((t - SWELL_FROM) / (1 - SWELL_FROM))) *
     (1 + Math.max(FLOOR_SWELL * b.low, CORNER_SWELL * b.corner));
 
@@ -206,10 +218,11 @@ export function createField(width: number, height: number, options: FieldOptions
 
   const typical = SIZE + (EDGE_GROWTH[0] + EDGE_GROWTH[1]) / 4;
   const count = Math.round((SEED_FILL * width * height) / (Math.PI * (typical + GAP / 2) ** 2));
-  for (let i = 0; i < count; i++) {
+  // smaller blobs near the rim need proportionally more of them to cover the same area.
+  for (let i = 0; i < count / RAMP_START ** 2; i++) {
     const x = random() * width;
     const y = random() * height;
-    blobs.push(blob(x, y, 0, 0));
+    if (random() < (RAMP_START / rampAt(x, y)) ** 2) blobs.push(blob(x, y, 0, 0));
   }
   for (const b of blobs) {
     const t = travelled(b);
@@ -247,7 +260,9 @@ export function createField(width: number, height: number, options: FieldOptions
           const rim = anchor.r + GAP + 1;
           const x = anchor.x + ux * rim;
           const y = anchor.y + uy * rim;
-          const crowded = blobs.some((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (Math.max(b.r, SIZE) + GAP * 0.75) ** 2);
+          const crowded = blobs.some(
+            (b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (Math.max(b.r, SIZE * RAMP_START) + GAP * 0.75) ** 2
+          );
           if (crowded) continue;
           blobs.push(blob(x, y, colorPhase, armsAt(clock)));
           break;
