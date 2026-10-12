@@ -8,10 +8,20 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   let stopArt: (() => void) | undefined;
   let closing: ReturnType<typeof setTimeout> | undefined;
 
+  // the art scrolls up with the portrait on open, so the canvas reaches
+  // below the screen by that distance and the portrait keeps its hole.
+  // measuring the open layout toggles the state with transitions held off.
   const measure = () => {
     if (!html.hasAttribute('data-immersive')) return;
+    html.setAttribute('data-measuring', '');
     const rect = image.getBoundingClientRect();
     const frame = canvas.getBoundingClientRect();
+    html.removeAttribute('data-immersive');
+    const opened = image.getBoundingClientRect();
+    html.setAttribute('data-immersive', '');
+    image.getBoundingClientRect();
+    html.removeAttribute('data-measuring');
+    canvas.style.setProperty('--travel', `${Math.max(0, rect.top - opened.top)}px`);
     anchor = {
       x: rect.left + rect.width / 2 - frame.left,
       y: rect.top + rect.height / 2 - frame.top,
