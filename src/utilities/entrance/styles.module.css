@@ -1,5 +1,5 @@
 .root {
-  --entrance-rise: 12px;
+  --entrance-rise: 24px;
   --entrance-start: 0ms;
 
   animation: fade 500ms ease-out both;
@@ -11,7 +11,7 @@
 }
 
 .second {
-  --entrance-start: 400ms;
+  --entrance-start: 600ms;
 
   animation-delay: var(--entrance-start);
 }
