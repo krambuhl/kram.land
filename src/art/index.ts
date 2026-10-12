@@ -1,68 +1,148 @@
-const COUNT = 600;
-const SPEED = 0.6;
+const EXPONENT = 2 ** 1.35;
+const SPAWN_EVERY = 140;
+const GROW = 0.08;
+const GAP = 3;
+const RELAX = 4;
 
-interface Particle {
+interface Blob {
   x: number;
   y: number;
-  age: number;
+  r: number;
+  size: number;
+  grey: number;
+}
+
+function unitShape(): Path2D {
+  const path = new Path2D();
+  const steps = 64;
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * Math.PI * 2;
+    const c = Math.cos(t);
+    const s = Math.sin(t);
+    const x = Math.sign(c) * Math.abs(c) ** (2 / EXPONENT);
+    const y = Math.sign(s) * Math.abs(s) ** (2 / EXPONENT);
+    if (i === 0) path.moveTo(x, y);
+    else path.lineTo(x, y);
+  }
+  path.closePath();
+  return path;
 }
 
 export default function start(canvas: HTMLCanvasElement): () => void {
   const context = canvas.getContext('2d');
   if (context === null) return () => {};
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const shape = unitShape();
+  const blobs: Blob[] = [];
   let width = 0;
   let height = 0;
+  let scale = 1;
   let frame = 0;
-  let time = 0;
+  let last = 0;
+  let sinceSpawn = SPAWN_EVERY;
 
   const resize = () => {
     const ratio = window.devicePixelRatio || 1;
     width = canvas.clientWidth;
     height = canvas.clientHeight;
+    scale = Math.min(width, height) / 900;
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
+  };
+
+  const spawn = () => {
+    const angle = Math.random() * Math.PI * 2;
+    blobs.push({
+      x: width / 2 + Math.cos(angle),
+      y: height / 2 + Math.sin(angle),
+      r: 0,
+      size: (18 + Math.random() * 26) * Math.max(0.6, scale),
+      grey: 22 + Math.random() * 30,
+    });
+  };
+
+  const relax = () => {
+    const cell = 64 * Math.max(0.6, scale);
+    const grid = new Map<string, Blob[]>();
+    for (const blob of blobs) {
+      const key = `${Math.floor(blob.x / cell)},${Math.floor(blob.y / cell)}`;
+      const bucket = grid.get(key);
+      if (bucket) bucket.push(blob);
+      else grid.set(key, [blob]);
+    }
+    for (const a of blobs) {
+      const cx = Math.floor(a.x / cell);
+      const cy = Math.floor(a.y / cell);
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          for (const b of grid.get(`${cx + dx},${cy + dy}`) ?? []) {
+            if (b === a) continue;
+            const ox = b.x - a.x;
+            const oy = b.y - a.y;
+            const distance = Math.hypot(ox, oy) || 0.01;
+            const overlap = a.r + b.r + GAP - distance;
+            if (overlap <= 0) continue;
+            const push = overlap / 2 / distance;
+            a.x -= ox * push;
+            a.y -= oy * push;
+            b.x += ox * push;
+            b.y += oy * push;
+          }
+        }
+      }
+    }
+  };
+
+  const step = (elapsed: number) => {
+    sinceSpawn += elapsed;
+    while (sinceSpawn >= SPAWN_EVERY) {
+      sinceSpawn -= SPAWN_EVERY;
+      spawn();
+    }
+    for (const blob of blobs) blob.r += (blob.size - blob.r) * GROW;
+    for (let i = 0; i < RELAX; i++) relax();
+    const reach = Math.hypot(width, height) / 2 + 60;
+    for (let i = blobs.length - 1; i >= 0; i--) {
+      const blob = blobs[i];
+      if (Math.hypot(blob.x - width / 2, blob.y - height / 2) > reach) blobs.splice(i, 1);
+    }
+  };
+
+  const draw = () => {
+    const ratio = canvas.width / (width || 1);
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.fillStyle = '#000';
     context.fillRect(0, 0, width, height);
-  };
-
-  const spawn = (): Particle => ({ x: Math.random() * width, y: Math.random() * height, age: Math.random() * 200 });
-  const particles = Array.from({ length: COUNT }, spawn);
-
-  const angle = (x: number, y: number) =>
-    Math.sin(x * 0.004 + time * 0.0003) * 2 + Math.cos(y * 0.005 - time * 0.0002) * 2;
-
-  const step = () => {
-    time += 16;
-    context.fillStyle = 'rgb(0 0 0 / 0.04)';
-    context.fillRect(0, 0, width, height);
-    context.strokeStyle = 'rgb(255 255 255 / 0.35)';
-    context.lineWidth = 0.6;
-    context.beginPath();
-    for (const p of particles) {
-      const a = angle(p.x, p.y);
-      const nx = p.x + Math.cos(a) * SPEED;
-      const ny = p.y + Math.sin(a) * SPEED;
-      context.moveTo(p.x, p.y);
-      context.lineTo(nx, ny);
-      p.x = nx;
-      p.y = ny;
-      p.age += 1;
-      if (p.age > 400 || p.x < 0 || p.x > width || p.y < 0 || p.y > height) Object.assign(p, spawn(), { age: 0 });
+    for (const blob of blobs) {
+      context.setTransform(ratio * blob.r, 0, 0, ratio * blob.r, ratio * blob.x, ratio * blob.y);
+      context.fillStyle = `hsl(0 0% ${blob.grey}%)`;
+      context.fill(shape);
     }
-    context.stroke();
   };
 
-  const loop = () => {
-    step();
+  const loop = (now: number) => {
+    step(Math.min(64, last === 0 ? 16 : now - last));
+    last = now;
+    draw();
     frame = requestAnimationFrame(loop);
   };
 
   resize();
   window.addEventListener('resize', resize);
-  if (still) for (let i = 0; i < 240; i++) step();
-  else frame = requestAnimationFrame(loop);
+  if (still) {
+    const count = Math.round((width * height) / (Math.PI * (34 * Math.max(0.6, scale)) ** 2));
+    for (let i = 0; i < count; i++) {
+      spawn();
+      const blob = blobs[blobs.length - 1];
+      blob.x = Math.random() * width;
+      blob.y = Math.random() * height;
+      blob.r = blob.size;
+    }
+    for (let i = 0; i < 40; i++) relax();
+    draw();
+  } else {
+    frame = requestAnimationFrame(loop);
+  }
 
   return () => {
     cancelAnimationFrame(frame);
