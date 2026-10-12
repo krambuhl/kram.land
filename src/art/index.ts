@@ -82,11 +82,14 @@ export interface FieldOptions {
 interface Field {
   blobs: Blob[];
   step(elapsed: number): void;
+  // takes new bounds, anchor and floor without restarting: blobs keep their places and
+  // colours, new area fills in, and the next steps reflow around a moved anchor.
+  reshape(width: number, height: number, options?: FieldOptions): void;
   breath(): { inner: number; outer: number };
 }
 
 export function createField(width: number, height: number, options: FieldOptions = {}, random = Math.random): Field {
-  const { anchor = { x: width / 2, y: height / 2, r: 0 }, floor = height } = options;
+  let { anchor = { x: width / 2, y: height / 2, r: 0 }, floor = height } = options;
   const blobs: Blob[] = [];
   let sinceSpawn = 0;
   let clock = 0;
@@ -152,9 +155,9 @@ export function createField(width: number, height: number, options: FieldOptions
 
   const low = (b: Blob) => (floor < height ? smooth((b.y - floor) / (height - floor)) : 0);
   // distance from a top corner over which blobs swell: CORNER_REACH of the short side, at least 160px.
-  const cornerReach = Math.max(160, CORNER_REACH * Math.min(width, height));
+  let cornerReach = Math.max(160, CORNER_REACH * Math.min(width, height));
   const corner = (b: Blob) => smooth(1 - Math.min(Math.hypot(b.x, b.y), Math.hypot(width - b.x, b.y)) / cornerReach);
-  const rampLength = Math.max(RAMP_MIN, RAMP_SHARE * width);
+  let rampLength = Math.max(RAMP_MIN, RAMP_SHARE * width);
   const rampAt = (x: number, y: number) => {
     const off = Math.hypot(x - anchor.x, y - anchor.y) - anchor.r;
     return RAMP_START + (1 - RAMP_START) * Math.min(1, Math.max(0, off / rampLength));
@@ -174,7 +177,7 @@ export function createField(width: number, height: number, options: FieldOptions
     INNER_BREATHE * inner * (1 - b.along) +
     OUTER_BREATHE * (1 + FLOOR_BREATHE * b.low + CORNER_BREATHE * b.corner) * outer * b.along;
 
-  const rimShare = anchor.r / Math.max(1, Math.min(width, height) / 2);
+  let rimShare = anchor.r / Math.max(1, Math.min(width, height) / 2);
   const along = (t: number) => Math.min(1, Math.max(0, (t - rimShare) / Math.max(0.01, 1 - rimShare)));
 
   const blob = (x: number, y: number, phase: number, arms: number): Blob => ({
@@ -264,6 +267,24 @@ export function createField(width: number, height: number, options: FieldOptions
       }
     }
     return moved;
+  };
+
+  // adds a blob at (x, y) if it fits among `near` with its full gap, coloured as a blob
+  // born on the rim would be by the time it drifted this far out.
+  const place = (x: number, y: number, near: Blob[]): Blob | undefined => {
+    const b = blob(x, y, 0, 0);
+    const t = travelled(b);
+    b.low = low(b);
+    b.corner = corner(b);
+    b.along = along(t);
+    b.r = target(b, t) * breathe(b);
+    if (near.some((o) => (o.x - x) ** 2 + (o.y - y) ** 2 < (o.r + b.r + gapFor((o.r + b.r) / 2)) ** 2))
+      return undefined;
+    const age = (Math.hypot(x - anchor.x, y - anchor.y) - anchor.r) / DRIFT;
+    b.color = colorAt(x, y, colorPhase - spinRate(clock) * age, armsAt(clock - age));
+    blobs.push(b);
+    near.push(b);
+    return b;
   };
 
   const typical = SIZE + (EDGE_GROWTH[0] + EDGE_GROWTH[1]) / 4;
@@ -374,22 +395,7 @@ export function createField(width: number, height: number, options: FieldOptions
               : around < 2 * w + h
                 ? height + MARGIN - SIZE
                 : around - 2 * w - h - MARGIN;
-        const b = blob(x, y, 0, 0);
-        const t = travelled(b);
-        b.low = low(b);
-        b.corner = corner(b);
-        b.along = along(t);
-        b.r = target(b, t) * breathe(b);
-        const crowded = nearEdge.some(
-          (o) => (o.x - x) ** 2 + (o.y - y) ** 2 < (o.r + b.r + gapFor((o.r + b.r) / 2)) ** 2
-        );
-        if (crowded) continue;
-        const age = (Math.hypot(x - anchor.x, y - anchor.y) - anchor.r) / DRIFT;
-        b.color = colorAt(x, y, colorPhase - spinRate(clock) * age, armsAt(clock - age));
-        b.drawX = x;
-        b.drawY = y;
-        blobs.push(b);
-        nearEdge.push(b);
+        place(x, y, nearEdge);
       }
       for (const b of blobs) {
         b.drawX += (b.x - b.drawX) * SMOOTH;
@@ -399,6 +405,27 @@ export function createField(width: number, height: number, options: FieldOptions
         const { x, y } = blobs[i];
         const out = MARGIN + 60;
         if (x < -out || y < -out || x > width + out || y > height + out) blobs.splice(i, 1);
+      }
+    },
+    reshape(nextWidth, nextHeight, changes = {}) {
+      const before = { width, height };
+      width = nextWidth;
+      height = nextHeight;
+      anchor = changes.anchor ?? anchor;
+      floor = changes.floor ?? height;
+      cornerReach = Math.max(160, CORNER_REACH * Math.min(width, height));
+      rampLength = Math.max(RAMP_MIN, RAMP_SHARE * width);
+      rimShare = anchor.r / Math.max(1, Math.min(width, height) / 2);
+      const grown =
+        (width + 2 * MARGIN) * (height + 2 * MARGIN) - (before.width + 2 * MARGIN) * (before.height + 2 * MARGIN);
+      if (grown <= 0) return;
+      const attempts = Math.ceil((4 * grown) / (Math.PI * (typical + gapFor(typical)) ** 2));
+      const near = [...blobs];
+      for (let attempt = 0; attempt < attempts; attempt++) {
+        const x = random() * (width + 2 * MARGIN) - MARGIN;
+        const y = random() * (height + 2 * MARGIN) - MARGIN;
+        if (x < before.width + MARGIN && y < before.height + MARGIN) continue;
+        place(x, y, near);
       }
     },
     breath: () => ({ inner, outer }),
@@ -414,22 +441,44 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
   const context = canvas.getContext('2d');
   if (context === null) return () => {};
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  let field: Field;
+  let field: Field | undefined;
   let width = 0;
   let height = 0;
   let frame = 0;
   let last = 0;
 
+  let anchor = options.anchor?.();
+  let floor = options.floor?.();
+
+  // a resize reshapes the running field instead of restarting it, and a resize that
+  // leaves the canvas size unchanged does nothing.
   const resize = () => {
     const ratio = window.devicePixelRatio || 1;
-    width = canvas.clientWidth;
-    height = canvas.clientHeight;
+    const nextWidth = canvas.clientWidth;
+    const nextHeight = canvas.clientHeight;
+    if (nextWidth === width && nextHeight === height && canvas.width === Math.round(width * ratio)) return;
+    width = nextWidth;
+    height = nextHeight;
     canvas.width = Math.round(width * ratio);
     canvas.height = Math.round(height * ratio);
-    field = createField(width, height, { anchor: options.anchor?.(), floor: options.floor?.() });
+    anchor = options.anchor?.();
+    floor = options.floor?.();
+    if (field === undefined) field = createField(width, height, { anchor, floor });
+    else field.reshape(width, height, { anchor, floor });
+  };
+
+  // the portrait can move after the field starts, so the hole follows its measured spot.
+  const follow = () => {
+    const nextAnchor = options.anchor?.();
+    const nextFloor = options.floor?.();
+    if (nextAnchor === anchor && nextFloor === floor) return;
+    anchor = nextAnchor;
+    floor = nextFloor;
+    field?.reshape(width, height, { anchor, floor });
   };
 
   const draw = () => {
+    if (field === undefined) return;
     const ratio = canvas.width / (width || 1);
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.fillStyle = '#000';
@@ -452,7 +501,8 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
   };
 
   const loop = (now: number) => {
-    field.step(Math.min(64, last === 0 ? 16 : now - last));
+    follow();
+    field?.step(Math.min(64, last === 0 ? 16 : now - last));
     last = now;
     draw();
     frame = requestAnimationFrame(loop);

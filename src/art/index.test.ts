@@ -98,4 +98,21 @@ describe('createField', { timeout: 30_000 }, () => {
     const middle = field.blobs.filter((b) => b.y < 40 && Math.abs(b.x - 720) < 200);
     expect(mean(corners)).toBeGreaterThan(mean(middle) * 1.12);
   });
+
+  test('reshaping keeps the running field, fills new area and reflows around a moved portrait', () => {
+    const field = createField(800, 600, { anchor: { x: 400, y: 300, r: 96 } }, seeded(7));
+    for (let i = 0; i < 60; i++) field.step(16);
+    const colours = new Map(field.blobs.map((b) => [b, b.color]));
+    const moved = { x: 500, y: 340, r: 96 };
+    field.reshape(1000, 700, { anchor: moved });
+    const kept = field.blobs.filter((b) => colours.has(b));
+    expect(kept.every((b) => b.color === colours.get(b))).toBe(true);
+    expect(kept.length / colours.size).toBeGreaterThan(0.95);
+    const grown = field.blobs.filter((b) => b.x > 800 || b.y > 600);
+    const covered = grown.reduce((sum, b) => sum + Math.PI * b.r ** 2, 0) / (1000 * 700 - 800 * 600);
+    expect(covered).toBeGreaterThan(0.3);
+    for (let i = 0; i < 10; i++) field.step(16);
+    const inside = field.blobs.filter((b) => Math.hypot(b.x - moved.x, b.y - moved.y) < moved.r);
+    expect(inside.length).toBe(0);
+  });
 });
