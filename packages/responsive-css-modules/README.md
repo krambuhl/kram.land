@@ -38,7 +38,7 @@ Breakpoints are an ordered list of `{ name, width }`, where `width` is where the
 | `matchOnly: ['sm', 'md']`   | `(sm <= width < lg)`               |
 | `matchOnly: ['base', 'md']` | `(width < sm), (md <= width < lg)` |
 
-A `matchOnly` list can name any breakpoints in any order; neighbours merge into one range and gaps become a list of queries. The class name follows the list as written, so `['md', 'sm']` and `['sm', 'md']` are two classes with the same CSS. A list that covers every breakpoint emits no query.
+A `matchOnly` list can name any breakpoints, gaps included; neighbours merge into one range and gaps become a list of queries. A list is written in breakpoint order without repeats, so `['sm', 'md']` is the class `cn--only-sm-md` and `['md', 'sm']` is a type error and a build error that names the order to write. A list that covers every breakpoint emits no query.
 
 ## How variants are found
 
@@ -85,4 +85,4 @@ export default { plugins: [tokenJet(), responsiveCssModules({ breakpoints: fromT
 
 ## Types
 
-The types file registers the breakpoint names, so an unknown breakpoint is a type error. The plugin writes it on start. For a type check that runs before any build, `responsive-css-modules --token-jet [--tag <tag>]` writes it from the command line.
+The types file registers the breakpoint names and every ordered list of them, so an unknown breakpoint or a list out of order is a type error. The plugin writes it on start. For a type check that runs before any build, `responsive-css-modules --token-jet [--tag <tag>]` writes it from the command line.

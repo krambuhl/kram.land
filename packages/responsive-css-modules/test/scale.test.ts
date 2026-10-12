@@ -51,9 +51,11 @@ describe('rangesOf and mediaQuery', () => {
     expect(query({ matchOnly: ['base', 'sm', 'md', 'lg'] })).toBeNull();
   });
 
-  test('matchOnly order and repeats do not matter', () => {
-    expect(query({ matchOnly: ['md', 'sm'] })).toBe(query({ matchOnly: ['sm', 'md'] }));
-    expect(query({ matchOnly: ['lg', 'base', 'lg'] })).toBe('(width < 32rem), (width >= 64rem)');
+  test('a matchOnly list out of order or with repeats is an error naming the order to write', () => {
+    expect(() => rangesOf({ matchOnly: ['md', 'sm'] }, scale)).toThrow(
+      "matchOnly lists breakpoints in order without repeats; write ['sm', 'md']."
+    );
+    expect(() => rangesOf({ matchOnly: ['lg', 'base', 'lg'] }, scale)).toThrow("write ['base', 'lg']");
   });
 
   test('an unknown breakpoint or an empty list is an error', () => {
@@ -64,7 +66,10 @@ describe('rangesOf and mediaQuery', () => {
   });
 });
 
-test('typesFile registers the breakpoint names', () => {
+test('typesFile registers the breakpoint names and every ordered list of them', () => {
   const text = typesFile({ names: ['base', 'sm', 'md'], widths: ['0px', '1px', '2px'] });
   expect(text).toContain("breakpoint: 'base' | 'sm' | 'md';");
+  expect(text).toContain(
+    "list: readonly ['base'] | readonly ['sm'] | readonly ['base', 'sm'] | readonly ['md'] | readonly ['base', 'md'] | readonly ['sm', 'md'] | readonly ['base', 'sm', 'md'];"
+  );
 });

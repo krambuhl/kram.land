@@ -3,11 +3,12 @@ export interface ResponsiveRegister {}
 type Registered<Key extends string, Fallback> = ResponsiveRegister extends Record<Key, infer T> ? T : Fallback;
 
 export type Breakpoint = Registered<'breakpoint', string>;
+export type BreakpointList = Registered<'list', readonly string[]>;
 
 export type Match =
   | { matchMin: Breakpoint; matchMax?: never; matchOnly?: never }
   | { matchMax: Breakpoint; matchMin?: never; matchOnly?: never }
-  | { matchOnly: Breakpoint | readonly Breakpoint[]; matchMin?: never; matchMax?: never };
+  | { matchOnly: Breakpoint | BreakpointList; matchMin?: never; matchMax?: never };
 
 export type MatchOptions =
   | { matchMin: string; matchMax?: never; matchOnly?: never }
