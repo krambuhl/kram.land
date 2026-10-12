@@ -5,6 +5,10 @@ const ART_DELAY = 500;
 const ART_FADE = 200;
 const DEAD_ZONE = 0.25;
 
+export function scrubProgress(scrollY: number, bottom: number, runway: number): number {
+  return runway <= 0 ? 0 : Math.min(1, Math.max(0, (scrollY - (bottom - runway)) / runway));
+}
+
 export function nextOpen(scrollY: number, openAt: number, deadZone: number, open: boolean): boolean {
   return open ? scrollY > openAt - deadZone : scrollY > openAt;
 }
@@ -19,7 +23,9 @@ export function secretScroll(
   const track = stage?.parentElement;
   if (!stage || !track) return () => {};
 
+  const coarse = window.matchMedia('(pointer: coarse)');
   let open = false;
+  let progress = 0;
   let runway = 0;
   let returnY = 0;
   let stopArt: (() => void) | undefined;
@@ -44,11 +50,14 @@ export function secretScroll(
     }, ART_FADE);
   };
 
-  const render = (next: boolean) => {
-    open = next;
-    root.setAttribute('data-settling', '');
-    root.toggleAttribute('data-open', next);
-    root.style.setProperty('--secret', open ? '1' : '0');
+  const render = (next: number, settling: boolean) => {
+    progress = next;
+    root.toggleAttribute('data-settling', settling);
+    root.style.setProperty('--secret', String(progress));
+    const nowOpen = progress >= 0.98;
+    if (nowOpen === open) return;
+    open = nowOpen;
+    root.toggleAttribute('data-open', open);
     text.inert = open;
     image.setAttribute('aria-pressed', String(open));
     if (open) showArt();
@@ -60,23 +69,31 @@ export function secretScroll(
     runway = track.offsetHeight - stage.offsetHeight;
 
     const rect = image.getBoundingClientRect();
-    const shift = open ? Number.parseFloat(root.style.getPropertyValue('--secret-shift')) || 0 : 0;
+    const shift = progress * (Number.parseFloat(root.style.getPropertyValue('--secret-shift')) || 0);
     root.style.setProperty('--secret-shift', `${window.innerHeight / 2 - (rect.top + rect.height / 2 - shift)}px`);
     root.style.setProperty('--secret-radius', `${rect.width / 2}px`);
   };
 
-  const openAt = () => document.documentElement.scrollHeight - window.innerHeight - runway * (1 - OPEN_AT);
+  const bottom = () => document.documentElement.scrollHeight - window.innerHeight;
+  const openAt = () => bottom() - runway * (1 - OPEN_AT);
 
   const onScroll = () => {
+    if (coarse.matches) {
+      const next = scrubProgress(window.scrollY, bottom(), runway);
+      if (progress === 0 && next > 0) measure();
+      render(next, false);
+      return;
+    }
     const next = nextOpen(window.scrollY, openAt(), runway * DEAD_ZONE, open);
     if (next === open) return;
     if (next) measure();
-    render(next);
+    render(next ? 1 : 0, true);
   };
 
   const onClick = () => {
     if (!open) returnY = window.scrollY;
-    const top = open ? Math.min(returnY, openAt() - runway * DEAD_ZONE - 1) : document.documentElement.scrollHeight;
+    const close = coarse.matches ? bottom() - runway : openAt() - runway * DEAD_ZONE - 1;
+    const top = open ? Math.min(returnY, close) : document.documentElement.scrollHeight;
     window.scrollTo({ top, behavior: 'smooth' });
   };
 
