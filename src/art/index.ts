@@ -42,7 +42,7 @@ const CORNER_BREATHE = 0.5;
 const CORNER_REACH = 0.3;
 // the outer band orbits the portrait one way per field at up to ORBIT px/ms and the
 // inner field the other way at ORBIT_INNER of that. a mood eases the speed between ORBIT_CALM and full.
-const ORBIT = 0.035;
+const ORBIT = 0.026;
 const ORBIT_CALM = 0.3;
 const ORBIT_INNER = 0.1;
 const ORBIT_FROM = 0.5;
