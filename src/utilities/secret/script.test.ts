@@ -1,24 +1,19 @@
 import { describe, expect, test } from 'vitest';
 
-import { clampProgress, engages, settleTarget } from './script.ts';
+import { clampProgress, scrollProgress } from './script.ts';
 
 describe('secret scroll progress', () => {
-  test('stays between the page and the secret state', () => {
+  test('stays between the page and the portrait view', () => {
     expect(clampProgress(-0.2)).toBe(0);
     expect(clampProgress(0.4)).toBe(0.4);
     expect(clampProgress(1.3)).toBe(1);
   });
 
-  test('settles to whichever end is closer, halfway going to the secret state', () => {
-    expect(settleTarget(0.49)).toBe(0);
-    expect(settleTarget(0.5)).toBe(1);
-    expect(settleTarget(0.9)).toBe(1);
-  });
-
-  test('takes over a downward gesture at the end of the page, and any gesture once open', () => {
-    expect(engages(0, 10, true)).toBe(true);
-    expect(engages(0, 10, false)).toBe(false);
-    expect(engages(0, -10, true)).toBe(false);
-    expect(engages(0.3, -10, false)).toBe(true);
+  test('follows the scroll position through the runway at the end of the page', () => {
+    expect(scrollProgress(0, 1000, 400)).toBe(0);
+    expect(scrollProgress(600, 1000, 400)).toBe(0);
+    expect(scrollProgress(800, 1000, 400)).toBe(0.5);
+    expect(scrollProgress(1000, 1000, 400)).toBe(1);
+    expect(scrollProgress(500, 1000, 0)).toBe(0);
   });
 });

@@ -22,16 +22,23 @@ import ikea from '../assets/ikea.png';
       secret({ part: 'root' }),
     ]}
   >
-    <Image
-      src={ikea}
-      alt=""
-      width={192}
-      height={192}
-      densities={[1, 2, 3]}
-      priority
+    <button
+      type="button"
+      aria-label="portrait view"
+      aria-pressed="false"
       data-secret-image
-      class:list={[superellipse(), entrance({ motion: 'rise' }), secret({ part: 'image' })]}
-    />
+      class={secret({ part: 'image' })}
+    >
+      <Image
+        src={ikea}
+        alt=""
+        width={192}
+        height={192}
+        densities={[1, 2, 3]}
+        priority
+        class:list={[superellipse(), entrance({ motion: 'rise' })]}
+      />
+    </button>
 
     <div
       data-secret-text
