@@ -11,12 +11,16 @@ export function settleTarget(progress: number): 0 | 1 {
   return progress >= 0.5 ? 1 : 0;
 }
 
+export function engages(progress: number, delta: number, atEnd: boolean): boolean {
+  return progress > 0 || (delta > 0 && atEnd);
+}
+
 export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLElement): () => void {
   let progress = 0;
   let idle: ReturnType<typeof setTimeout> | undefined;
-  let touchStart: { y: number; progress: number } | null = null;
+  let touchY: number | null = null;
 
-  const fits = () => document.documentElement.scrollHeight <= window.innerHeight + 1;
+  const atEnd = () => window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 1;
 
   const measure = () => {
     const rect = image.getBoundingClientRect();
@@ -34,38 +38,48 @@ export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLEl
 
   const settle = () => render(settleTarget(progress), true);
 
-  const scrub = (delta: number) => {
+  const engage = (delta: number): boolean => {
+    if (!engages(progress, delta, atEnd())) return false;
+    if (progress === 0) measure();
+    return true;
+  };
+
+  const scrub = (delta: number, settleLater: boolean) => {
     render(clampProgress(progress + delta / RANGE), false);
     clearTimeout(idle);
-    idle = setTimeout(settle, IDLE);
+    if (settleLater) idle = setTimeout(settle, IDLE);
   };
 
   const onWheel = (event: WheelEvent) => {
-    if (!fits()) return;
+    const delta = event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY;
+    if (!engage(delta)) return;
     event.preventDefault();
-    scrub(event.deltaMode === 1 ? event.deltaY * 16 : event.deltaY);
+    scrub(delta, true);
   };
 
   const onTouchStart = (event: TouchEvent) => {
-    touchStart = { y: event.touches[0].clientY, progress };
+    touchY = event.touches[0].clientY;
   };
 
   const onTouchMove = (event: TouchEvent) => {
-    if (touchStart === null || !fits()) return;
+    if (touchY === null) return;
+    const y = event.touches[0].clientY;
+    const delta = touchY - y;
+    touchY = y;
+    if (!engage(delta)) return;
     event.preventDefault();
-    render(clampProgress(touchStart.progress + (touchStart.y - event.touches[0].clientY) / RANGE), false);
+    scrub(delta, false);
   };
 
   const onTouchEnd = () => {
-    if (touchStart === null) return;
-    touchStart = null;
-    settle();
+    touchY = null;
+    if (progress > 0 && progress < 1) settle();
   };
 
   const onKey = (event: KeyboardEvent) => {
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) return;
-    if (DOWN_KEYS.has(event.key)) render(1, true);
-    else if (UP_KEYS.has(event.key)) render(0, true);
+    if (DOWN_KEYS.has(event.key) && engage(1)) render(1, true);
+    else if (UP_KEYS.has(event.key) && progress > 0) render(0, true);
     else return;
     event.preventDefault();
   };
