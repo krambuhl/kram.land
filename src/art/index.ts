@@ -5,7 +5,7 @@ const SPAWN_ATTEMPTS = 32;
 const SPAWN_ROOM = 0.5;
 const SEED_ROUNDS = 6;
 // circles can't tile the plane, so seeding a full area's worth overfills the screen.
-const SEED_FILL = 0.8;
+const SEED_FILL = 0.9;
 const GROW = 0.08;
 // the gap between neighbours scales with their size, from GAP_MIN px at radius
 // GAP_FROM to GAP_MAX px at radius GAP_TO, so it reads the same at every size.
