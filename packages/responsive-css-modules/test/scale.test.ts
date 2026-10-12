@@ -1,28 +1,31 @@
-import { defineSchema, loadTokens, pattern, schemaToConfig, slots } from 'token-jet';
 import { describe, expect, test } from 'vitest';
 
-import { mediaQuery, rangeOf, scaleFromTokens, typesFile } from '../src/scale.ts';
+import { mediaQuery, rangeOf, toScale, typesFile } from '../src/scale.ts';
 import type { Scale } from '../src/scale.ts';
 
 const scale: Scale = { names: ['base', 'sm', 'md', 'lg'], widths: ['0px', '32rem', '48rem', '64rem'] };
 
-describe('scaleFromTokens', () => {
-  test('takes the tagged tokens in order, named by their last segment, with resolved widths', () => {
-    const breakpoint = pattern({ type: 'dimension', tags: ['media-breakpoint'] });
-    const schema = defineSchema({ modes: {}, shape: { bp: slots(['base', 'sm', 'md'], breakpoint) } });
-    const tokens = schema.defineTokens({
-      bp: { base: { value: '0px' }, sm: { value: '32rem' }, md: { value: '{bp.sm}' } },
-    });
-    expect(scaleFromTokens(loadTokens(schemaToConfig(tokens)))).toEqual({
-      names: ['base', 'sm', 'md'],
-      widths: ['0px', '32rem', '32rem'],
+describe('toScale', () => {
+  test('keeps the order it is given', () => {
+    expect(
+      toScale([
+        { name: 'base', width: '0px' },
+        { name: 'sm', width: '32rem' },
+      ])
+    ).toEqual({
+      names: ['base', 'sm'],
+      widths: ['0px', '32rem'],
     });
   });
 
-  test('no tagged tokens is an error naming the tag', () => {
-    const schema = defineSchema({ modes: {}, shape: { a: pattern({ type: 'dimension' }) } });
-    const resolved = loadTokens(schemaToConfig(schema.defineTokens({ a: { value: '1px' } })));
-    expect(() => scaleFromTokens(resolved)).toThrow('No tokens carry the tag "media-breakpoint"');
+  test('an empty list or a repeated name is an error', () => {
+    expect(() => toScale([])).toThrow('There are no breakpoints.');
+    expect(() =>
+      toScale([
+        { name: 'sm', width: '1px' },
+        { name: 'sm', width: '2px' },
+      ])
+    ).toThrow('The breakpoint "sm" is listed twice.');
   });
 });
 

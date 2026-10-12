@@ -19,6 +19,10 @@
     "./vite": {
       "types": "./dist/vite.d.ts",
       "default": "./dist/vite.js"
+    },
+    "./token-jet": {
+      "types": "./dist/token-jet.d.ts",
+      "default": "./dist/token-jet.js"
     }
   },
   "scripts": {
@@ -29,18 +33,22 @@
   },
   "dependencies": {
     "postcss": "^8.5.28",
-    "token-jet": "*",
     "typescript": "6.0.3"
   },
   "devDependencies": {
     "@types/node": "24.13.6",
+    "token-jet": "*",
     "vite": "^8.3.1",
     "vitest": "^5.0.1"
   },
   "peerDependencies": {
+    "token-jet": "*",
     "vite": ">=6"
   },
   "peerDependenciesMeta": {
+    "token-jet": {
+      "optional": true
+    },
     "vite": {
       "optional": true
     }

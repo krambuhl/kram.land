@@ -1,6 +1,6 @@
 # responsive-css-modules
 
-Responsive variants of CSS Module classes at token-jet breakpoints. A class is written once; a variant is emitted only when a component asks for it.
+Responsive variants of CSS Module classes at named breakpoints. A class is written once; a variant is emitted only when a component asks for it.
 
 ```css
 /* card.module.css */
@@ -27,7 +27,7 @@ A call returns only the variant class, so `r.cn({ matchMin: 'sm' })` styles noth
 
 ## Breakpoints
 
-Breakpoints are the tokens tagged `media-breakpoint`, in the order the tokens declare them. Each is named by its last path segment, and its value is where it starts; the first one's value is ignored. `@media` cannot read custom properties, so the values are written into the queries at build time.
+Breakpoints are an ordered list of `{ name, width }`, where `width` is where the breakpoint starts; the first one's width is ignored. `@media` cannot read custom properties, so the widths are written into the queries at build time.
 
 | option                    | query                |
 | ------------------------- | -------------------- |
@@ -48,12 +48,39 @@ A wrapper passed to another component still works if the call it makes is visibl
 
 ```js
 // astro.config.mjs or vite.config.js
-import tokenJet from 'token-jet/vite';
 import responsiveCssModules from 'responsive-css-modules/vite';
 
-export default { plugins: [tokenJet(), responsiveCssModules()] };
+export default {
+  plugins: [
+    responsiveCssModules({
+      breakpoints: [
+        { name: 'base', width: '0px' },
+        { name: 'sm', width: '32rem' },
+        { name: 'md', width: '48rem' },
+      ],
+    }),
+  ],
+};
 ```
 
-Options: `src` (default `src`), `tag` (default `media-breakpoint`) and `typesFile` (default `generated/responsive/breakpoints.d.ts`).
+Options: `breakpoints` (required), `src` (default `src`) and `typesFile` (default `generated/responsive/breakpoints.d.ts`).
 
-The types file registers the breakpoint names and every contiguous run, so an unknown breakpoint or a gap is a type error. The plugin writes it on start, and `responsive-css-modules` writes it from the command line for type checks that run before a build.
+`breakpoints` can also be a source, `{ load(root), watch? }`, which the plugin loads on start and again when a file under `watch` changes.
+
+### From token-jet
+
+`responsive-css-modules/token-jet` reads the breakpoints from token-jet tokens, which is an optional peer dependency:
+
+```js
+import tokenJet from 'token-jet/vite';
+import { fromTokenJet } from 'responsive-css-modules/token-jet';
+import responsiveCssModules from 'responsive-css-modules/vite';
+
+export default { plugins: [tokenJet(), responsiveCssModules({ breakpoints: fromTokenJet() })] };
+```
+
+`fromTokenJet({ tag })` takes the tokens tagged `media-breakpoint` by default, in the order the tokens declare them, each named by its last path segment. It watches `tokens/`.
+
+## Types
+
+The types file registers the breakpoint names and every contiguous run, so an unknown breakpoint or a gap is a type error. The plugin writes it on start. For a type check that runs before any build, `responsive-css-modules --token-jet [--tag <tag>]` writes it from the command line.

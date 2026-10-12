@@ -6,7 +6,9 @@ import tokenJet from 'token-jet/vite';
 import { build } from 'vite';
 import { describe, expect, test } from 'vitest';
 
+import { fromTokenJet } from '../src/token-jet.ts';
 import responsiveCssModules from '../src/vite.ts';
+import type { ResponsiveOptions } from '../src/vite.ts';
 
 const TOKENS = `import { defineSchema, pattern, slots } from 'token-jet';
 
@@ -38,11 +40,14 @@ function project(entry: string): string {
   return dir;
 }
 
-async function bundle(dir: string): Promise<{ css: string; js: string }> {
+async function bundle(
+  dir: string,
+  breakpoints: ResponsiveOptions['breakpoints'] = fromTokenJet()
+): Promise<{ css: string; js: string }> {
   await build({
     root: dir,
     logLevel: 'silent',
-    plugins: [tokenJet(), responsiveCssModules()],
+    plugins: [tokenJet(), responsiveCssModules({ breakpoints })],
     build: { lib: { entry: 'src/entry.ts', formats: ['es'], fileName: 'entry' }, cssCodeSplit: false },
   });
   const files = readdirSync(join(dir, 'dist'));
@@ -65,6 +70,19 @@ export default r.cn({ matchMin: 'sm' });
     expect(readFileSync(join(dir, 'generated/responsive/breakpoints.d.ts'), 'utf8')).toContain(
       "breakpoint: 'base' | 'sm' | 'md';"
     );
+  });
+
+  test('takes breakpoints as a list too', async () => {
+    const dir = project(`import styles from './card.module.css';
+import { responsive } from 'responsive-css-modules';
+
+export default responsive(styles).cn({ matchMax: 'narrow' });
+`);
+    const { css } = await bundle(dir, [
+      { name: 'narrow', width: '0px' },
+      { name: 'wide', width: '60rem' },
+    ]);
+    expect(css).toMatch(/@media \(width<60rem\)\{\._cn--max-narrow_\w+/);
   });
 
   test('a call the scanner cannot read fails the build with its location', async () => {

@@ -1,22 +1,26 @@
-import { resolveValue } from 'token-jet';
-import type { ResolvedTokens } from 'token-jet';
-
 import type { MatchOptions } from './index.ts';
 
-const DEFAULT_TAG = 'media-breakpoint';
+export interface Breakpoint {
+  name: string;
+  width: string;
+}
+
+export interface BreakpointSource {
+  load(root: string): readonly Breakpoint[] | Promise<readonly Breakpoint[]>;
+  watch?: string;
+}
 
 export interface Scale {
   names: string[];
   widths: string[];
 }
 
-export function scaleFromTokens(resolved: ResolvedTokens, tag = DEFAULT_TAG): Scale {
-  const tokens = resolved.tokens.filter((t) => t.tags?.includes(tag));
-  if (tokens.length === 0) throw new Error(`No tokens carry the tag "${tag}", so there are no breakpoints.`);
-  return {
-    names: tokens.map((t) => t.segments[t.segments.length - 1]),
-    widths: tokens.map((t) => String(resolveValue(t.path, resolved.tokens))),
-  };
+export function toScale(breakpoints: readonly Breakpoint[]): Scale {
+  if (breakpoints.length === 0) throw new Error('There are no breakpoints.');
+  const names = breakpoints.map((b) => b.name);
+  const repeated = names.find((name, i) => names.indexOf(name) !== i);
+  if (repeated !== undefined) throw new Error(`The breakpoint "${repeated}" is listed twice.`);
+  return { names, widths: breakpoints.map((b) => b.width) };
 }
 
 function indexOf(scale: Scale, name: string): number {

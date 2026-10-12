@@ -16,7 +16,7 @@
     "format": "oxfmt --check && prettier --check \"**/*.astro\"",
     "verify": "npm run format && npm run lint && npm run lint:css && npm run check && npm run knip && npm test && npm run build",
     "lint:css": "npm run tokens && stylelint \"src/**/*.css\"",
-    "tokens": "token-jet generate && token-jet-generate && responsive-css-modules",
+    "tokens": "token-jet generate && token-jet-generate && responsive-css-modules --token-jet",
     "prebuild": "npm run tokens",
     "test": "vitest run && npm test --workspaces --if-present",
     "predev": "npm run tokens",
