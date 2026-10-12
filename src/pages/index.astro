@@ -22,6 +22,9 @@ import ikea from '../assets/ikea.png';
       secret({ part: 'root' }),
     ]}
   >
+    <canvas data-secret-art aria-hidden="true" class={secret({ part: 'art' })}></canvas>
+    <div aria-hidden="true" class={secret({ part: 'scrim' })}></div>
+
     <button
       type="button"
       aria-label="portrait view"
@@ -91,5 +94,6 @@ import ikea from '../assets/ikea.png';
   const root = document.querySelector<HTMLElement>('[data-secret-root]');
   const image = document.querySelector<HTMLElement>('[data-secret-image]');
   const text = document.querySelector<HTMLElement>('[data-secret-text]');
-  if (root && image && text) secretScroll(root, image, text);
+  const art = document.querySelector<HTMLCanvasElement>('[data-secret-art]');
+  if (root && image && text && art) secretScroll(root, image, text, art);
 </script>

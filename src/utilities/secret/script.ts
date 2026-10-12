@@ -1,13 +1,20 @@
 import styles from './styles.module.css';
 
 const OPEN_AT = 0.5;
+const ART_DELAY = 500;
+const ART_FADE = 200;
 const DEAD_ZONE = 0.25;
 
 export function nextOpen(scrollY: number, openAt: number, deadZone: number, open: boolean): boolean {
   return open ? scrollY > openAt - deadZone : scrollY > openAt;
 }
 
-export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLElement): () => void {
+export function secretScroll(
+  root: HTMLElement,
+  image: HTMLElement,
+  text: HTMLElement,
+  canvas: HTMLCanvasElement
+): () => void {
   const stage = root.parentElement;
   const track = stage?.parentElement;
   if (!stage || !track) return () => {};
@@ -16,6 +23,27 @@ export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLEl
   let openAt = 0;
   let deadZone = 0;
   let returnY = 0;
+  let stopArt: (() => void) | undefined;
+  let artTimer: ReturnType<typeof setTimeout> | undefined;
+
+  const showArt = () => {
+    clearTimeout(artTimer);
+    artTimer = setTimeout(async () => {
+      const { default: start } = await import('../../art/index.ts');
+      if (!open) return;
+      stopArt ??= start(canvas);
+      root.setAttribute('data-art', '');
+    }, ART_DELAY);
+  };
+
+  const hideArt = () => {
+    clearTimeout(artTimer);
+    root.removeAttribute('data-art');
+    artTimer = setTimeout(() => {
+      stopArt?.();
+      stopArt = undefined;
+    }, ART_FADE);
+  };
 
   const render = (next: boolean) => {
     open = next;
@@ -24,6 +52,8 @@ export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLEl
     root.style.setProperty('--secret', open ? '1' : '0');
     text.inert = open;
     image.setAttribute('aria-pressed', String(open));
+    if (open) showArt();
+    else hideArt();
   };
 
   const measure = () => {
@@ -35,6 +65,7 @@ export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLEl
     const rect = image.getBoundingClientRect();
     const shift = open ? Number.parseFloat(root.style.getPropertyValue('--secret-shift')) || 0 : 0;
     root.style.setProperty('--secret-shift', `${window.innerHeight / 2 - (rect.top + rect.height / 2 - shift)}px`);
+    root.style.setProperty('--secret-radius', `${rect.width / 2}px`);
   };
 
   const onScroll = () => {
@@ -58,6 +89,7 @@ export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLEl
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', measure);
   return () => {
+    hideArt();
     image.removeEventListener('click', onClick);
     window.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', measure);
