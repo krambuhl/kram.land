@@ -5,6 +5,10 @@ const SEED_ROUNDS = 6;
 const SEED_FILL = 0.8;
 const GROW = 0.08;
 const GAP = 5;
+// small pairs sit GAP·GAP_LOOSE apart, large pairs (GAP_LARGE radius) GAP·GAP_TIGHT.
+const GAP_LOOSE = 1.25;
+const GAP_TIGHT = 0.75;
+const GAP_LARGE = 16;
 const RELAX = 8;
 const SMOOTH = 0.5;
 const SIZE = 7;
@@ -148,7 +152,7 @@ export function createField(width: number, height: number, options: FieldOptions
     color: colorAt(x, y, phase, arms),
   });
 
-  const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) * (1 + Math.max(FLOOR_SWELL, CORNER_SWELL)) + GAP;
+  const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) * (1 + Math.max(FLOOR_SWELL, CORNER_SWELL)) + GAP * GAP_LOOSE;
   const columns = Math.ceil(width / cell) + 2;
   const rows = Math.ceil(height / cell) + 2;
   const cellOf = (x: number, y: number) => {
@@ -156,6 +160,8 @@ export function createField(width: number, height: number, options: FieldOptions
     const cy = Math.min(rows - 1, Math.max(0, Math.floor(y / cell) + 1));
     return cy * columns + cx;
   };
+
+  const gapFor = (r: number) => GAP * (GAP_LOOSE + (GAP_TIGHT - GAP_LOOSE) * smooth((r - SIZE) / (GAP_LARGE - SIZE)));
 
   const settle = (passes: number): number => {
     let moved = 0;
@@ -180,7 +186,7 @@ export function createField(width: number, height: number, options: FieldOptions
               if (b === a) continue;
               const ox = b.x - a.x;
               const oy = b.y - a.y;
-              const reach = a.r + b.r + GAP;
+              const reach = a.r + b.r + gapFor((a.r + b.r) / 2);
               const squared = ox * ox + oy * oy;
               if (squared >= reach * reach) continue;
               const distance = Math.sqrt(squared) || 0.01;
