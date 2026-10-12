@@ -11,7 +11,9 @@ function seeded(seed: number) {
 
 const portrait = { x: 720, y: 450, r: 96 };
 
-describe('createField', () => {
+// the overlap and floor tests run the full simulation for a few hundred steps, which outlasts the 5s
+// default on slower CI runners.
+describe('createField', { timeout: 30_000 }, () => {
   test('starts with the screen already covered', () => {
     const field = createField(1440, 900, { anchor: portrait }, seeded(1));
     const covered = field.blobs.reduce((sum, b) => sum + Math.PI * b.r ** 2, 0);
