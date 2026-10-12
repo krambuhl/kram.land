@@ -20,6 +20,7 @@ export function secretScroll(root: HTMLElement, image: HTMLElement, text: HTMLEl
   const render = (next: boolean) => {
     open = next;
     root.setAttribute('data-settling', '');
+    root.toggleAttribute('data-open', next);
     root.style.setProperty('--secret', open ? '1' : '0');
     text.inert = open;
     image.setAttribute('aria-pressed', String(open));
