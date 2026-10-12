@@ -7,10 +7,14 @@ const GAP = 5;
 const RELAX = 8;
 const SMOOTH = 0.5;
 const SIZE = 7;
+const MOOD_PERIOD = [12000, 28000];
+const SPIN = 2;
+const BREATHE = 0.12;
+const EDGE_BAND = 0.3;
 const BAND = 50;
 const DRIFT = 0.025;
 const ARMS = 3;
-const JITTER = 2;
+const JITTER = 3;
 const EDGE_GROWTH = [2, 4];
 const EDGE_SWELL = 3;
 const SWELL_FROM = 0.85;
@@ -23,6 +27,7 @@ interface Blob {
   drawY: number;
   r: number;
   extra: number;
+  edge: number;
   color: string;
 }
 
@@ -44,6 +49,7 @@ export interface FieldOptions {
 interface Field {
   blobs: Blob[];
   step(elapsed: number): void;
+  breath(): number;
 }
 
 export function createField(width: number, height: number, options: FieldOptions = {}, random = Math.random): Field {
@@ -52,6 +58,28 @@ export function createField(width: number, height: number, options: FieldOptions
   const blobs: Blob[] = [];
   let sinceSpawn = 0;
   let clock = 0;
+  let colorPhase = 0;
+
+  const waves = Array.from({ length: 2 }, () =>
+    Array.from({ length: 3 }, () => ({
+      rate: (Math.PI * 2) / (MOOD_PERIOD[0] + random() * (MOOD_PERIOD[1] - MOOD_PERIOD[0])),
+      offset: random() * Math.PI * 2,
+    }))
+  );
+  const mood = (k: number, at = clock) =>
+    waves[k].reduce((sum, w) => sum + Math.sin(at * w.rate + w.offset), 0) / waves[k].length;
+  const spinRate = (at: number) => (DRIFT / (BAND * RAINBOW.length)) * SPIN * mood(0, at);
+
+  const HISTORY_STEP = 100;
+  const history = [0];
+  const phaseAgo = (age: number) => {
+    const index = Math.max(0, Math.round(age / HISTORY_STEP));
+    while (history.length <= index) {
+      const at = -history.length * HISTORY_STEP;
+      history.push(history[history.length - 1] - spinRate(at) * HISTORY_STEP);
+    }
+    return history[index];
+  };
 
   const colorAt = (x: number, y: number, phase: number) => {
     const turn = Math.atan2(y - anchor.y, x - anchor.x) / (Math.PI * 2);
@@ -66,14 +94,23 @@ export function createField(width: number, height: number, options: FieldOptions
     return Math.min(tx, ty);
   };
 
-  const target = (b: Blob) => {
+  const smooth = (t: number) => {
+    const c = Math.min(1, Math.max(0, t));
+    return c * c * (3 - 2 * c);
+  };
+
+  const travelled = (b: Blob) => {
     const dx = b.x - anchor.x;
     const dy = b.y - anchor.y;
     const away = Math.hypot(dx, dy) || 0.01;
-    const travelled = Math.min(1, Math.max(0, away / edgeReach(dx / away, dy / away)));
-    const swell = Math.min(1, Math.max(0, (travelled - SWELL_FROM) / (1 - SWELL_FROM)));
-    return SIZE + b.extra * travelled + EDGE_SWELL * swell * swell * (3 - 2 * swell);
+    return Math.min(1, Math.max(0, away / edgeReach(dx / away, dy / away)));
   };
+
+  const target = (b: Blob, t: number) => SIZE + b.extra * t + EDGE_SWELL * smooth((t - SWELL_FROM) / (1 - SWELL_FROM));
+
+  const rimShare = anchor.r / Math.max(1, Math.min(width, height) / 2);
+  const edgeWeight = (t: number) =>
+    Math.max(smooth(1 - (t - rimShare) / EDGE_BAND), smooth((t - (1 - EDGE_BAND)) / EDGE_BAND));
 
   const blob = (x: number, y: number, phase: number): Blob => ({
     x,
@@ -82,6 +119,7 @@ export function createField(width: number, height: number, options: FieldOptions
     drawY: y,
     r: 0,
     extra: EDGE_GROWTH[0] + random() * (EDGE_GROWTH[1] - EDGE_GROWTH[0]),
+    edge: 0,
     color: colorAt(x, y, phase),
   });
 
@@ -142,14 +180,18 @@ export function createField(width: number, height: number, options: FieldOptions
     const y = random() * height;
     blobs.push(blob(x, y, 0));
   }
-  for (const b of blobs) b.r = target(b);
+  for (const b of blobs) {
+    const t = travelled(b);
+    b.r = target(b, t);
+    b.edge = edgeWeight(t);
+  }
   for (let round = 0; round < SEED_ROUNDS && settle(10) > 0.25; round++);
   for (const b of blobs) {
     const dx = b.x - anchor.x;
     const dy = b.y - anchor.y;
     const away = Math.hypot(dx, dy) || 0.01;
     const rim = anchor.r * extent(exponent, dx / away, dy / away);
-    b.color = colorAt(b.x, b.y, -(away - rim) / (BAND * RAINBOW.length));
+    b.color = colorAt(b.x, b.y, phaseAgo((away - rim) / DRIFT));
   }
   for (const b of blobs) {
     b.drawX = b.x;
@@ -161,6 +203,7 @@ export function createField(width: number, height: number, options: FieldOptions
     step(elapsed) {
       sinceSpawn += elapsed;
       clock += elapsed;
+      colorPhase += spinRate(clock) * elapsed;
       while (sinceSpawn >= SPAWN_EVERY) {
         sinceSpawn -= SPAWN_EVERY;
         for (let attempt = 0; attempt < SPAWN_ATTEMPTS; attempt++) {
@@ -174,11 +217,15 @@ export function createField(width: number, height: number, options: FieldOptions
             (b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (Math.max(b.r, SIZE) * reachFactor + GAP / 2) ** 2
           );
           if (crowded) continue;
-          blobs.push(blob(x, y, (clock * DRIFT) / (BAND * RAINBOW.length)));
+          blobs.push(blob(x, y, colorPhase));
           break;
         }
       }
-      for (const b of blobs) b.r += (target(b) - b.r) * GROW;
+      for (const b of blobs) {
+        const t = travelled(b);
+        b.r += (target(b, t) - b.r) * GROW;
+        b.edge = edgeWeight(t);
+      }
       settle(RELAX);
       for (const b of blobs) {
         b.drawX += (b.x - b.drawX) * SMOOTH;
@@ -189,6 +236,7 @@ export function createField(width: number, height: number, options: FieldOptions
         if (x < -60 || y < -60 || x > width + 60 || y > height + 60) blobs.splice(i, 1);
       }
     },
+    breath: () => mood(1),
   };
 }
 
@@ -239,8 +287,10 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.fillStyle = '#000';
     context.fillRect(0, 0, width, height);
+    const breath = field.breath();
     for (const blob of field.blobs) {
-      context.setTransform(ratio * blob.r, 0, 0, ratio * blob.r, ratio * blob.drawX, ratio * blob.drawY);
+      const r = blob.r * (1 + BREATHE * breath * blob.edge);
+      context.setTransform(ratio * r, 0, 0, ratio * r, ratio * blob.drawX, ratio * blob.drawY);
       context.fillStyle = blob.color;
       context.fill(shape);
     }
