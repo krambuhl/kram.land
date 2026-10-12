@@ -1,15 +1,19 @@
 const SPAWN_EVERY = 3;
 const SPAWN_ATTEMPTS = 32;
+// newborns need room for SPAWN_ROOM of their size and gap: less squeezes the inner
+// ring, more starves the outward push that keeps the field moving.
+const SPAWN_ROOM = 0.5;
 const SEED_ROUNDS = 6;
 // circles can't tile the plane, so seeding a full area's worth overfills the screen.
 const SEED_FILL = 0.8;
 const GROW = 0.08;
-const GAP = 5;
-// small pairs sit GAP·GAP_LOOSE apart, large pairs (GAP_LARGE radius) GAP·GAP_TIGHT.
-const GAP_LOOSE = 1.1;
-const GAP_TIGHT = 0.9;
-const GAP_LARGE = 16;
-const RELAX = 8;
+// the gap between neighbours scales with their size, from GAP_MIN px at radius
+// GAP_FROM to GAP_MAX px at radius GAP_TO, so it reads the same at every size.
+const GAP_MIN = 3.5;
+const GAP_MAX = 4;
+const GAP_FROM = 5;
+const GAP_TO = 22;
+const RELAX = 6;
 const SMOOTH = 0.5;
 const SIZE = 7;
 const MOOD_PERIOD = [12000, 28000];
@@ -143,10 +147,19 @@ export function createField(width: number, height: number, options: FieldOptions
     return RAMP_START + (1 - RAMP_START) * Math.min(1, Math.max(0, off / rampLength));
   };
   const ramp = (b: Blob) => rampAt(b.x, b.y);
+  const newborn = SIZE * RAMP_START;
   const target = (b: Blob, t: number) =>
     ramp(b) *
     (SIZE + b.extra * t + EDGE_SWELL * smooth((t - SWELL_FROM) / (1 - SWELL_FROM))) *
     (1 + Math.max(FLOOR_SWELL * b.low, CORNER_SWELL * b.corner));
+
+  // the breath is part of each blob's physical size, so neighbours make room for it.
+  let inner = mood(1);
+  let outer = mood(2);
+  const breathe = (b: Blob) =>
+    1 +
+    INNER_BREATHE * inner * (1 - b.along) +
+    OUTER_BREATHE * (1 + FLOOR_BREATHE * b.low + CORNER_BREATHE * b.corner) * outer * b.along;
 
   const rimShare = anchor.r / Math.max(1, Math.min(width, height) / 2);
   const along = (t: number) => Math.min(1, Math.max(0, (t - rimShare) / Math.max(0.01, 1 - rimShare)));
@@ -164,27 +177,49 @@ export function createField(width: number, height: number, options: FieldOptions
     color: colorAt(x, y, phase, arms),
   });
 
-  const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) * (1 + Math.max(FLOOR_SWELL, CORNER_SWELL)) + GAP * GAP_LOOSE;
-  const columns = Math.ceil(width / cell) + 2;
-  const rows = Math.ceil(height / cell) + 2;
-  const cellOf = (x: number, y: number) => {
-    const cx = Math.min(columns - 1, Math.max(0, Math.floor(x / cell) + 1));
-    const cy = Math.min(rows - 1, Math.max(0, Math.floor(y / cell) + 1));
-    return cy * columns + cx;
-  };
+  const gapFor = (r: number) =>
+    GAP_MIN + (GAP_MAX - GAP_MIN) * Math.min(1, Math.max(0, (r - GAP_FROM) / (GAP_TO - GAP_FROM)));
 
-  const gapFor = (r: number) => GAP * (GAP_LOOSE + (GAP_TIGHT - GAP_LOOSE) * smooth((r - SIZE) / (GAP_LARGE - SIZE)));
-
+  // the collision grid is stored as linked lists in typed arrays: head[cell] is the
+  // first blob in a cell, next[i] the one after blob i.
+  let head = new Int32Array(0);
+  let next = new Int32Array(0);
+  // a pair's reach is the sum of each blob's extent: its r plus half its gap.
+  let extent = new Float64Array(0);
   const settle = (passes: number): number => {
     let moved = 0;
-    const grid: Blob[][] = Array.from({ length: columns * rows }, () => []);
-    for (const b of blobs) grid[cellOf(b.x, b.y)].push(b);
+    // cells fit an average blob; each blob searches as many cells out as its reach needs.
+    if (extent.length < blobs.length) extent = new Float64Array(blobs.length * 2);
+    let widest = 0;
+    let total = 0;
+    for (let i = 0; i < blobs.length; i++) {
+      extent[i] = blobs[i].r + gapFor(blobs[i].r) / 2;
+      widest = Math.max(widest, extent[i]);
+      total += extent[i];
+    }
+    const cell = Math.max(1, (2 * total) / Math.max(1, blobs.length));
+    const columns = Math.ceil(width / cell) + 2;
+    const rows = Math.ceil(height / cell) + 2;
+    const cellOf = (x: number, y: number) => {
+      const cx = Math.min(columns - 1, Math.max(0, Math.floor(x / cell) + 1));
+      const cy = Math.min(rows - 1, Math.max(0, Math.floor(y / cell) + 1));
+      return cy * columns + cx;
+    };
+    if (head.length < columns * rows) head = new Int32Array(columns * rows);
+    if (next.length < blobs.length) next = new Int32Array(blobs.length * 2);
+    head.fill(-1, 0, columns * rows);
+    for (let i = 0; i < blobs.length; i++) {
+      const c = cellOf(blobs[i].x, blobs[i].y);
+      next[i] = head[c];
+      head[c] = i;
+    }
     for (let pass = 0; pass < passes; pass++) {
-      for (const a of blobs) {
+      for (let i = 0; i < blobs.length; i++) {
+        const a = blobs[i];
         const ax = a.x - anchor.x;
         const ay = a.y - anchor.y;
         const away = Math.hypot(ax, ay) || 0.01;
-        const clear = anchor.r + a.r + GAP;
+        const clear = anchor.r + a.r + gapFor(a.r);
         if (away < clear) {
           a.x = anchor.x + (ax / away) * clear;
           a.y = anchor.y + (ay / away) * clear;
@@ -192,13 +227,15 @@ export function createField(width: number, height: number, options: FieldOptions
         const home = cellOf(a.x, a.y);
         const hx = home % columns;
         const hy = (home - hx) / columns;
-        for (let cy = Math.max(0, hy - 1); cy <= Math.min(rows - 1, hy + 1); cy++) {
-          for (let cx = Math.max(0, hx - 1); cx <= Math.min(columns - 1, hx + 1); cx++) {
-            for (const b of grid[cy * columns + cx]) {
+        const span = Math.ceil((extent[i] + widest) / cell);
+        for (let cy = Math.max(0, hy - span); cy <= Math.min(rows - 1, hy + span); cy++) {
+          for (let cx = Math.max(0, hx - span); cx <= Math.min(columns - 1, hx + span); cx++) {
+            for (let j = head[cy * columns + cx]; j !== -1; j = next[j]) {
+              const b = blobs[j];
               if (b === a) continue;
               const ox = b.x - a.x;
               const oy = b.y - a.y;
-              const reach = a.r + b.r + gapFor((a.r + b.r) / 2);
+              const reach = extent[i] + extent[j];
               const squared = ox * ox + oy * oy;
               if (squared >= reach * reach) continue;
               const distance = Math.sqrt(squared) || 0.01;
@@ -217,7 +254,7 @@ export function createField(width: number, height: number, options: FieldOptions
   };
 
   const typical = SIZE + (EDGE_GROWTH[0] + EDGE_GROWTH[1]) / 4;
-  const count = Math.round((SEED_FILL * width * height) / (Math.PI * (typical + GAP / 2) ** 2));
+  const count = Math.round((SEED_FILL * width * height) / (Math.PI * (typical + gapFor(typical) / 2) ** 2));
   // smaller blobs near the rim need proportionally more of them to cover the same area.
   for (let i = 0; i < count / RAMP_START ** 2; i++) {
     const x = random() * width;
@@ -228,8 +265,8 @@ export function createField(width: number, height: number, options: FieldOptions
     const t = travelled(b);
     b.low = low(b);
     b.corner = corner(b);
-    b.r = target(b, t);
     b.along = along(t);
+    b.r = target(b, t) * breathe(b);
   }
   for (let round = 0; round < SEED_ROUNDS && settle(10) > 0.25; round++);
   for (const b of blobs) {
@@ -251,17 +288,19 @@ export function createField(width: number, height: number, options: FieldOptions
       sinceSpawn += elapsed;
       clock += elapsed;
       colorPhase += spinRate(clock) * elapsed;
+      inner = mood(1);
+      outer = mood(2);
       while (sinceSpawn >= SPAWN_EVERY) {
         sinceSpawn -= SPAWN_EVERY;
         for (let attempt = 0; attempt < SPAWN_ATTEMPTS; attempt++) {
           const angle = random() * Math.PI * 2;
           const ux = Math.cos(angle);
           const uy = Math.sin(angle);
-          const rim = anchor.r + GAP + 1;
+          const rim = anchor.r + gapFor(newborn) + 1;
           const x = anchor.x + ux * rim;
           const y = anchor.y + uy * rim;
           const crowded = blobs.some(
-            (b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (Math.max(b.r, SIZE * RAMP_START) + GAP * 0.75) ** 2
+            (b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r + SPAWN_ROOM * (newborn + gapFor(newborn))) ** 2
           );
           if (crowded) continue;
           blobs.push(blob(x, y, colorPhase, armsAt(clock)));
@@ -272,8 +311,8 @@ export function createField(width: number, height: number, options: FieldOptions
         const t = travelled(b);
         b.low = low(b);
         b.corner = corner(b);
-        b.r += (target(b, t) - b.r) * GROW;
         b.along = along(t);
+        b.r += (target(b, t) * breathe(b) - b.r) * GROW;
       }
       settle(RELAX);
       for (const b of blobs) {
@@ -285,7 +324,7 @@ export function createField(width: number, height: number, options: FieldOptions
         if (x < -60 || y < -60 || x > width + 60 || y > height + 60) blobs.splice(i, 1);
       }
     },
-    breath: () => ({ inner: mood(1), outer: mood(2) }),
+    breath: () => ({ inner, outer }),
   };
 }
 
@@ -322,11 +361,6 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     const center = options.anchor?.() ?? { x: width / 2, y: height / 2 };
     for (const blob of field.blobs) {
       const t = blob.along;
-      const r =
-        blob.r *
-        (1 +
-          INNER_BREATHE * inner * (1 - t) +
-          OUTER_BREATHE * (1 + FLOOR_BREATHE * blob.low + CORNER_BREATHE * blob.corner) * outer * t);
       const dx = blob.drawX - center.x;
       const dy = blob.drawY - center.y;
       const away = Math.hypot(dx, dy) || 1;
@@ -335,7 +369,7 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
       const y = blob.drawY + dy * shift;
       context.fillStyle = blob.color;
       context.beginPath();
-      context.arc(x, y, r, 0, Math.PI * 2);
+      context.arc(x, y, blob.r, 0, Math.PI * 2);
       context.fill();
     }
   };
