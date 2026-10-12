@@ -25,15 +25,7 @@ import ikea from '../assets/ikea.png';
       data-immersive-image
       class={immersive({ part: 'image' })}
     >
-      <Image
-        src={ikea}
-        alt=""
-        width={192}
-        height={192}
-        densities={[1, 2, 3]}
-        priority
-        class:list={[circle(), entrance({ motion: 'rise' })]}
-      />
+      <Image src={ikea} alt="" width={192} height={192} densities={[1, 2, 3]} priority class={circle()} />
     </button>
 
     <div
