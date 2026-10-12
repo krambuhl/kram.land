@@ -20,8 +20,7 @@ export function secretScroll(
   if (!stage || !track) return () => {};
 
   let open = false;
-  let openAt = 0;
-  let deadZone = 0;
+  let runway = 0;
   let returnY = 0;
   let stopArt: (() => void) | undefined;
   let artTimer: ReturnType<typeof setTimeout> | undefined;
@@ -58,9 +57,7 @@ export function secretScroll(
 
   const measure = () => {
     stage.style.setProperty('--stage-top', `${Math.min(0, window.innerHeight - stage.offsetHeight)}px`);
-    const runway = track.offsetHeight - stage.offsetHeight;
-    openAt = Math.max(0, stage.offsetHeight - window.innerHeight) + runway * OPEN_AT;
-    deadZone = runway * DEAD_ZONE;
+    runway = track.offsetHeight - stage.offsetHeight;
 
     const rect = image.getBoundingClientRect();
     const shift = open ? Number.parseFloat(root.style.getPropertyValue('--secret-shift')) || 0 : 0;
@@ -68,8 +65,10 @@ export function secretScroll(
     root.style.setProperty('--secret-radius', `${rect.width / 2}px`);
   };
 
+  const openAt = () => document.documentElement.scrollHeight - window.innerHeight - runway * (1 - OPEN_AT);
+
   const onScroll = () => {
-    const next = nextOpen(window.scrollY, openAt, deadZone, open);
+    const next = nextOpen(window.scrollY, openAt(), runway * DEAD_ZONE, open);
     if (next === open) return;
     if (next) measure();
     render(next);
@@ -77,7 +76,7 @@ export function secretScroll(
 
   const onClick = () => {
     if (!open) returnY = window.scrollY;
-    const top = open ? Math.min(returnY, openAt - deadZone - 1) : document.documentElement.scrollHeight;
+    const top = open ? Math.min(returnY, openAt() - runway * DEAD_ZONE - 1) : document.documentElement.scrollHeight;
     window.scrollTo({ top, behavior: 'smooth' });
   };
 
@@ -88,10 +87,12 @@ export function secretScroll(
   image.addEventListener('click', onClick);
   window.addEventListener('scroll', onScroll, { passive: true });
   window.addEventListener('resize', measure);
+  window.visualViewport?.addEventListener('resize', measure);
   return () => {
     hideArt();
     image.removeEventListener('click', onClick);
     window.removeEventListener('scroll', onScroll);
     window.removeEventListener('resize', measure);
+    window.visualViewport?.removeEventListener('resize', measure);
   };
 }
