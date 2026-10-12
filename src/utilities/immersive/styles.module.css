@@ -36,6 +36,7 @@
   z-index: 0;
   width: 100%;
   height: calc(100% + var(--travel, 0px));
+  height: calc(100lvh + var(--travel, 0px));
   background: #000;
   opacity: 0;
   pointer-events: none;

@@ -30,7 +30,8 @@ const image = new URL(social.src, Astro.site).href;
     {immersive && <script is:inline>
       document.documentElement.setAttribute('data-immersive', '');
     </script>}
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content={`width=device-width, initial-scale=1${immersive ? ', viewport-fit=cover' : ''}`} />
+    {immersive && <meta name="theme-color" content="#000" />}
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />
