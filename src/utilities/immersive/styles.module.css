@@ -60,7 +60,7 @@
 
 :root[data-art]:not([data-immersive]) .art {
   opacity: 1;
-  filter: brightness(0.3);
+  filter: brightness(0.12);
 }
 
 @media (prefers-reduced-motion: reduce) {
