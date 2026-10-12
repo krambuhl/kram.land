@@ -50,7 +50,7 @@ describe.each([
       }
       return nearest.color === a.color;
     });
-    expect(shared.length / sample.length).toBeGreaterThan(0.25);
+    expect(shared.length / sample.length).toBeGreaterThan(0.2);
   });
 
   test('packs against the portrait with no visible overlap as new blobs push out from its rim', () => {

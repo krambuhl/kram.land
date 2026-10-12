@@ -10,7 +10,7 @@ const SIZE = 7;
 const MOOD_PERIOD = [12000, 28000];
 const SPIN = 2;
 const BREATHE = 0.12;
-const EDGE_BAND = 0.3;
+const SHIFT = 14;
 const BAND = 50;
 const DRIFT = 0.025;
 const ARMS = 3;
@@ -27,7 +27,7 @@ interface Blob {
   drawY: number;
   r: number;
   extra: number;
-  edge: number;
+  along: number;
   color: string;
 }
 
@@ -49,7 +49,7 @@ export interface FieldOptions {
 interface Field {
   blobs: Blob[];
   step(elapsed: number): void;
-  breath(): number;
+  breath(): { inner: number; outer: number };
 }
 
 export function createField(width: number, height: number, options: FieldOptions = {}, random = Math.random): Field {
@@ -60,7 +60,7 @@ export function createField(width: number, height: number, options: FieldOptions
   let clock = 0;
   let colorPhase = 0;
 
-  const waves = Array.from({ length: 2 }, () =>
+  const waves = Array.from({ length: 3 }, () =>
     Array.from({ length: 3 }, () => ({
       rate: (Math.PI * 2) / (MOOD_PERIOD[0] + random() * (MOOD_PERIOD[1] - MOOD_PERIOD[0])),
       offset: random() * Math.PI * 2,
@@ -109,8 +109,7 @@ export function createField(width: number, height: number, options: FieldOptions
   const target = (b: Blob, t: number) => SIZE + b.extra * t + EDGE_SWELL * smooth((t - SWELL_FROM) / (1 - SWELL_FROM));
 
   const rimShare = anchor.r / Math.max(1, Math.min(width, height) / 2);
-  const edgeWeight = (t: number) =>
-    Math.max(smooth(1 - (t - rimShare) / EDGE_BAND), smooth((t - (1 - EDGE_BAND)) / EDGE_BAND));
+  const along = (t: number) => Math.min(1, Math.max(0, (t - rimShare) / Math.max(0.01, 1 - rimShare)));
 
   const blob = (x: number, y: number, phase: number): Blob => ({
     x,
@@ -119,7 +118,7 @@ export function createField(width: number, height: number, options: FieldOptions
     drawY: y,
     r: 0,
     extra: EDGE_GROWTH[0] + random() * (EDGE_GROWTH[1] - EDGE_GROWTH[0]),
-    edge: 0,
+    along: 0,
     color: colorAt(x, y, phase),
   });
 
@@ -183,7 +182,7 @@ export function createField(width: number, height: number, options: FieldOptions
   for (const b of blobs) {
     const t = travelled(b);
     b.r = target(b, t);
-    b.edge = edgeWeight(t);
+    b.along = along(t);
   }
   for (let round = 0; round < SEED_ROUNDS && settle(10) > 0.25; round++);
   for (const b of blobs) {
@@ -224,7 +223,7 @@ export function createField(width: number, height: number, options: FieldOptions
       for (const b of blobs) {
         const t = travelled(b);
         b.r += (target(b, t) - b.r) * GROW;
-        b.edge = edgeWeight(t);
+        b.along = along(t);
       }
       settle(RELAX);
       for (const b of blobs) {
@@ -236,7 +235,7 @@ export function createField(width: number, height: number, options: FieldOptions
         if (x < -60 || y < -60 || x > width + 60 || y > height + 60) blobs.splice(i, 1);
       }
     },
-    breath: () => mood(1),
+    breath: () => ({ inner: mood(1), outer: mood(2) }),
   };
 }
 
@@ -287,10 +286,18 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.fillStyle = '#000';
     context.fillRect(0, 0, width, height);
-    const breath = field.breath();
+    const { inner, outer } = field.breath();
+    const center = options.anchor?.() ?? { x: width / 2, y: height / 2 };
     for (const blob of field.blobs) {
-      const r = blob.r * (1 + BREATHE * breath * blob.edge);
-      context.setTransform(ratio * r, 0, 0, ratio * r, ratio * blob.drawX, ratio * blob.drawY);
+      const t = blob.along;
+      const r = blob.r * (1 + BREATHE * (inner * (1 - t) + outer * t));
+      const dx = blob.drawX - center.x;
+      const dy = blob.drawY - center.y;
+      const away = Math.hypot(dx, dy) || 1;
+      const shift = (SHIFT * (inner - outer) * Math.sin(Math.PI * t)) / away;
+      const x = blob.drawX + dx * shift;
+      const y = blob.drawY + dy * shift;
+      context.setTransform(ratio * r, 0, 0, ratio * r, ratio * x, ratio * y);
       context.fillStyle = blob.color;
       context.fill(shape);
     }
