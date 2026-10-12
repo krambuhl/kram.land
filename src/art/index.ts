@@ -20,7 +20,7 @@ const JITTER = 3;
 const EDGE_GROWTH = [2, 4];
 const EDGE_SWELL = 3;
 const SWELL_FROM = 0.85;
-const FLOOR_SWELL = 0.2;
+const FLOOR_SWELL = 0.4;
 const FLOOR_BREATHE = 0.2;
 const RAINBOW = ['#5A4D9A', '#A067C3', '#CD361F', '#F07C31', '#E9AC38', '#5B9E47', '#58BABB', '#1079CB'];
 
@@ -44,7 +44,7 @@ interface Anchor {
 
 export interface FieldOptions {
   anchor?: Anchor;
-  // blobs below this height grow and breathe up to 20% more toward the bottom.
+  // blobs below this height grow up to 40% and breathe up to 20% more toward the bottom.
   floor?: number;
 }
 
