@@ -1,10 +1,12 @@
 const SUPERELLIPSE = 2 ** 1.35;
-const SPAWN_EVERY = 9;
+const SPAWN_EVERY = 6;
+const SPAWN_ATTEMPTS = 4;
 const GROW = 0.08;
 const GAP = 5;
-const RELAX = 6;
+const RELAX = 8;
 const SMOOTH = 0.5;
 const SIZE = 7;
+const EDGE_GROWTH = [2, 4];
 const RAINBOW = ['#5A4D9A', '#A067C3', '#CD361F', '#F07C31', '#E9AC38', '#5B9E47', '#58BABB', '#1079CB'];
 
 interface Blob {
@@ -13,6 +15,7 @@ interface Blob {
   drawX: number;
   drawY: number;
   r: number;
+  extra: number;
   color: string;
 }
 
@@ -42,16 +45,31 @@ export function createField(width: number, height: number, options: FieldOptions
   const blobs: Blob[] = [];
   let sinceSpawn = 0;
 
-  const blob = (x: number, y: number, grown: boolean): Blob => ({
+  const edgeReach = (ux: number, uy: number) => {
+    const tx = ux > 0 ? (width - anchor.x) / ux : ux < 0 ? -anchor.x / ux : Infinity;
+    const ty = uy > 0 ? (height - anchor.y) / uy : uy < 0 ? -anchor.y / uy : Infinity;
+    return Math.min(tx, ty);
+  };
+
+  const target = (b: Blob) => {
+    const dx = b.x - anchor.x;
+    const dy = b.y - anchor.y;
+    const away = Math.hypot(dx, dy) || 0.01;
+    const travelled = Math.min(1, Math.max(0, away / edgeReach(dx / away, dy / away)));
+    return SIZE + b.extra * travelled;
+  };
+
+  const blob = (x: number, y: number): Blob => ({
     x,
     y,
     drawX: x,
     drawY: y,
-    r: grown ? SIZE : 0,
+    r: 0,
+    extra: EDGE_GROWTH[0] + random() * (EDGE_GROWTH[1] - EDGE_GROWTH[0]),
     color: RAINBOW[Math.floor(random() * RAINBOW.length)],
   });
 
-  const cell = 2 * SIZE * reachFactor + GAP;
+  const cell = 2 * (SIZE + EDGE_GROWTH[1]) * reachFactor + GAP;
   const columns = Math.ceil(width / cell) + 2;
   const rows = Math.ceil(height / cell) + 2;
   const cellOf = (x: number, y: number) => {
@@ -99,7 +117,8 @@ export function createField(width: number, height: number, options: FieldOptions
   };
 
   const count = Math.round((width * height) / (Math.PI * (SIZE * reachFactor + GAP / 2) ** 2));
-  for (let i = 0; i < count; i++) blobs.push(blob(random() * width, random() * height, true));
+  for (let i = 0; i < count; i++) blobs.push(blob(random() * width, random() * height));
+  for (const b of blobs) b.r = target(b);
   settle(60);
   for (const b of blobs) {
     b.drawX = b.x;
@@ -112,13 +131,20 @@ export function createField(width: number, height: number, options: FieldOptions
       sinceSpawn += elapsed;
       while (sinceSpawn >= SPAWN_EVERY) {
         sinceSpawn -= SPAWN_EVERY;
-        const angle = random() * Math.PI * 2;
-        const ux = Math.cos(angle);
-        const uy = Math.sin(angle);
-        const rim = anchor.r * extent(exponent, ux, uy) + GAP + 1;
-        blobs.push(blob(anchor.x + ux * rim, anchor.y + uy * rim, false));
+        for (let attempt = 0; attempt < SPAWN_ATTEMPTS; attempt++) {
+          const angle = random() * Math.PI * 2;
+          const ux = Math.cos(angle);
+          const uy = Math.sin(angle);
+          const rim = anchor.r * extent(exponent, ux, uy) + GAP + 1;
+          const x = anchor.x + ux * rim;
+          const y = anchor.y + uy * rim;
+          const crowded = blobs.some((b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r * reachFactor) ** 2);
+          if (crowded) continue;
+          blobs.push(blob(x, y));
+          break;
+        }
       }
-      for (const b of blobs) b.r += (SIZE - b.r) * GROW;
+      for (const b of blobs) b.r += (target(b) - b.r) * GROW;
       settle(RELAX);
       for (const b of blobs) {
         b.drawX += (b.x - b.drawX) * SMOOTH;
