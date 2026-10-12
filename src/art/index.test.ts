@@ -26,7 +26,7 @@ describe('createField', () => {
     const mean = (list: typeof near) => list.reduce((sum, b) => sum + b.r * 2, 0) / list.length;
     expect(mean(near)).toBeLessThan(16);
     expect(mean(edge)).toBeGreaterThan(20);
-    expect(Math.max(...edge.map((b) => b.r * 2))).toBeLessThanOrEqual(28);
+    expect(Math.max(...edge.map((b) => b.r * 2))).toBeLessThanOrEqual(35);
   });
 
   test('colours fall into bands, so most blobs share a colour with their nearest neighbour', () => {
@@ -86,5 +86,14 @@ describe('createField', () => {
       }
     }
     expect(worst).toBeLessThanOrEqual(1);
+  });
+
+  test('blobs in the top corners grow larger than those along the middle of the top edge', () => {
+    const field = createField(1440, 900, { anchor: portrait }, seeded(6));
+    for (let i = 0; i < 200; i++) field.step(16);
+    const mean = (list: typeof field.blobs) => list.reduce((sum, b) => sum + b.r * 2, 0) / list.length;
+    const corners = field.blobs.filter((b) => b.y < 40 && (b.x < 40 || b.x > 1400));
+    const middle = field.blobs.filter((b) => b.y < 40 && Math.abs(b.x - 720) < 200);
+    expect(mean(corners)).toBeGreaterThan(mean(middle) * 1.12);
   });
 });

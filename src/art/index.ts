@@ -24,6 +24,9 @@ const EDGE_SWELL = 3;
 const SWELL_FROM = 0.85;
 const FLOOR_SWELL = 0.4;
 const FLOOR_BREATHE = 0.2;
+const CORNER_SWELL = 0.25;
+const CORNER_BREATHE = 0.5;
+const CORNER_REACH = 0.3;
 const RAINBOW = ['#5A4D9A', '#A067C3', '#CD361F', '#F07C31', '#E9AC38', '#5B9E47', '#58BABB', '#1079CB'];
 
 interface Blob {
@@ -35,6 +38,7 @@ interface Blob {
   extra: number;
   along: number;
   low: number;
+  corner: number;
   color: string;
 }
 
@@ -121,8 +125,12 @@ export function createField(width: number, height: number, options: FieldOptions
   };
 
   const low = (b: Blob) => (floor < height ? smooth((b.y - floor) / (height - floor)) : 0);
+  // distance from a top corner over which blobs swell: CORNER_REACH of the short side, at least 160px.
+  const cornerReach = Math.max(160, CORNER_REACH * Math.min(width, height));
+  const corner = (b: Blob) => smooth(1 - Math.min(Math.hypot(b.x, b.y), Math.hypot(width - b.x, b.y)) / cornerReach);
   const target = (b: Blob, t: number) =>
-    (SIZE + b.extra * t + EDGE_SWELL * smooth((t - SWELL_FROM) / (1 - SWELL_FROM))) * (1 + FLOOR_SWELL * b.low);
+    (SIZE + b.extra * t + EDGE_SWELL * smooth((t - SWELL_FROM) / (1 - SWELL_FROM))) *
+    (1 + Math.max(FLOOR_SWELL * b.low, CORNER_SWELL * b.corner));
 
   const rimShare = anchor.r / Math.max(1, Math.min(width, height) / 2);
   const along = (t: number) => Math.min(1, Math.max(0, (t - rimShare) / Math.max(0.01, 1 - rimShare)));
@@ -136,10 +144,11 @@ export function createField(width: number, height: number, options: FieldOptions
     extra: EDGE_GROWTH[0] + random() * (EDGE_GROWTH[1] - EDGE_GROWTH[0]),
     along: 0,
     low: 0,
+    corner: 0,
     color: colorAt(x, y, phase, arms),
   });
 
-  const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) * (1 + FLOOR_SWELL) + GAP;
+  const cell = 2 * (SIZE + EDGE_GROWTH[1] + EDGE_SWELL) * (1 + Math.max(FLOOR_SWELL, CORNER_SWELL)) + GAP;
   const columns = Math.ceil(width / cell) + 2;
   const rows = Math.ceil(height / cell) + 2;
   const cellOf = (x: number, y: number) => {
@@ -199,6 +208,7 @@ export function createField(width: number, height: number, options: FieldOptions
   for (const b of blobs) {
     const t = travelled(b);
     b.low = low(b);
+    b.corner = corner(b);
     b.r = target(b, t);
     b.along = along(t);
   }
@@ -240,6 +250,7 @@ export function createField(width: number, height: number, options: FieldOptions
       for (const b of blobs) {
         const t = travelled(b);
         b.low = low(b);
+        b.corner = corner(b);
         b.r += (target(b, t) - b.r) * GROW;
         b.along = along(t);
       }
@@ -291,7 +302,10 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     for (const blob of field.blobs) {
       const t = blob.along;
       const r =
-        blob.r * (1 + INNER_BREATHE * inner * (1 - t) + OUTER_BREATHE * (1 + FLOOR_BREATHE * blob.low) * outer * t);
+        blob.r *
+        (1 +
+          INNER_BREATHE * inner * (1 - t) +
+          OUTER_BREATHE * (1 + FLOOR_BREATHE * blob.low + CORNER_BREATHE * blob.corner) * outer * t);
       const dx = blob.drawX - center.x;
       const dy = blob.drawY - center.y;
       const away = Math.hypot(dx, dy) || 1;
