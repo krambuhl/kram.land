@@ -16,14 +16,9 @@ import ikea from '../assets/ikea.png';
 <Layout immersive mode="dark">
   <canvas data-immersive-art aria-hidden="true" class={immersive({ part: 'art' })}></canvas>
 
-  <div
-    class:list={[
-      area({ width: token('size.x384') }),
-      stack({ gap: token('space.x48'), align: 'center' }),
-      immersive({ part: 'block' }),
-    ]}
-  >
-    <div aria-hidden="true" class={immersive({ part: 'scrim' })}></div>
+  <div aria-hidden="true" class={immersive({ part: 'scrim' })}></div>
+
+  <div class:list={[area({ width: token('size.x384') }), stack({ gap: token('space.x48'), align: 'center' })]}>
     <button
       type="button"
       aria-label="about evan"

@@ -1,33 +1,18 @@
-.block {
-  position: relative;
-}
-
-/* blurs and darkens the art behind the open content, fading out toward its edges.
-   the darkening stays because blur alone leaves white text over bright yellow and teal. */
+/* blurs the art behind the open page into a soft grain of colour. brightness(0.55)
+   darkens it because blur alone leaves the light text over the palette's brightest colours. */
 .scrim {
-  --bleed: token('space.x24');
-
-  position: absolute;
-  inset: calc(-1 * token('space.x48')) calc(-1 * var(--bleed));
+  position: fixed;
+  inset: 0;
   z-index: 0;
+  margin: 0;
   opacity: 0;
   pointer-events: none;
-  backdrop-filter: blur(16px) brightness(0.35);
-  mask-image:
-    linear-gradient(to right, transparent, #000 var(--bleed), #000 calc(100% - var(--bleed)), transparent),
-    linear-gradient(to bottom, transparent, #000 token('space.x48'), #000 calc(100% - token('space.x48')), transparent);
-  mask-composite: intersect;
+  backdrop-filter: blur(14px) brightness(0.55);
   transition: opacity 600ms ease-out;
 }
 
 :root:not([data-immersive], [data-closing]) .scrim {
   opacity: 1;
-}
-
-@media (width >= 32rem) {
-  .scrim {
-    --bleed: token('space.x64');
-  }
 }
 
 .image {
