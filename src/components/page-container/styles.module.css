@@ -1,4 +1,6 @@
 .root {
+  --optical-offset: 10dvh;
+
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -9,6 +11,10 @@
   text-align: center;
   max-width: token('size.x640');
   margin: auto;
+}
+
+.root > * {
+  margin-block-end: calc(var(--optical-offset) * 2);
 }
 
 @media (width >= 32rem) {
