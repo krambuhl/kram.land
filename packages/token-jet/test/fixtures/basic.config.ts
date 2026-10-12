@@ -2,7 +2,7 @@ import type { Config } from '../../src/index.ts';
 
 export default {
   modes: {
-    dark: '(prefers-color-scheme: dark)',
+    dark: { media: '(prefers-color-scheme: dark)', scheme: true },
   },
   tokens: {
     space: {

@@ -1,4 +1,9 @@
-export type Modes = Record<string, string>;
+export interface ModeCss {
+  media?: string;
+  scheme?: boolean;
+}
+
+export type Modes = Record<string, ModeCss>;
 
 export type TokenValue = string | number;
 

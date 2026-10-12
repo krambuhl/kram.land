@@ -10,11 +10,8 @@ const spacing = pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' }
 const color = pattern({ type: 'color', tags: ['color', 'background'], preview: 'swatch', modes: ['dark'] });
 
 const schema = defineSchema({
-  modes: { dark: '(prefers-color-scheme: dark)' },
-  shape: {
-    space: slots(['x4', 'x8'], spacing),
-    surface: slots(['default', 'hover'], color),
-  },
+  space: slots(['x4', 'x8'], spacing),
+  surface: slots(['default', 'hover'], color),
 });
 
 const defined = schema.defineTokens({
@@ -50,16 +47,24 @@ describe('defineSchema', () => {
 describe('schemaToConfig', () => {
   const config = schemaToConfig(defined);
 
-  test('takes the modes from the schema and the type, tags and preview from each pattern', () => {
-    expect(config.modes).toEqual({ dark: '(prefers-color-scheme: dark)' });
+  test('takes the mode names from the patterns and the type, tags and preview from each pattern', () => {
+    expect(config.modes).toEqual({ dark: {} });
     expect(config.tokens.space).toEqual({
       x4: { value: '4px', type: 'dimension', tags: ['spacing'], preview: 'gap' },
       x8: { value: '8px', description: 'The default gap.', type: 'dimension', tags: ['spacing'], preview: 'gap' },
     });
   });
 
+  test('a css config implements the modes, and implementing one no pattern uses is an error', () => {
+    const css = { modes: { dark: { media: '(prefers-color-scheme: dark)', scheme: true } } };
+    expect(schemaToConfig(defined, css).modes).toEqual(css.modes);
+    expect(() => schemaToConfig(defined, { modes: { night: {} } })).toThrow(
+      'css config implements the mode "night", which no pattern uses.'
+    );
+  });
+
   test('a pattern without tags or a preview adds neither to its leaves', () => {
-    const plain = defineSchema({ modes: {}, shape: { ratio: pattern({ type: 'number' }) } });
+    const plain = defineSchema({ ratio: pattern({ type: 'number' }) });
     expect(schemaToConfig(plain.defineTokens({ ratio: { value: 1.5 } })).tokens).toEqual({
       ratio: { value: 1.5, type: 'number' },
     });
@@ -113,26 +118,20 @@ describe('tag unions', () => {
   });
 
   test('a kebab-case tag becomes a PascalCase union', () => {
-    const kebab = defineSchema({
-      modes: {},
-      shape: { radius: slots(['sm'], pattern({ type: 'dimension', tags: ['border-radius'] })) },
-    });
+    const kebab = defineSchema({ radius: slots(['sm'], pattern({ type: 'dimension', tags: ['border-radius'] })) });
     const unions = loadTokens(schemaToConfig(kebab.defineTokens({ radius: { sm: { value: '2px' } } }))).unions;
     expect(unions.map((u) => u.name)).toContain('BorderRadiusToken');
   });
 
   test('a tag whose union name a group already has is an error naming both', () => {
-    const clash = defineSchema({
-      modes: {},
-      shape: { spacing: slots(['x4'], pattern({ type: 'dimension', tags: ['spacing'] })) },
-    });
+    const clash = defineSchema({ spacing: slots(['x4'], pattern({ type: 'dimension', tags: ['spacing'] })) });
     expect(() => loadTokens(schemaToConfig(clash.defineTokens({ spacing: { x4: { value: '4px' } } })))).toThrow(
       'Type name "SpacingToken" is produced by both tokens.spacing and tags.spacing.'
     );
   });
 
   test('a tag that cannot become a type name is an error naming it', () => {
-    const bad = defineSchema({ modes: {}, shape: { a: pattern({ type: 'dimension', tags: ['two words'] }) } });
+    const bad = defineSchema({ a: pattern({ type: 'dimension', tags: ['two words'] }) });
     expect(() => loadTokens(schemaToConfig(bad.defineTokens({ a: { value: '1px' } })))).toThrow(
       'Token "a" has the tag "two words"; a tag is letters, digits and dashes, starting with a letter.'
     );

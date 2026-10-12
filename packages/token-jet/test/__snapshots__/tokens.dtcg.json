@@ -1,10 +1,10 @@
 {
   "$extensions": {
     "token-jet": {
-      "modes": {
-        "dark": "(prefers-color-scheme: dark)",
-        "contrast": "(prefers-contrast: more)"
-      }
+      "modes": [
+        "dark",
+        "contrast"
+      ]
     }
   },
   "space": {

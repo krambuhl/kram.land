@@ -11,7 +11,7 @@ const api = pathToFileURL(join(import.meta.dirname, '../src/index.ts')).href;
 
 const SCHEMA_TOKENS = `import { defineSchema, pattern, slots } from '${api}';
 const spacing = pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' });
-const schema = defineSchema({ modes: {}, shape: { space: slots(['x4', 'x8'], spacing) } });
+const schema = defineSchema({ space: slots(['x4', 'x8'], spacing) });
 export default schema.defineTokens({ space: { x4: { value: '4px' }, x8: { value: '8px' } } });
 `;
 
@@ -53,7 +53,7 @@ describe('loadConfigFile', () => {
 
   test('a second load sees an edit to a module tokens.ts imports', async () => {
     const schemaFile = (size: string) => `import { defineSchema, pattern, slots } from '${api}';
-export const schema = defineSchema({ modes: {}, shape: { space: slots([${size}], pattern({ type: 'dimension' })) } });
+export const schema = defineSchema({ space: slots([${size}], pattern({ type: 'dimension' })) });
 `;
     const dir = workspace({
       'tokens/schema.ts': schemaFile("'x4'"),

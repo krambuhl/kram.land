@@ -1,15 +1,12 @@
 import { describe, expectTypeOf, test } from 'vitest';
 
 import { defineSchema, pattern, slots } from '../src/index.ts';
-import type { TagsOf } from '../src/index.ts';
+import type { ModesOf, TagsOf } from '../src/index.ts';
 
 const spacing = pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' });
 const color = pattern({ type: 'color', tags: ['color', 'surface'], modes: ['dark'] });
 
-const schema = defineSchema({
-  modes: { dark: '(prefers-color-scheme: dark)' },
-  shape: { space: slots(['x4', 'x8'], spacing), page: color },
-});
+const schema = defineSchema({ space: slots(['x4', 'x8'], spacing), page: color });
 
 describe('defineTokens', () => {
   test('accepts a tree that fills every slot', () => {
@@ -46,10 +43,9 @@ describe('defineTokens', () => {
   });
 });
 
-describe('defineSchema', () => {
-  test('rejects a pattern that requires a mode the schema does not declare', () => {
-    // @ts-expect-error color requires dark
-    defineSchema({ modes: {}, shape: { page: color } });
+describe('modes', () => {
+  test('are collected from every pattern in the shape', () => {
+    expectTypeOf<ModesOf<typeof schema.shape>>().toEqualTypeOf<'dark'>();
   });
 });
 

@@ -58,10 +58,8 @@ describe('toDtcg', () => {
     await expect(JSON.stringify(file, null, 2)).toMatchFileSnapshot('./__snapshots__/tokens.dtcg.json');
   });
 
-  test('the modes and their media queries sit at the root under the token-jet extension', () => {
-    expect(file.$extensions).toEqual({
-      'token-jet': { modes: { dark: '(prefers-color-scheme: dark)', contrast: '(prefers-contrast: more)' } },
-    });
+  test('the mode names sit at the root under the token-jet extension', () => {
+    expect(file.$extensions).toEqual({ 'token-jet': { modes: ['dark', 'contrast'] } });
   });
 
   test('every token carries its own $type and a group carries none', () => {
@@ -108,11 +106,8 @@ describe('toDtcg', () => {
 
 describe('tags and preview', () => {
   const schema = defineSchema({
-    modes: { dark: '(prefers-color-scheme: dark)' },
-    shape: {
-      space: slots(['x4'], pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' })),
-      page: pattern({ type: 'color', tags: ['color', 'surface'], modes: ['dark'] }),
-    },
+    space: slots(['x4'], pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' })),
+    page: pattern({ type: 'color', tags: ['color', 'surface'], modes: ['dark'] }),
   });
   const tagged = schemaToConfig(
     schema.defineTokens({ space: { x4: { value: '4px' } }, page: { value: '#ffffff', dark: '#000000' } })

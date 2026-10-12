@@ -44,46 +44,42 @@ const intentContexts = {
 };
 
 export const schema = defineSchema({
-  modes: {
-    dark: '(prefers-color-scheme: dark)',
-  },
-  shape: {
-    // dimensions
-    space: slots(
-      ['x0', 'x2', 'x4', 'x6', 'x8', 'x12', 'x16', 'x20', 'x24', 'x32', 'x48', 'x64', 'x80', 'x96', 'x128'],
-      spacing
-    ),
-    size: slots(
-      [
-        'x192',
-        'x256',
-        'x384',
-        'x512',
-        'x640',
-        'x768',
-        'x896',
-        'x1024',
-        'x1152',
-        'x1280',
-        'x1408',
-        'x1536',
-        'x1664',
-        'x1792',
-        'x1920',
-      ],
-      sizing
-    ),
-    radius: slots(['none', 'sm', 'md', 'lg', 'pill'], radius),
-    breakpoint: slots(['base', 'sm', 'md', 'lg', 'xl'], breakpoint),
+  breakpoint: slots(['base', 'sm', 'md', 'lg', 'xl'], breakpoint),
 
-    // typography
-    heading: typeBundle(['xs', 'sm', 'md', 'lg', 'xl']),
-    body: typeBundle(['xs', 'sm', 'md', 'lg', 'xl']),
-    data: typeBundle(['xs', 'sm', 'md', 'lg', 'xl']),
+  // dimensions
+  space: slots(
+    ['x0', 'x2', 'x4', 'x6', 'x8', 'x12', 'x16', 'x20', 'x24', 'x32', 'x48', 'x64', 'x80', 'x96', 'x128'],
+    spacing
+  ),
+  size: slots(
+    [
+      'x192',
+      'x256',
+      'x384',
+      'x512',
+      'x640',
+      'x768',
+      'x896',
+      'x1024',
+      'x1152',
+      'x1280',
+      'x1408',
+      'x1536',
+      'x1664',
+      'x1792',
+      'x1920',
+    ],
+    sizing
+  ),
+  radius: slots(['none', 'sm', 'md', 'lg', 'pill'], radius),
 
-    // colors
-    page: color(),
-    ...neutralContexts,
-    ...intentContexts,
-  },
+  // typography
+  heading: typeBundle(['xs', 'sm', 'md', 'lg', 'xl']),
+  body: typeBundle(['xs', 'sm', 'md', 'lg', 'xl']),
+  data: typeBundle(['xs', 'sm', 'md', 'lg', 'xl']),
+
+  // colors
+  page: color(),
+  ...neutralContexts,
+  ...intentContexts,
 });

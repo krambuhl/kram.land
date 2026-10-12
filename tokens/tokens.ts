@@ -1,6 +1,13 @@
 import { schema } from './schema.ts';
 
 export default schema.defineTokens({
+  breakpoint: {
+    base: { value: '0px' },
+    sm: { value: '32rem' },
+    md: { value: '48rem' },
+    lg: { value: '64rem' },
+    xl: { value: '80rem' },
+  },
   space: {
     x0: { value: '0px' },
     x2: { value: '2px' },
@@ -34,13 +41,6 @@ export default schema.defineTokens({
     x1664: { value: '1664px' },
     x1792: { value: '1792px' },
     x1920: { value: '1920px' },
-  },
-  breakpoint: {
-    base: { value: '0px' },
-    sm: { value: '32rem' },
-    md: { value: '48rem' },
-    lg: { value: '64rem' },
-    xl: { value: '80rem' },
   },
   radius: {
     none: { value: '0px' },

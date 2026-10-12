@@ -104,12 +104,9 @@ describe('tokens fixture', () => {
 
 describe('selecting by tag', () => {
   const schema = defineSchema({
-    modes: {},
-    shape: {
-      space: slots(['x4', 'x8'], pattern({ type: 'dimension', tags: ['spacing'] })),
-      inset: slots(['sm'], pattern({ type: 'dimension', tags: ['spacing'] })),
-      size: slots(['x640'], pattern({ type: 'dimension', tags: ['sizing'] })),
-    },
+    space: slots(['x4', 'x8'], pattern({ type: 'dimension', tags: ['spacing'] })),
+    inset: slots(['sm'], pattern({ type: 'dimension', tags: ['spacing'] })),
+    size: slots(['x640'], pattern({ type: 'dimension', tags: ['sizing'] })),
   });
   const tagged = loadTokens(
     schemaToConfig(

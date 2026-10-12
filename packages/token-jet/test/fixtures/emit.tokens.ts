@@ -2,21 +2,17 @@ import { defineSchema, pattern, slots } from '../../src/index.ts';
 
 const spacing = pattern({ type: 'dimension', preview: 'gap' });
 const color = pattern({ type: 'color' });
+const colorDark = pattern({ type: 'color', modes: ['dark'] });
+const colorDarkContrast = pattern({ type: 'color', modes: ['dark', 'contrast'] });
 
 const schema = defineSchema({
-  modes: {
-    dark: '(prefers-color-scheme: dark)',
-    contrast: '(prefers-contrast: more)',
-  },
-  shape: {
-    space: slots(['x4', 'x16'], spacing),
-    weight: { bold: pattern({ type: 'fontWeight' }) },
-    family: { body: pattern({ type: 'fontFamily' }) },
-    ratio: { golden: pattern({ type: 'number' }) },
-    gray: slots(['50', '900'], color),
-    bg: slots(['page', 'card'], color),
-    content: slots(['regular', 'body'], color),
-  },
+  space: slots(['x4', 'x16'], spacing),
+  weight: { bold: pattern({ type: 'fontWeight' }) },
+  family: { body: pattern({ type: 'fontFamily' }) },
+  ratio: { golden: pattern({ type: 'number' }) },
+  gray: slots(['50', '900'], color),
+  bg: { page: colorDark, card: colorDarkContrast },
+  content: { regular: colorDark, body: color },
 });
 
 export default schema.defineTokens({

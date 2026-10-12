@@ -10,10 +10,6 @@ export interface EmitCssOptions {
   used?: ReadonlySet<string>;
 }
 
-// The mode that is a two-valued colour scheme. It alone gets the four scopes
-// light, dark, auto and inverted; any other mode gets on and off.
-const SCHEME_MODE = 'dark';
-
 const SYNTAX: Record<TokenType, string> = {
   color: '<color>',
   dimension: '<length>',
@@ -90,23 +86,23 @@ export function emitCss(resolved: ResolvedTokens, options: EmitCssOptions = {}):
   out.push(block(':where(html)', base));
 
   for (const mode of modeNames) {
-    const query = resolved.config.modes[mode];
+    const { media, scheme } = resolved.config.modes[mode];
+    const whenMedia = (blocks: string[]) => (media === undefined ? [] : [`@media ${media} {\n${indent(blocks)}\n}`]);
     const withMode = tokens.filter((t) => mode in t.modes);
     if (withMode.length === 0) continue;
     const fill = withMode.map((t) => `${cssVariableName(t.path)}--${mode}: ${emitValue(t.modes[mode])};`);
     const unset = withMode.map((t) => `${cssVariableName(t.path)}--${mode}: initial;`);
 
-    if (mode === SCHEME_MODE) {
-      out.push(`@media ${query} {\n${indent([block(':where(html)', fill)])}\n}`);
-      out.push(block(`[data-mode='dark']`, fill));
+    out.push(...whenMedia([block(':where(html)', fill)]));
+    if (scheme === true) {
+      out.push(block(`[data-mode='${mode}']`, fill));
       out.push(block(`[data-mode='light']`, unset));
-      out.push(block(`[data-mode='auto']`, unset));
-      out.push(block(`[data-mode='inverted']`, fill));
-      out.push(
-        `@media ${query} {\n${indent([block(`[data-mode='auto']`, fill), block(`[data-mode='inverted']`, unset)])}\n}`
-      );
+      if (media !== undefined) {
+        out.push(block(`[data-mode='auto']`, unset));
+        out.push(block(`[data-mode='inverted']`, fill));
+        out.push(...whenMedia([block(`[data-mode='auto']`, fill), block(`[data-mode='inverted']`, unset)]));
+      }
     } else {
-      out.push(`@media ${query} {\n${indent([block(':where(html)', fill)])}\n}`);
       out.push(block(`[data-${mode}='on']`, fill));
       out.push(block(`[data-${mode}='off']`, unset));
     }

@@ -1,9 +1,11 @@
-export { defineSchema, isDefinedTokens, pattern, schemaToConfig, slots } from './core/schema.ts';
+export { defineCss, defineSchema, isDefinedTokens, pattern, schemaToConfig, slots } from './core/schema.ts';
 export type {
+  CssConfig,
   DefinedGenerate,
   DefinedTokens,
   GenerateEntry,
   LeafFields,
+  ModesOf,
   ModeValues,
   OptionalModeValues,
   Pattern,
@@ -16,6 +18,7 @@ export type {
 export { TOKEN_TYPES } from './core/config.ts';
 export type {
   Config,
+  ModeCss,
   Modes,
   Preview,
   TokenLeaf,

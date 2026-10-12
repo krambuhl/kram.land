@@ -45,8 +45,13 @@ describe('fromDtcgValue', () => {
 describe('fromDtcg', () => {
   test('reproduces the modes and the token tree of the config it was exported from', () => {
     const imported = fromDtcg(exported);
-    expect(imported.modes).toEqual(config.modes);
+    expect(imported.modes).toEqual({ dark: {}, contrast: {} });
     expect(flatten(imported.tokens)).toEqual(flatten(config.tokens));
+  });
+
+  test('reads mode names from the older name-to-query form too', () => {
+    const file = { $extensions: { 'token-jet': { modes: { dark: '(prefers-color-scheme: dark)' } } } };
+    expect(fromDtcg(file).modes).toEqual({ dark: {} });
   });
 
   test('a $type token-jet does not support is an error naming it', () => {
@@ -88,7 +93,7 @@ describe('renderTokensFile', () => {
     const roundTrip = loadTokens(loaded);
     expect(project(roundTrip.tokens)).toEqual(project(original.tokens));
     expect(roundTrip.tokens.map(inferType)).toEqual(original.tokens.map(inferType));
-    expect(loaded.modes).toEqual(config.modes);
+    expect(Object.keys(loaded.modes)).toEqual(Object.keys(config.modes));
   });
 
   test('names a pattern by its tags, or by its type without any, and collapses a uniform group to slots', () => {
@@ -104,9 +109,9 @@ describe('renderTokensFile', () => {
     });
     expect(text).toContain("const spacing = pattern({ type: 'dimension', tags: ['spacing'], preview: 'gap' });");
     expect(text).toContain("const colorSurface = pattern({ type: 'color', tags: ['color', 'surface'] });");
-    expect(text).toContain("    space: slots(['x4'], spacing),");
-    expect(text).toContain('    mixed: {\n      a: dimension,\n      b: colorSurface,\n    },');
-    expect(text).toContain('  modes: {},');
+    expect(text).toContain("  space: slots(['x4'], spacing),");
+    expect(text).toContain('  mixed: {\n    a: dimension,\n    b: colorSurface,\n  },');
+    expect(text).not.toContain('modes:');
   });
 
   test('quotes keys that are not identifiers and skips slots when nothing uses it', () => {

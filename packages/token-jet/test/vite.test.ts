@@ -7,6 +7,10 @@ import { describe, expect, test } from 'vitest';
 
 import tokenJet from '../src/vite.ts';
 
+const cssFile = readFileSync(join(import.meta.dirname, 'fixtures/emit.css.ts'), 'utf8').replace(
+  "from '../../src/index.ts'",
+  "from 'token-jet'"
+);
 const fixture = readFileSync(join(import.meta.dirname, 'fixtures/emit.tokens.ts'), 'utf8').replace(
   "from '../../src/index.ts'",
   "from 'token-jet'"
@@ -18,6 +22,7 @@ function project(): string {
   const dir = mkdtempSync(join(tmpdir(), 'token-jet-vite-'));
   mkdirSync(join(dir, 'tokens'));
   writeFileSync(join(dir, 'tokens/tokens.ts'), fixture);
+  writeFileSync(join(dir, 'tokens/css.ts'), cssFile);
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'fixture', type: 'module' }));
   mkdirSync(join(dir, 'node_modules'));
   symlinkSync(join(import.meta.dirname, '..'), join(dir, 'node_modules/token-jet'));

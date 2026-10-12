@@ -43,7 +43,14 @@ export const MANIFEST_SCHEMA = {
   properties: {
     $schema: { type: 'string' },
     version: { const: 1 },
-    modes: { type: 'object', additionalProperties: { type: 'string' } },
+    modes: {
+      type: 'object',
+      additionalProperties: {
+        type: 'object',
+        additionalProperties: false,
+        properties: { media: { type: 'string' }, scheme: { type: 'boolean' } },
+      },
+    },
     tokens: {
       type: 'array',
       items: {

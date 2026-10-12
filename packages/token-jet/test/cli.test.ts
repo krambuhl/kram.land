@@ -6,6 +6,10 @@ import { join } from 'node:path';
 import { beforeAll, describe, expect, test } from 'vitest';
 
 const cli = join(import.meta.dirname, '../src/cli.ts');
+const cssFile = readFileSync(join(import.meta.dirname, 'fixtures/emit.css.ts'), 'utf8').replace(
+  "from '../../src/index.ts'",
+  "from 'token-jet'"
+);
 const fixture = readFileSync(join(import.meta.dirname, 'fixtures/emit.tokens.ts'), 'utf8')
   // the fixture imports the package by relative path; a project imports it by name
   .replace("from '../../src/index.ts'", "from 'token-jet'");
@@ -25,6 +29,7 @@ function project(config = fixture): string {
   const dir = mkdtempSync(join(tmpdir(), 'token-jet-'));
   mkdirSync(join(dir, 'tokens'));
   writeFileSync(join(dir, 'tokens/tokens.ts'), config);
+  writeFileSync(join(dir, 'tokens/css.ts'), cssFile);
   // resolve 'token-jet' to this package from inside the temp project
   writeFileSync(join(dir, 'package.json'), JSON.stringify({ name: 'fixture', type: 'module' }));
   mkdirSync(join(dir, 'node_modules'));
@@ -176,13 +181,10 @@ const spacing = pattern({ type: 'dimension', tags: ['spacing'] });
 const corner = pattern({ type: 'dimension' });
 
 export const schema = defineSchema({
-  modes: {},
-  shape: {
     space: slots(['x4', 'x8'], spacing),
     radius: { md: corner },
     gutter: { md: corner },
-  },
-});
+  });
 `;
 
 const TOKENS = `import { schema } from './schema.ts';

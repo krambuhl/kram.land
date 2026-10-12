@@ -117,7 +117,7 @@ function group(tree: TokenTree<Modes>, parent: string[]): DtcgNode {
 export function toDtcg(resolved: ResolvedTokens): DtcgFile {
   const { config } = resolved;
   return {
-    $extensions: { [DTCG_EXTENSION]: { modes: config.modes } },
+    $extensions: { [DTCG_EXTENSION]: { modes: Object.keys(config.modes) } },
     ...group(config.tokens, []),
   };
 }

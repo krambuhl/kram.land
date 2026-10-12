@@ -1,4 +1,4 @@
-import type { Preview, TokenType } from './config.ts';
+import type { ModeCss, Preview, TokenType } from './config.ts';
 import { emitCss } from './emit-css.ts';
 import type { Token } from './flatten.ts';
 import type { ResolvedTokens } from './load.ts';
@@ -331,13 +331,14 @@ function groupSection(group: Group, resolved: ResolvedTokens, modes: readonly st
 
 // The page script sets this attribute on <html>: auto/light/dark for the
 // colour scheme, auto/on/off for other modes. auto removes it so the media query decides.
-function modeControl(mode: string): string {
-  const scheme = mode === 'dark';
+function modeControl(mode: string, css: ModeCss): string {
+  const scheme = css.scheme === true;
   const attribute = scheme ? 'mode' : mode;
   const heading = scheme ? 'scheme' : mode;
-  const options = scheme ? ['auto', 'light', 'dark'] : ['auto', 'on', 'off'];
+  const states = scheme ? ['light', mode] : ['on', 'off'];
+  const options = css.media === undefined ? (scheme ? states : ['off', 'on']) : ['auto', ...states];
   const buttons = options
-    .map((o) => `<button type="button" data-value="${o}" aria-pressed="${o === 'auto'}">${o}</button>`)
+    .map((o, i) => `<button type="button" data-value="${o}" aria-pressed="${i === 0}">${o}</button>`)
     .join('');
   return `<div class="mode-control" role="group" aria-label="${escape(heading)}" data-attribute="${escape(attribute)}"><span>${escape(heading)}</span>${buttons}</div>`;
 }
@@ -368,7 +369,7 @@ export function emitSpecimen(resolved: ResolvedTokens): string {
     `<h1>tokens</h1><span class="count">${resolved.tokens.length}</span>`,
     '<div class="controls" hidden>',
     '<input class="filter" type="search" placeholder="filter by path" aria-label="filter tokens by path">',
-    ...modes.map(modeControl),
+    ...modes.map((mode) => modeControl(mode, resolved.config.modes[mode])),
     '</div>',
     '</header>',
     '<main>',

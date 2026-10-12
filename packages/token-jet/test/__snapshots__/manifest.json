@@ -2,8 +2,13 @@
   "$schema": "./manifest.schema.json",
   "version": 1,
   "modes": {
-    "dark": "(prefers-color-scheme: dark)",
-    "contrast": "(prefers-contrast: more)"
+    "dark": {
+      "media": "(prefers-color-scheme: dark)",
+      "scheme": true
+    },
+    "contrast": {
+      "media": "(prefers-contrast: more)"
+    }
   },
   "tokens": [
     {

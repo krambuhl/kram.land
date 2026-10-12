@@ -127,9 +127,12 @@ export function fromDtcg(file: DtcgNode): ImportedConfig {
   const extension =
     isObject(file.$extensions) && isObject(file.$extensions[DTCG_EXTENSION]) ? file.$extensions[DTCG_EXTENSION] : {};
   const modes: Modes = {};
-  if (isObject(extension.modes)) {
-    for (const [name, query] of Object.entries(extension.modes)) modes[name] = String(query);
-  }
+  const declared = Array.isArray(extension.modes)
+    ? extension.modes.map(String)
+    : isObject(extension.modes)
+      ? Object.keys(extension.modes)
+      : [];
+  for (const name of declared) modes[name] = {};
   return { modes, tokens: group(file, [], undefined, modes) };
 }
 
@@ -197,8 +200,8 @@ function renderValues(node: ValueNode, depth: number): string {
   return lines.join('\n');
 }
 
-// Writes the imported modes and tokens as tokens/tokens.ts text with the schema
-// inline. One pattern per distinct type, tags and preview combination, named
+// Writes the imported tokens as tokens/tokens.ts text with the schema inline.
+// One pattern per distinct type, tags, preview and modes combination, named
 // after its tags, or its type when untagged. A group whose tokens share one
 // pattern renders as slots().
 export function renderTokensFile(config: ImportedConfig): string {
@@ -211,7 +214,8 @@ export function renderTokensFile(config: ImportedConfig): string {
     const type = inferType(token);
     if (type === undefined) throw new Error(`Token "${token.path}" has no type.`);
     const tags = token.tags ?? [];
-    const signature = JSON.stringify([type, tags, token.preview ?? null]);
+    const tokenModes = Object.keys(token.modes);
+    const signature = JSON.stringify([type, tags, token.preview ?? null, tokenModes]);
     let name = patterns.get(signature);
     if (name === undefined) {
       const base = camel(tags.length > 0 ? tags.join('-') : type);
@@ -223,6 +227,7 @@ export function renderTokensFile(config: ImportedConfig): string {
         `type: ${quote(type)}`,
         ...(tags.length > 0 ? [`tags: [${tags.map(quote).join(', ')}]`] : []),
         ...(token.preview !== undefined ? [`preview: ${quote(token.preview)}`] : []),
+        ...(tokenModes.length > 0 ? [`modes: [${tokenModes.map(quote).join(', ')}]`] : []),
       ];
       declarations.push(`const ${name} = pattern({ ${fields.join(', ')} });`);
     }
@@ -236,20 +241,16 @@ export function renderTokensFile(config: ImportedConfig): string {
     parents.reduce<ValueNode>((node, segment) => subtree(node, segment), values).set(leafName, leafValue);
   }
   let slotsUsed = false;
-  const shapeText = renderShape(shape, 2, () => {
+  const shapeText = renderShape(shape, 1, () => {
     slotsUsed = true;
   });
-  const modes = Object.entries(config.modes).map(([mode, query]) => `    ${key(mode)}: ${quote(query)},`);
   return [
     `import { defineSchema, pattern${slotsUsed ? ', slots' : ''} } from 'token-jet';`,
     '',
     ...declarations,
     '',
     'const schema = defineSchema({',
-    modes.length > 0 ? ['  modes: {', ...modes, '  },'].join('\n') : '  modes: {},',
-    '  shape: {',
     shapeText,
-    '  },',
     '});',
     '',
     'export default schema.defineTokens({',

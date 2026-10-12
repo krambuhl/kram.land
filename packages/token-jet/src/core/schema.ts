@@ -1,4 +1,4 @@
-import type { Config, Modes, Preview, TokenLeaf, TokenTree, TokenType, TokenValue } from './config.ts';
+import type { Config, ModeCss, Modes, Preview, TokenLeaf, TokenTree, TokenType, TokenValue } from './config.ts';
 
 export interface Pattern<
   Type extends TokenType = TokenType,
@@ -55,14 +55,12 @@ export type TokensFor<Shape, Mode extends string> = Shape extends Pattern
   ? Leaf<Shape, Mode>
   : { [K in keyof Shape]: TokensFor<Shape[K], Mode> };
 
-type RequiredModes<Shape> =
+export type ModesOf<Shape> =
   Shape extends Pattern<TokenType, string, infer Mode>
     ? Mode
     : Shape extends Pattern
       ? never
-      : { [K in keyof Shape]: RequiredModes<Shape[K]> }[keyof Shape];
-
-type UndeclaredModes<Shape, M extends Modes> = Exclude<RequiredModes<Shape>, keyof M>;
+      : { [K in keyof Shape]: ModesOf<Shape[K]> }[keyof Shape];
 
 export type TagsOf<Shape> =
   Shape extends Pattern<TokenType, infer Tag>
@@ -76,31 +74,24 @@ export interface GenerateEntry<Shape> {
   template: object;
 }
 
-export interface DefinedTokens<Shape = unknown, M extends Modes = Modes> {
-  schema: Schema<Shape, M>;
-  tokens: TokensFor<Shape, Extract<keyof M, string>>;
+export interface DefinedTokens<Shape = unknown> {
+  schema: Schema<Shape>;
+  tokens: TokensFor<Shape, ModesOf<Shape>>;
 }
 
-export interface DefinedGenerate<Shape = unknown, M extends Modes = Modes> {
-  schema: Schema<Shape, M>;
+export interface DefinedGenerate<Shape = unknown> {
+  schema: Schema<Shape>;
   entries: Record<string, GenerateEntry<Shape>>;
 }
 
-export interface Schema<Shape = unknown, M extends Modes = Modes> {
-  modes: M;
+export interface Schema<Shape = unknown> {
   shape: Shape;
-  defineTokens(tokens: TokensFor<Shape, Extract<keyof M, string>>): DefinedTokens<Shape, M>;
-  defineGenerate(entries: Record<string, GenerateEntry<Shape>>): DefinedGenerate<Shape, M>;
+  defineTokens(tokens: TokensFor<Shape, ModesOf<Shape>>): DefinedTokens<Shape>;
+  defineGenerate(entries: Record<string, GenerateEntry<Shape>>): DefinedGenerate<Shape>;
 }
 
-export function defineSchema<const M extends Modes, const Shape>(
-  schema: { modes: M; shape: Shape } & ([UndeclaredModes<Shape, M>] extends [never]
-    ? unknown
-    : { undeclaredModes: UndeclaredModes<Shape, M> })
-): Schema<Shape, M> {
-  const { modes, shape } = schema;
-  const result: Schema<Shape, M> = {
-    modes,
+export function defineSchema<const Shape>(shape: Shape): Schema<Shape> {
+  const result: Schema<Shape> = {
     shape,
     defineTokens: (tokens) => ({ schema: result, tokens }),
     defineGenerate: (entries) => ({ schema: result, entries }),
@@ -120,13 +111,11 @@ export function isDefinedTokens(value: unknown): value is DefinedTokens {
   return isRecord(value) && isRecord(value.schema) && isRecord(value.schema.shape) && isRecord(value.tokens);
 }
 
-function leafFor(atom: Pattern, node: unknown, path: string, modes: Modes): TokenLeaf<Modes> {
+function leafFor(atom: Pattern, node: unknown, path: string): TokenLeaf<Modes> {
   if (!isRecord(node) || !('value' in node)) {
     throw new Error(`Token "${path}" needs a value: the schema has a ${atom.type} pattern there.`);
   }
   for (const mode of atom.modes) {
-    if (!(mode in modes))
-      throw new Error(`Token "${path}" requires the mode "${mode}", which the schema does not declare.`);
     if (!(mode in node)) throw new Error(`Token "${path}" needs a value for the mode "${mode}".`);
   }
   const leaf = {
@@ -138,7 +127,7 @@ function leafFor(atom: Pattern, node: unknown, path: string, modes: Modes): Toke
   return leaf as unknown as TokenLeaf<Modes>;
 }
 
-function treeFor(shape: Record<string, unknown>, node: unknown, path: string[], modes: Modes): TokenTree<Modes> {
+function treeFor(shape: Record<string, unknown>, node: unknown, path: string[]): TokenTree<Modes> {
   const where = path.length === 0 ? 'the token tree' : `"${path.join('.')}"`;
   if (!isRecord(node)) throw new Error(`${where} must be a group: the schema has a group there.`);
   for (const key of Object.keys(node)) {
@@ -149,13 +138,34 @@ function treeFor(shape: Record<string, unknown>, node: unknown, path: string[], 
     const childPath = [...path, key];
     if (!(key in node)) throw new Error(`"${childPath.join('.')}" is in the schema but has no token.`);
     out[key] = isPattern(child)
-      ? leafFor(child, node[key], childPath.join('.'), modes)
-      : treeFor(child as Record<string, unknown>, node[key], childPath, modes);
+      ? leafFor(child, node[key], childPath.join('.'))
+      : treeFor(child as Record<string, unknown>, node[key], childPath);
   }
   return out;
 }
 
-export function schemaToConfig(defined: DefinedTokens): Config<Modes> {
+function modeNames(shape: unknown, into: Set<string>): Set<string> {
+  if (isPattern(shape)) for (const mode of shape.modes) into.add(mode);
+  else if (isRecord(shape)) for (const child of Object.values(shape)) modeNames(child, into);
+  return into;
+}
+
+export interface CssConfig {
+  modes?: Record<string, ModeCss>;
+}
+
+export function defineCss(css: CssConfig): CssConfig {
+  return css;
+}
+
+// Mode names come from the patterns; what each mode does in CSS comes from
+// the css config, and a mode it leaves out gets data-attribute scopes only.
+export function schemaToConfig(defined: DefinedTokens, css: CssConfig = {}): Config<Modes> {
   const { schema, tokens } = defined;
-  return { modes: schema.modes, tokens: treeFor(schema.shape as Record<string, unknown>, tokens, [], schema.modes) };
+  const names = modeNames(schema.shape, new Set());
+  for (const name of Object.keys(css.modes ?? {})) {
+    if (!names.has(name)) throw new Error(`css config implements the mode "${name}", which no pattern uses.`);
+  }
+  const modes: Modes = Object.fromEntries([...names].map((name) => [name, css.modes?.[name] ?? {}]));
+  return { modes, tokens: treeFor(schema.shape as Record<string, unknown>, tokens, []) };
 }

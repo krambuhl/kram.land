@@ -169,18 +169,15 @@ describe('emitSpecimen', () => {
 
 describe('previews from the schema', () => {
   const previews = defineSchema({
-    modes: {},
-    shape: {
-      gutter: slots(['md'], pattern({ type: 'dimension', preview: 'gap' })),
-      measure: slots(['wide'], pattern({ type: 'dimension', preview: 'bar' })),
-      corner: slots(['soft'], pattern({ type: 'dimension', preview: 'corner' })),
-      ink: slots(['brand'], pattern({ type: 'color', preview: 'swatch' })),
-      font: {
-        family: pattern({ type: 'fontFamily', preview: 'text' }),
-        weight: pattern({ type: 'fontWeight', preview: 'text' }),
-        size: pattern({ type: 'dimension', preview: 'text' }),
-        leading: pattern({ type: 'number', preview: 'paragraph' }),
-      },
+    gutter: slots(['md'], pattern({ type: 'dimension', preview: 'gap' })),
+    measure: slots(['wide'], pattern({ type: 'dimension', preview: 'bar' })),
+    corner: slots(['soft'], pattern({ type: 'dimension', preview: 'corner' })),
+    ink: slots(['brand'], pattern({ type: 'color', preview: 'swatch' })),
+    font: {
+      family: pattern({ type: 'fontFamily', preview: 'text' }),
+      weight: pattern({ type: 'fontWeight', preview: 'text' }),
+      size: pattern({ type: 'dimension', preview: 'text' }),
+      leading: pattern({ type: 'number', preview: 'paragraph' }),
     },
   });
   const page = emitSpecimen(

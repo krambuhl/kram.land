@@ -14,6 +14,7 @@ import { isDefinedTokens, schemaToConfig } from './schema.ts';
 import { validate } from './validate.ts';
 
 const TOKENS_FILE = 'tokens/tokens.ts';
+const CSS_FILE = 'tokens/css.ts';
 const TAG = /^[A-Za-z][A-Za-z0-9-]*$/;
 
 export interface Union {
@@ -94,5 +95,10 @@ export async function loadConfigFile(dir: string): Promise<{ file: string; watch
   if (!isDefinedTokens(exported)) {
     throw new Error(`${TOKENS_FILE} must export schema.defineTokens(...) as its default export.`);
   }
-  return { file, watch: dirname(file), config: schemaToConfig(exported) };
+  const cssFile = resolve(dir, CSS_FILE);
+  const css = existsSync(cssFile) ? await importFresh(cssFile) : {};
+  if (typeof css !== 'object' || css === null) {
+    throw new Error(`${CSS_FILE} must export defineCss(...) as its default export.`);
+  }
+  return { file, watch: dirname(file), config: schemaToConfig(exported, css) };
 }

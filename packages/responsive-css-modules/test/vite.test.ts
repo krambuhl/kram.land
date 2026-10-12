@@ -15,10 +15,7 @@ const TOKENS = `import { defineSchema, pattern, slots } from 'token-jet';
 const breakpoint = pattern({ type: 'dimension', tags: ['media-breakpoint'] });
 const spacing = pattern({ type: 'dimension' });
 
-const schema = defineSchema({
-  modes: {},
-  shape: { breakpoint: slots(['base', 'sm', 'md'], breakpoint), space: { x16: spacing } },
-});
+const schema = defineSchema({ breakpoint: slots(['base', 'sm', 'md'], breakpoint), space: { x16: spacing } });
 
 export default schema.defineTokens({
   breakpoint: { base: { value: '0px' }, sm: { value: '32rem' }, md: { value: '48rem' } },

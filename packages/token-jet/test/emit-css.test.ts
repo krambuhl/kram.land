@@ -46,7 +46,10 @@ describe('emitCss', () => {
     const same = emitCss(
       loadTokens(
         defineConfig({
-          modes: { dark: '(prefers-color-scheme: dark)', contrast: '(prefers-contrast: more)' },
+          modes: {
+            dark: { media: '(prefers-color-scheme: dark)', scheme: true },
+            contrast: { media: '(prefers-contrast: more)' },
+          },
           tokens: {
             gray: { 50: { value: '#fafafa', type: 'color' } },
             flat: { ink: { value: '#111111', dark: '#111111', type: 'color' } },
@@ -61,11 +64,28 @@ describe('emitCss', () => {
     expect(same).toContain('--ref-page: var(--ref-page--contrast, var(--ref-page--light));');
   });
 
+  test('a mode with no implementation gets only on and off scopes, and a scheme without media no auto', () => {
+    const plain = emitCss(
+      loadTokens(
+        defineConfig({
+          modes: { night: { scheme: true }, roomy: {} },
+          tokens: { ink: { value: '#111111', night: '#eeeeee', roomy: '#222222', type: 'color' } },
+        })
+      )
+    );
+    expect(plain).not.toContain('@media');
+    expect(plain).toContain("[data-mode='night'] {\n  --ink--night: #eeeeee;\n}");
+    expect(plain).toContain("[data-mode='light'] {\n  --ink--night: initial;\n}");
+    expect(plain).not.toContain("data-mode='auto'");
+    expect(plain).toContain("[data-roomy='on'] {\n  --ink--roomy: #222222;\n}");
+    expect(plain).toContain("[data-roomy='off'] {\n  --ink--roomy: initial;\n}");
+  });
+
   test('a mode value that only resolves to the base literal is still emitted', () => {
     const resolvesSame = emitCss(
       loadTokens(
         defineConfig({
-          modes: { dark: '(prefers-color-scheme: dark)' },
+          modes: { dark: { media: '(prefers-color-scheme: dark)', scheme: true } },
           tokens: {
             white: { base: { value: '#ffffff', dark: '#000000', type: 'color' } },
             page: { bg: { value: '#ffffff', dark: '{white.base}', type: 'color' } },
