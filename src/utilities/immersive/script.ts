@@ -1,10 +1,21 @@
 const MOVE = 450;
 const FADE = 200;
+const LIFT = 64;
 const RESEED = 250;
 
 export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCanvasElement): () => void {
   const html = document.documentElement;
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // safari shows what has scrolled past the top under its top bar, so on touch the page
+  // rests LIFT px down with art above it. if the scroll doesn't take, the padding is removed.
+  const lift = window.matchMedia('(pointer: coarse)').matches ? LIFT : 0;
+  const rest = () => (html.hasAttribute('data-lifted') ? lift : 0);
+  if (lift > 0) {
+    history.scrollRestoration = 'manual';
+    html.setAttribute('data-lifted', '');
+    window.scrollTo(0, lift);
+    if (window.scrollY < lift - 1) html.removeAttribute('data-lifted');
+  }
   let anchor = { x: 0, y: 0, r: 0 };
   let floor = window.innerHeight;
   let stopArt: (() => void) | undefined;
@@ -67,7 +78,7 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
       () => {
         html.removeAttribute('data-closing');
         glide(() => html.setAttribute('data-immersive', ''));
-        window.scrollTo({ top: 0 });
+        window.scrollTo({ top: rest() });
       },
       still ? 0 : FADE
     );
