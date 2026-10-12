@@ -1,5 +1,6 @@
 const MOVE = 450;
 const FADE = 200;
+const RESEED = 250;
 
 export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCanvasElement): () => void {
   const html = document.documentElement;
@@ -7,6 +8,8 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   let anchor = { x: 0, y: 0, r: 0 };
   let floor = window.innerHeight;
   let stopArt: (() => void) | undefined;
+  let startArt: (() => () => void) | undefined;
+  let reseeding: ReturnType<typeof setTimeout> | undefined;
   let closing: ReturnType<typeof setTimeout> | undefined;
 
   // the art scrolls up with the portrait on open, so the canvas reaches
@@ -68,7 +71,24 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
 
   const onClick = () => (html.hasAttribute('data-immersive') ? open() : close());
   const onKey = (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && !html.hasAttribute('data-immersive')) close();
+    if (event.key !== 'Escape') return;
+    if (!html.hasAttribute('data-immersive')) close();
+    else reseed();
+  };
+  // clears the art at once, starts a fresh field with a new seed, and fades it in.
+  const reseed = () => {
+    if (startArt === undefined || reseeding !== undefined) return;
+    html.setAttribute('data-reseed', '');
+    html.removeAttribute('data-art');
+    // commits the cleared state so the fade-in starts from zero.
+    canvas.getBoundingClientRect();
+    stopArt?.();
+    stopArt = startArt();
+    html.setAttribute('data-art', '');
+    reseeding = setTimeout(() => {
+      html.removeAttribute('data-reseed');
+      reseeding = undefined;
+    }, RESEED);
   };
   // a click on the scrim around the content closes it, unless it ends a text selection.
   const onOutside = (event: MouseEvent) => {
@@ -79,7 +99,8 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
 
   measure();
   import('../../art/index.ts').then(({ default: start }) => {
-    stopArt = start(canvas, { anchor: () => anchor, floor: () => floor });
+    startArt = () => start(canvas, { anchor: () => anchor, floor: () => floor });
+    stopArt = startArt();
     html.setAttribute('data-art', '');
   });
   image.addEventListener('click', onClick);
@@ -87,6 +108,7 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   document.addEventListener('click', onOutside);
   window.addEventListener('resize', measure);
   return () => {
+    clearTimeout(reseeding);
     stopArt?.();
     image.removeEventListener('click', onClick);
     window.removeEventListener('keydown', onKey);

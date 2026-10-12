@@ -64,6 +64,14 @@
   filter: brightness(0.12);
 }
 
+:root[data-reseed]:not([data-art]) .art {
+  transition: none;
+}
+
+:root[data-reseed][data-art] .art {
+  transition: opacity 250ms ease-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .art {
     transition: none;
