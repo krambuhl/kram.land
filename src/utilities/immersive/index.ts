@@ -1,7 +1,7 @@
 import styles from './styles.module.css';
 
 export interface ImmersiveOptions {
-  part: 'image' | 'text' | 'art';
+  part: 'block' | 'image' | 'text' | 'art' | 'scrim';
 }
 
 export function immersive({ part }: ImmersiveOptions) {
