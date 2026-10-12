@@ -24,7 +24,7 @@ const image = new URL(social.src, Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-backdrop={immersive ? 'art' : undefined}>
   <head>
     <meta charset="utf-8" />
     {immersive && <script is:inline>
@@ -32,6 +32,8 @@ const image = new URL(social.src, Astro.site).href;
     </script>}
     <meta name="viewport" content={`width=device-width, initial-scale=1${immersive ? ', viewport-fit=cover' : ''}`} />
     {immersive && <meta name="theme-color" content="#000" />}
+    {immersive && <meta name="apple-mobile-web-app-capable" content="yes" />}
+    {immersive && <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />}
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta property="og:title" content={title} />

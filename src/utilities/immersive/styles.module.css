@@ -54,6 +54,13 @@
   opacity: 0;
 }
 
+/* safari fills the areas above and below the page with the body's background, so the
+   art's page sets it to the canvas's black, not the page colour. */
+:root[data-backdrop='art'],
+:root[data-backdrop='art'] body {
+  background-color: #000;
+}
+
 /* the art sits on the page, not the screen, so it scrolls with the open content. */
 .art {
   position: absolute;
