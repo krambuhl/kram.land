@@ -6,6 +6,7 @@
 }
 
 html {
+  overscroll-behavior: none;
   line-height: token('body.lineHeight');
   tab-size: 4;
   font-family: token('body.family');

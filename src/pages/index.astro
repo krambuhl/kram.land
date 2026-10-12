@@ -6,6 +6,7 @@ import Layout from 'layouts/Layout.astro';
 import { token } from 'generated/tokens';
 import { area } from 'utilities/area';
 import { entrance } from 'utilities/entrance';
+import { secret } from 'utilities/secret';
 import { stack } from 'utilities/stack';
 import { superellipse } from 'utilities/superellipse';
 import { bodyText, headingText } from 'utilities/text';
@@ -13,7 +14,14 @@ import ikea from '../assets/ikea.png';
 ---
 
 <Layout>
-  <div class:list={[area({ width: token('size.x384') }), stack({ gap: token('space.x48'), align: 'center' })]}>
+  <div
+    data-secret-root
+    class:list={[
+      area({ width: token('size.x384') }),
+      stack({ gap: token('space.x48'), align: 'center' }),
+      secret({ part: 'root' }),
+    ]}
+  >
     <Image
       src={ikea}
       alt=""
@@ -21,13 +29,16 @@ import ikea from '../assets/ikea.png';
       height={192}
       densities={[1, 2, 3]}
       priority
-      class:list={[superellipse(), entrance({ motion: 'rise' })]}
+      data-secret-image
+      class:list={[superellipse(), entrance({ motion: 'rise' }), secret({ part: 'image' })]}
     />
 
     <div
+      data-secret-text
       class:list={[
         stack({ gap: token('space.x24'), align: 'center' }),
         entrance({ motion: 'rise', order: 'second', stagger: true }),
+        secret({ part: 'text' }),
       ]}
     >
       <h1 class={headingText({ size: 'xl' })}>oh hi. hello!</h1>
@@ -66,3 +77,12 @@ import ikea from '../assets/ikea.png';
     </div>
   </div>
 </Layout>
+
+<script>
+  import { secretScroll } from 'utilities/secret/script';
+
+  const root = document.querySelector<HTMLElement>('[data-secret-root]');
+  const image = document.querySelector<HTMLElement>('[data-secret-image]');
+  const text = document.querySelector<HTMLElement>('[data-secret-text]');
+  if (root && image && text) secretScroll(root, image, text);
+</script>
