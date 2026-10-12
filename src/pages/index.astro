@@ -13,10 +13,10 @@ import { bodyText, headingText } from 'utilities/text';
 import ikea from '../assets/ikea.png';
 ---
 
-<Layout immersive>
-  <div class:list={[area({ width: token('size.x384') }), stack({ gap: token('space.x48'), align: 'center' })]}>
-    <canvas data-immersive-art aria-hidden="true" class={immersive({ part: 'art' })}></canvas>
+<Layout immersive mode="dark">
+  <canvas data-immersive-art aria-hidden="true" class={immersive({ part: 'art' })}></canvas>
 
+  <div class:list={[area({ width: token('size.x384') }), stack({ gap: token('space.x48'), align: 'center' })]}>
     <button
       type="button"
       aria-label="about evan"

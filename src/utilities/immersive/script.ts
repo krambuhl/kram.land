@@ -19,13 +19,15 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
     };
   };
 
+  const block = text.parentElement ?? image;
+
   const glide = (change: () => void) => {
     const before = image.getBoundingClientRect();
     change();
     const after = image.getBoundingClientRect();
     const dy = before.top - after.top;
     if (dy === 0 || still) return;
-    image.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], {
+    block.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], {
       duration: MOVE,
       easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)',
     });

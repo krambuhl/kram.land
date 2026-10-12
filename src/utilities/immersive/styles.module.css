@@ -38,7 +38,9 @@
   background: #000;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 600ms ease-out;
+  transition:
+    opacity 600ms ease-out,
+    filter 600ms ease-out;
 }
 
 :root[data-art][data-immersive] .art {
@@ -46,5 +48,6 @@
 }
 
 :root[data-art]:not([data-immersive]) .art {
-  opacity: 0.25;
+  opacity: 1;
+  filter: brightness(0.3);
 }

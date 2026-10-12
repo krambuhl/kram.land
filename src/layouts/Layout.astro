@@ -7,11 +7,14 @@ import ikea from '../assets/ikea.png';
 
 import '../styles/globals.css';
 
+import type { ModeValue } from 'components/mode';
+
 interface Props {
   immersive?: boolean;
+  mode?: ModeValue;
 }
 
-const { immersive = false } = Astro.props;
+const { immersive = false, mode = 'auto' } = Astro.props;
 
 const title = 'kram.land';
 const description = 'making internet with the nice people who live there';
@@ -46,7 +49,7 @@ const image = new URL(social.src, Astro.site).href;
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
-    <Mode value="auto">
+    <Mode value={mode}>
       <PageContainer>
         <slot />
       </PageContainer>
