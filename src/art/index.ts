@@ -4,72 +4,43 @@ const GROW = 0.08;
 const GAP = 4;
 const REACH = 2 ** (0.5 - 1 / EXPONENT);
 const RELAX = 4;
+const SMOOTH = 0.5;
+const MIN_SIZE = 18;
+const MAX_SIZE = 44;
 
 interface Blob {
   x: number;
   y: number;
+  drawX: number;
+  drawY: number;
   r: number;
   size: number;
   grey: number;
 }
 
-function unitShape(): Path2D {
-  const path = new Path2D();
-  const steps = 64;
-  for (let i = 0; i <= steps; i++) {
-    const t = (i / steps) * Math.PI * 2;
-    const c = Math.cos(t);
-    const s = Math.sin(t);
-    const x = Math.sign(c) * Math.abs(c) ** (2 / EXPONENT);
-    const y = Math.sign(s) * Math.abs(s) ** (2 / EXPONENT);
-    if (i === 0) path.moveTo(x, y);
-    else path.lineTo(x, y);
-  }
-  path.closePath();
-  return path;
+interface Field {
+  blobs: Blob[];
+  step(elapsed: number): void;
 }
 
-export default function start(canvas: HTMLCanvasElement): () => void {
-  const context = canvas.getContext('2d');
-  if (context === null) return () => {};
-  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const shape = unitShape();
+export function createField(width: number, height: number, scale: number, random = Math.random): Field {
+  const unit = Math.max(0.6, scale);
   const blobs: Blob[] = [];
-  let width = 0;
-  let height = 0;
-  let scale = 1;
-  let frame = 0;
-  let last = 0;
-  let sinceSpawn = SPAWN_EVERY;
+  let sinceSpawn = 0;
 
-  const resize = () => {
-    const ratio = window.devicePixelRatio || 1;
-    width = canvas.clientWidth;
-    height = canvas.clientHeight;
-    scale = Math.min(width, height) / 900;
-    canvas.width = Math.round(width * ratio);
-    canvas.height = Math.round(height * ratio);
+  const blob = (x: number, y: number, grown: boolean): Blob => {
+    const size = (MIN_SIZE + random() * (MAX_SIZE - MIN_SIZE)) * unit;
+    return { x, y, drawX: x, drawY: y, r: grown ? size : 0, size, grey: 22 + random() * 30 };
   };
 
-  const spawn = () => {
-    const angle = Math.random() * Math.PI * 2;
-    blobs.push({
-      x: width / 2 + Math.cos(angle),
-      y: height / 2 + Math.sin(angle),
-      r: 0,
-      size: (18 + Math.random() * 26) * Math.max(0.6, scale),
-      grey: 22 + Math.random() * 30,
-    });
-  };
-
-  const relax = () => {
-    const cell = 64 * Math.max(0.6, scale);
+  const settle = () => {
+    const cell = 2 * MAX_SIZE * unit * REACH + GAP;
     const grid = new Map<string, Blob[]>();
-    for (const blob of blobs) {
-      const key = `${Math.floor(blob.x / cell)},${Math.floor(blob.y / cell)}`;
+    for (const b of blobs) {
+      const key = `${Math.floor(b.x / cell)},${Math.floor(b.y / cell)}`;
       const bucket = grid.get(key);
-      if (bucket) bucket.push(blob);
-      else grid.set(key, [blob]);
+      if (bucket) bucket.push(b);
+      else grid.set(key, [b]);
     }
     for (const a of blobs) {
       const cx = Math.floor(a.x / cell);
@@ -94,19 +65,71 @@ export default function start(canvas: HTMLCanvasElement): () => void {
     }
   };
 
-  const step = (elapsed: number) => {
-    sinceSpawn += elapsed;
-    while (sinceSpawn >= SPAWN_EVERY) {
-      sinceSpawn -= SPAWN_EVERY;
-      spawn();
-    }
-    for (const blob of blobs) blob.r += (blob.size - blob.r) * GROW;
-    for (let i = 0; i < RELAX; i++) relax();
-    const reach = Math.hypot(width, height) / 2 + 60;
-    for (let i = blobs.length - 1; i >= 0; i--) {
-      const blob = blobs[i];
-      if (Math.hypot(blob.x - width / 2, blob.y - height / 2) > reach) blobs.splice(i, 1);
-    }
+  const count = Math.round((width * height) / (Math.PI * (34 * unit) ** 2));
+  for (let i = 0; i < count; i++) blobs.push(blob(random() * width, random() * height, true));
+  for (let i = 0; i < 60; i++) settle();
+  for (const b of blobs) {
+    b.drawX = b.x;
+    b.drawY = b.y;
+  }
+
+  return {
+    blobs,
+    step(elapsed) {
+      sinceSpawn += elapsed;
+      while (sinceSpawn >= SPAWN_EVERY) {
+        sinceSpawn -= SPAWN_EVERY;
+        const angle = random() * Math.PI * 2;
+        blobs.push(blob(width / 2 + Math.cos(angle), height / 2 + Math.sin(angle), false));
+      }
+      for (const b of blobs) b.r += (b.size - b.r) * GROW;
+      for (let i = 0; i < RELAX; i++) settle();
+      for (const b of blobs) {
+        b.drawX += (b.x - b.drawX) * SMOOTH;
+        b.drawY += (b.y - b.drawY) * SMOOTH;
+      }
+      const reach = Math.hypot(width, height) / 2 + 60;
+      for (let i = blobs.length - 1; i >= 0; i--) {
+        if (Math.hypot(blobs[i].x - width / 2, blobs[i].y - height / 2) > reach) blobs.splice(i, 1);
+      }
+    },
+  };
+}
+
+function unitShape(): Path2D {
+  const path = new Path2D();
+  const steps = 64;
+  for (let i = 0; i <= steps; i++) {
+    const t = (i / steps) * Math.PI * 2;
+    const c = Math.cos(t);
+    const s = Math.sin(t);
+    const x = Math.sign(c) * Math.abs(c) ** (2 / EXPONENT);
+    const y = Math.sign(s) * Math.abs(s) ** (2 / EXPONENT);
+    if (i === 0) path.moveTo(x, y);
+    else path.lineTo(x, y);
+  }
+  path.closePath();
+  return path;
+}
+
+export default function start(canvas: HTMLCanvasElement): () => void {
+  const context = canvas.getContext('2d');
+  if (context === null) return () => {};
+  const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const shape = unitShape();
+  let field: Field;
+  let width = 0;
+  let height = 0;
+  let frame = 0;
+  let last = 0;
+
+  const resize = () => {
+    const ratio = window.devicePixelRatio || 1;
+    width = canvas.clientWidth;
+    height = canvas.clientHeight;
+    canvas.width = Math.round(width * ratio);
+    canvas.height = Math.round(height * ratio);
+    field = createField(width, height, Math.min(width, height) / 900);
   };
 
   const draw = () => {
@@ -114,15 +137,15 @@ export default function start(canvas: HTMLCanvasElement): () => void {
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
     context.fillStyle = '#000';
     context.fillRect(0, 0, width, height);
-    for (const blob of blobs) {
-      context.setTransform(ratio * blob.r, 0, 0, ratio * blob.r, ratio * blob.x, ratio * blob.y);
+    for (const blob of field.blobs) {
+      context.setTransform(ratio * blob.r, 0, 0, ratio * blob.r, ratio * blob.drawX, ratio * blob.drawY);
       context.fillStyle = `hsl(0 0% ${blob.grey}%)`;
       context.fill(shape);
     }
   };
 
   const loop = (now: number) => {
-    step(Math.min(64, last === 0 ? 16 : now - last));
+    field.step(Math.min(64, last === 0 ? 16 : now - last));
     last = now;
     draw();
     frame = requestAnimationFrame(loop);
@@ -130,20 +153,8 @@ export default function start(canvas: HTMLCanvasElement): () => void {
 
   resize();
   window.addEventListener('resize', resize);
-  if (still) {
-    const count = Math.round((width * height) / (Math.PI * (34 * Math.max(0.6, scale)) ** 2));
-    for (let i = 0; i < count; i++) {
-      spawn();
-      const blob = blobs[blobs.length - 1];
-      blob.x = Math.random() * width;
-      blob.y = Math.random() * height;
-      blob.r = blob.size;
-    }
-    for (let i = 0; i < 40; i++) relax();
-    draw();
-  } else {
-    frame = requestAnimationFrame(loop);
-  }
+  if (still) draw();
+  else frame = requestAnimationFrame(loop);
 
   return () => {
     cancelAnimationFrame(frame);
