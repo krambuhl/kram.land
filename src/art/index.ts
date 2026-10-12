@@ -1,4 +1,4 @@
-const SPAWN_EVERY = 3;
+const SPAWN_EVERY = 1;
 const SPAWN_ATTEMPTS = 32;
 // newborns need room for SPAWN_ROOM of their size and gap: less squeezes the inner
 // ring, more starves the outward push that keeps the field moving.
@@ -305,6 +305,9 @@ export function createField(width: number, height: number, options: FieldOptions
       colorPhase += spinRate(clock) * elapsed;
       inner = mood(1);
       outer = mood(2);
+      // spawn checks only look at blobs near the rim, the only ones a newborn can touch.
+      const rimBand = anchor.r + 80;
+      const nearRim = blobs.filter((b) => (b.x - anchor.x) ** 2 + (b.y - anchor.y) ** 2 < rimBand * rimBand);
       while (sinceSpawn >= SPAWN_EVERY) {
         sinceSpawn -= SPAWN_EVERY;
         for (let attempt = 0; attempt < SPAWN_ATTEMPTS; attempt++) {
@@ -314,11 +317,13 @@ export function createField(width: number, height: number, options: FieldOptions
           const rim = anchor.r + gapFor(newborn) + 1;
           const x = anchor.x + ux * rim;
           const y = anchor.y + uy * rim;
-          const crowded = blobs.some(
+          const crowded = nearRim.some(
             (b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r + SPAWN_ROOM * (newborn + gapFor(newborn))) ** 2
           );
           if (crowded) continue;
-          blobs.push(blob(x, y, colorPhase, armsAt(clock)));
+          const born = blob(x, y, colorPhase, armsAt(clock));
+          blobs.push(born);
+          nearRim.push(born);
           break;
         }
       }
