@@ -1,5 +1,5 @@
 const EXPONENT = 2 ** 1.35;
-const SPAWN_EVERY = 12;
+const SPAWN_EVERY = 9;
 const GROW = 0.08;
 const GAP = 5;
 const REACH = 2 ** (0.5 - 1 / EXPONENT);
