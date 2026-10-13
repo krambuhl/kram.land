@@ -57,6 +57,13 @@
   pointer-events: none;
 }
 
+/* closed, there is nothing to read, so a finger can't pan the page. the scroll room
+   stays, since the script still has to rest the page under the bars. */
+:root[data-immersive],
+:root[data-immersive] body {
+  touch-action: pinch-zoom;
+}
+
 /* closed, the frame is a screen tall with the lift above and below it, so the page can
    scroll to its rest position without hiding overflow. */
 :root[data-immersive] .frame {
