@@ -40,6 +40,9 @@ const FLOOR_BREATHE = 0.2;
 const CORNER_SWELL = 0.25;
 const CORNER_BREATHE = 0.5;
 const CORNER_REACH = 0.3;
+// blobs grow up to OUTER_SWELL larger over the outer band, from OUTER_FROM of the way to the edge.
+const OUTER_FROM = 0.6;
+const OUTER_SWELL = 0.2;
 // the outer band orbits the portrait one way per field at up to ORBIT px/ms and the
 // inner field the other way at ORBIT_INNER of that. a mood eases the speed between ORBIT_CALM and full.
 const ORBIT = 0.026;
@@ -169,7 +172,9 @@ export function createField(width: number, height: number, options: FieldOptions
   const target = (b: Blob, t: number) =>
     ramp(b) *
     (SIZE + b.extra * t + EDGE_SWELL * smooth((t - SWELL_FROM) / (1 - SWELL_FROM))) *
-    (1 + Math.max(FLOOR_SWELL * b.low, CORNER_SWELL * b.corner));
+    (1 +
+      OUTER_SWELL * smooth((t - OUTER_FROM) / (1 - OUTER_FROM)) +
+      Math.max(FLOOR_SWELL * b.low, CORNER_SWELL * b.corner));
 
   // the breath is part of each blob's physical size, so neighbours make room for it.
   let inner = mood(1);

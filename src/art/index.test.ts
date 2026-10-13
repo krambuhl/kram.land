@@ -28,7 +28,7 @@ describe('createField', { timeout: 30_000 }, () => {
     const mean = (list: typeof near) => list.reduce((sum, b) => sum + b.r * 2, 0) / list.length;
     expect(mean(near)).toBeLessThan(16);
     expect(mean(edge)).toBeGreaterThan(20);
-    expect(Math.max(...edge.map((b) => b.r * 2))).toBeLessThanOrEqual(43);
+    expect(Math.max(...edge.map((b) => b.r * 2))).toBeLessThanOrEqual(56);
   });
 
   test('colours fall into bands, so most blobs share a colour with their nearest neighbour', () => {
