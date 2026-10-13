@@ -66,11 +66,12 @@ const EDGE_ATTEMPTS = 24;
 // the field runs MARGIN px past every screen edge, so refills spawn and culls happen
 // out of sight.
 const MARGIN = 48;
-// an eddy sits under the pointer and turns the blobs within EDDY_BLOBS blob spacings of it,
-// at up to EDDY_TURN px/ms a third of the way out. it winds up over EDDY_RISE ms while the
-// pointer is there and down over EDDY_FADE ms once it leaves.
+// an eddy under the pointer turns the blobs within EDDY_BLOBS spacings, at up to EDDY_TURN px/ms while the pointer
+// moves, easing toward EDDY_IDLE of that with an EDDY_CALM ms time constant once it stops.
 const EDDY_BLOBS = 4.5;
-const EDDY_TURN = 0.03;
+const EDDY_TURN = 0.06;
+const EDDY_IDLE = 0.35;
+const EDDY_CALM = 900;
 const EDDY_RISE = 500;
 const EDDY_FADE = 900;
 // rings spread from the pointer: a press sends a wide one across the whole field, and
@@ -79,7 +80,7 @@ const WAKES = 24;
 const WAKE_EVERY = 18;
 const WAKE_BLOBS = 4;
 const WAKE_SPEED = 0.2;
-const WAKE_SWELL = 0.35;
+const WAKE_SWELL = 0.5;
 const RIPPLE_SPEED = 0.9;
 const RIPPLE_WIDTH = 110;
 const RIPPLE_SWELL = 0.3;
@@ -158,7 +159,7 @@ export function createField(width: number, height: number, options: FieldOptions
   }
   const wakes: Wake[] = [];
   let pulsing = false;
-  const eddy = { x: 0, y: 0, spin: 1, power: 0, held: false, reach: 0 };
+  const eddy = { x: 0, y: 0, spin: 1, power: 0, held: false, reach: 0, stir: 0 };
   // turns the blobs under the eddy, and swells and turns those under each live ring.
   const play = (elapsed: number) => {
     for (const wake of wakes) wake.age += elapsed;
@@ -168,6 +169,7 @@ export function createField(width: number, height: number, options: FieldOptions
     if (eddy.held) eddy.power += (1 - eddy.power) * (1 - Math.exp(-elapsed / EDDY_RISE));
     else eddy.power *= Math.exp(-elapsed / EDDY_FADE);
     if (eddy.power < 0.01 && !eddy.held) eddy.power = 0;
+    eddy.stir *= Math.exp(-elapsed / EDDY_CALM);
     if (wakes.length === 0 && !pulsing && eddy.power === 0) return;
     pulsing = wakes.length > 0;
     for (const b of blobs) {
@@ -178,7 +180,8 @@ export function createField(width: number, height: number, options: FieldOptions
         const far = Math.hypot(dx, dy) / eddy.reach;
         if (far > 0 && far < 1) {
           // 6.75·far·(1 − far)² peaks at 1 a third of the way out and is 0 at both ends.
-          const turn = (eddy.spin * EDDY_TURN * eddy.power * 6.75 * (1 - far) ** 2 * elapsed) / eddy.reach;
+          const pace = EDDY_TURN * (EDDY_IDLE + (1 - EDDY_IDLE) * eddy.stir);
+          const turn = (eddy.spin * pace * eddy.power * 6.75 * (1 - far) ** 2 * elapsed) / eddy.reach;
           b.x -= dy * turn;
           b.y += dx * turn;
         }
@@ -578,6 +581,7 @@ export function createField(width: number, height: number, options: FieldOptions
     hover(at) {
       eddy.held = at !== undefined;
       if (at === undefined) return;
+      if (at.x !== eddy.x || at.y !== eddy.y) eddy.stir = 1;
       eddy.x = at.x;
       eddy.y = at.y;
       eddy.reach = EDDY_BLOBS * spacingAt(at.x, at.y);
