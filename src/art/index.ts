@@ -52,7 +52,8 @@ const EDGE_ATTEMPTS = 24;
 // the field runs MARGIN px past every screen edge, so refills spawn and culls happen
 // out of sight.
 const MARGIN = 48;
-const HOLE = '#e6e6e6';
+const HOLE = ['#1079CB', '#A067C3', '#5B9E47'];
+const HOLE_TURN = 40000;
 const RAINBOW = ['#5A4D9A', '#A067C3', '#CD361F', '#F07C31', '#E9AC38', '#5B9E47', '#58BABB', '#1079CB'];
 
 interface Blob {
@@ -505,10 +506,13 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
       }
       context.fill();
     }
-    // a light disc under the portrait, so blurring the art gives it a glow instead of
-    // smearing the empty hole into a dark halo.
+    // a disc under the portrait, so blurring the art gives it a glow instead of a dark
+    // halo. the colours sweep around the rim, the only part the portrait leaves in view.
     if (anchor !== undefined && anchor.r > 0) {
-      context.fillStyle = HOLE;
+      const sweep = context.createConicGradient((performance.now() / HOLE_TURN) * Math.PI * 2, anchor.x, anchor.y);
+      HOLE.forEach((color, i) => sweep.addColorStop(i / HOLE.length, color));
+      sweep.addColorStop(1, HOLE[0]);
+      context.fillStyle = sweep;
       context.beginPath();
       context.arc(anchor.x, anchor.y, anchor.r - 1, 0, Math.PI * 2);
       context.fill();
