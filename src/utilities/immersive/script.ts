@@ -1,5 +1,6 @@
 const MOVE = 450;
 const FADE = 200;
+const RETURN = 900;
 const LIFT = 160;
 const RESEED = 250;
 
@@ -77,14 +78,22 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   const close = () => {
     image.setAttribute('aria-expanded', 'false');
     html.setAttribute('data-closing', '');
-    closing = setTimeout(
-      () => {
-        html.removeAttribute('data-closing');
-        glide(() => html.setAttribute('data-immersive', ''));
-        window.scrollTo({ top: lift });
-      },
-      still ? 0 : FADE
-    );
+    // the glide starts from the rest position, so the page scrolls back there while the
+    // text fades, and closes once both are done or RETURN ms have passed.
+    const started = performance.now();
+    const rested = () => Math.abs(window.scrollY - lift) <= 1;
+    if (!rested()) window.scrollTo({ top: lift, behavior: still ? 'auto' : 'smooth' });
+    const finish = () => {
+      const waited = performance.now() - started;
+      if (!still && waited < RETURN && (waited < FADE || !rested())) {
+        closing = setTimeout(finish, 16);
+        return;
+      }
+      html.removeAttribute('data-closing');
+      window.scrollTo({ top: lift });
+      glide(() => html.setAttribute('data-immersive', ''));
+    };
+    finish();
   };
 
   // pageshow scrolls to the rest position and measures the portrait again.
