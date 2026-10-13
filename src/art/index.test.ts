@@ -141,26 +141,25 @@ describe('createField', { timeout: 30_000 }, () => {
     expect(Math.abs(stirred.far - still.far)).toBeLessThan(0.05);
   });
 
-  test('each pass of the pointer moves the blobs under it one colour along, and the change stays', () => {
-    const field = createField(800, 600, { anchor: portrait800 }, seeded(9));
-    for (let i = 0; i < 40; i++) field.step(16);
-    const colours = () => new Map(field.blobs.map((b) => [b, b.color]));
-    const changedSince = (from: ReturnType<typeof colours>) =>
-      field.blobs.filter((b) => from.has(b) && b.color !== from.get(b));
-    const pass = () => {
-      field.touch(150, 150, { x: 1, y: 0 });
-      for (let i = 0; i < 5; i++) field.step(16);
+  test('a moving pointer leaves a small ring that swells the blobs near it and changes no colours', () => {
+    const run = (touched: boolean) => {
+      const field = createField(800, 600, { anchor: portrait800 }, seeded(9));
+      for (let i = 0; i < 40; i++) field.step(16);
+      const colours = new Map(field.blobs.map((b) => [b, b.color]));
+      const near = field.blobs.filter((b) => Math.hypot(b.x - 150, b.y - 150) < 45);
+      const size = () => near.reduce((sum, b) => sum + b.r, 0) / near.length;
+      if (touched) field.touch(150, 150, { x: 1, y: 0 });
+      for (let i = 0; i < 8; i++) field.step(16);
+      const passing = size();
+      const kept = field.blobs.filter((b) => colours.has(b)).every((b) => b.color === colours.get(b));
+      for (let i = 0; i < 90; i++) field.step(16);
+      return { passing, after: size(), kept };
     };
-    const start = colours();
-    pass();
-    pass();
-    const first = changedSince(start);
-    const after = colours();
-    expect(first.length).toBeGreaterThan(4);
-    for (let i = 0; i < 60; i++) field.step(16);
-    expect(first.filter((b) => field.blobs.includes(b)).every((b) => b.color === after.get(b))).toBe(true);
-    pass();
-    expect(changedSince(after).filter((b) => first.includes(b)).length).toBeGreaterThan(2);
+    const calm = run(false);
+    const stirred = run(true);
+    expect(stirred.passing).toBeGreaterThan(calm.passing * 1.03);
+    expect(Math.abs(stirred.after / calm.after - 1)).toBeLessThan(0.05);
+    expect(stirred.kept).toBe(true);
   });
 
   test('a tap swells the blobs its ring is passing, and they settle back', () => {

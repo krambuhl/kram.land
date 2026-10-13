@@ -73,16 +73,13 @@ const EDDY_BLOBS = 4.5;
 const EDDY_TURN = 0.03;
 const EDDY_RISE = 500;
 const EDDY_FADE = 900;
-// blobs within STROKE_BLOBS spacings of a wake younger than WAKE_FRESH step one colour around the palette, one way
-// on each side of the path, and step again only once no fresh wake has covered them for STROKE_GAP ms.
-const STROKE_BLOBS = 2;
-const WAKE_FRESH = 500;
-const STROKE_GAP = 400;
-const WAKES = 16;
-// the pointer drops a wake each time it has moved this many px.
+// rings spread from the pointer: a press sends a wide one across the whole field, and
+// every WAKE_EVERY px of travel sends a small one, WAKE_BLOBS blob spacings out.
+const WAKES = 24;
 const WAKE_EVERY = 18;
-// a tap sends a ring RIPPLE_WIDTH either side of its crest across the whole field at RIPPLE_SPEED.
-// blobs under it swell by up to RIPPLE_SWELL and turn around the tap at up to RIPPLE_SPIN, fading as it spreads.
+const WAKE_BLOBS = 4;
+const WAKE_SPEED = 0.2;
+const WAKE_SWELL = 0.35;
 const RIPPLE_SPEED = 0.9;
 const RIPPLE_WIDTH = 110;
 const RIPPLE_SWELL = 0.3;
@@ -105,8 +102,6 @@ interface Blob {
   corner: number;
   pulse: number;
   color: string;
-  // when a fresh wake last covered this blob, on the field's clock.
-  stroked: number;
 }
 
 interface Anchor {
@@ -127,7 +122,7 @@ interface Field {
   // takes new bounds, anchor and floor without restarting: blobs keep their places and
   // colours, new area fills in, and the next steps reflow around a moved anchor.
   reshape(width: number, height: number, options?: FieldOptions): void;
-  // a pointer at (x, y): given how it moved it leaves a wake that way, otherwise it taps.
+  // a pointer at (x, y): a move leaves a small ring, a press a wide one.
   touch(x: number, y: number, moved?: { x: number; y: number }): void;
   // where the pointer rests, or nothing once it has gone. an eddy turns under it.
   hover(at?: { x: number; y: number }): void;
@@ -149,21 +144,22 @@ export function createField(width: number, height: number, options: FieldOptions
   );
   const orbitWay = random() < 0.5 ? -1 : 1;
 
+  // a ring spreading from (x, y): its speed in px/ms, its reach either side of the crest in
+  // px, how long it lasts in ms, and how much it swells and turns the blobs under it.
   interface Wake {
     x: number;
     y: number;
-    ux: number;
-    uy: number;
-    tap: boolean;
     age: number;
-    reach: number;
-    // how long the wake lasts, in ms.
+    speed: number;
+    width: number;
     life: number;
+    swell: number;
+    spin: number;
   }
   const wakes: Wake[] = [];
   let pulsing = false;
   const eddy = { x: 0, y: 0, spin: 1, power: 0, held: false, reach: 0 };
-  // turns the blobs under the eddy, and swells, turns and recolours those near each live wake.
+  // turns the blobs under the eddy, and swells and turns those under each live ring.
   const play = (elapsed: number) => {
     for (const wake of wakes) wake.age += elapsed;
     for (let i = wakes.length - 1; i >= 0; i--) {
@@ -173,7 +169,7 @@ export function createField(width: number, height: number, options: FieldOptions
     else eddy.power *= Math.exp(-elapsed / EDDY_FADE);
     if (eddy.power < 0.01 && !eddy.held) eddy.power = 0;
     if (wakes.length === 0 && !pulsing && eddy.power === 0) return;
-    pulsing = wakes.some((wake) => wake.tap);
+    pulsing = wakes.length > 0;
     for (const b of blobs) {
       b.pulse = 0;
       if (eddy.power > 0) {
@@ -192,23 +188,14 @@ export function createField(width: number, height: number, options: FieldOptions
         const dx = b.x - wake.x;
         const dy = b.y - wake.y;
         const away = Math.hypot(dx, dy) || 0.01;
-        if (wake.tap) {
-          const band = (away - RIPPLE_SPEED * wake.age) / RIPPLE_WIDTH;
-          if (Math.abs(band) < 1) {
-            const under = (1 - wake.age / wake.life) * (1 - band * band);
-            const turn = (eddy.spin * RIPPLE_SPIN * under * elapsed) / away;
-            b.pulse += RIPPLE_SWELL * under;
-            b.x -= dy * turn;
-            b.y += dx * turn;
-          }
-          continue;
-        }
-        if (wake.age > WAKE_FRESH || away > wake.reach) continue;
-        const gone = clock - b.stroked;
-        b.stroked = clock;
-        if (gone <= STROKE_GAP) continue;
-        const step = wake.ux * dy - wake.uy * dx < 0 ? -1 : 1;
-        b.color = RAINBOW[(RAINBOW.indexOf(b.color) + step + RAINBOW.length) % RAINBOW.length];
+        const band = (away - wake.speed * wake.age) / wake.width;
+        if (Math.abs(band) >= 1) continue;
+        const under = (1 - wake.age / wake.life) * (1 - band * band);
+        const turn = (eddy.spin * wake.spin * under * elapsed) / away;
+        // overlapping rings don't stack: a blob takes the strongest swell over it.
+        b.pulse = Math.max(b.pulse, wake.swell * under);
+        b.x -= dy * turn;
+        b.y += dx * turn;
       }
     }
   };
@@ -304,7 +291,6 @@ export function createField(width: number, height: number, options: FieldOptions
     along: 0,
     low: 0,
     pulse: 0,
-    stroked: -Infinity,
     corner: 0,
     color: colorAt(x, y, phase, arms),
   });
@@ -399,7 +385,6 @@ export function createField(width: number, height: number, options: FieldOptions
       corner: 0,
       pulse: 0,
       color: RAINBOW[0],
-      stroked: -Infinity,
     };
     probe.low = low(probe);
     probe.corner = corner(probe);
@@ -569,15 +554,26 @@ export function createField(width: number, height: number, options: FieldOptions
       }
     },
     touch(x, y, moved) {
-      const length = moved === undefined ? 0 : Math.hypot(moved.x, moved.y);
-      const tap = moved === undefined || length === 0;
-      const reach = STROKE_BLOBS * spacingAt(x, y);
-      const life = tap ? Math.hypot(width, height) / RIPPLE_SPEED : WAKE_FRESH;
-      wakes.push({ x, y, ux: tap ? 0 : moved.x / length, uy: tap ? 0 : moved.y / length, tap, age: 0, reach, life });
+      if (moved === undefined || Math.hypot(moved.x, moved.y) === 0) {
+        const life = Math.hypot(width, height) / RIPPLE_SPEED;
+        wakes.push({
+          x,
+          y,
+          age: 0,
+          speed: RIPPLE_SPEED,
+          width: RIPPLE_WIDTH,
+          life,
+          swell: RIPPLE_SWELL,
+          spin: RIPPLE_SPIN,
+        });
+      } else {
+        const spacing = spacingAt(x, y);
+        const life = (WAKE_BLOBS * spacing) / WAKE_SPEED;
+        wakes.push({ x, y, age: 0, speed: WAKE_SPEED, width: spacing, life, swell: WAKE_SWELL, spin: 0 });
+        // the eddy turns the way the pointer last went around the portrait.
+        eddy.spin = (x - anchor.x) * moved.y - (y - anchor.y) * moved.x < 0 ? -1 : 1;
+      }
       if (wakes.length > WAKES) wakes.shift();
-      if (tap) return;
-      // the eddy turns the way the pointer last went around the portrait.
-      eddy.spin = (x - anchor.x) * moved.y - (y - anchor.y) * moved.x < 0 ? -1 : 1;
     },
     hover(at) {
       eddy.held = at !== undefined;
