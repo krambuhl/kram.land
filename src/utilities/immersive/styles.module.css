@@ -60,16 +60,6 @@
   padding-top: calc(env(safe-area-inset-top) + var(--lift, 0px));
 }
 
-/* the page only comes to rest on its content, so a drag into the art strips above and
-   below springs back. */
-:root[data-lifted] {
-  scroll-snap-type: y mandatory;
-}
-
-:root[data-lifted] body > * {
-  scroll-snap-align: start;
-}
-
 /* the frame sits on the page, not the screen, so the art scrolls with the open content.
    it clips the canvas, which bleeds past every side so the open blur's soft edge is cut off. */
 .frame {

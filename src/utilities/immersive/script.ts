@@ -1,6 +1,8 @@
 const MOVE = 450;
 const FADE = 200;
 const RETURN = 900;
+const EASE_BACK = 800;
+const SETTLED = 140;
 const LIFT = 160;
 const RESEED = 250;
 
@@ -96,6 +98,40 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
     finish();
   };
 
+  // once the open page rests in an art strip above or below its content with no finger down,
+  // it eases back to the content's edge over EASE_BACK ms. a new touch cancels that.
+  let touching = false;
+  let settled: ReturnType<typeof setTimeout> | undefined;
+  let easing = 0;
+  const easeBack = () => {
+    if (lift === 0 || touching || html.hasAttribute('data-immersive') || html.hasAttribute('data-closing')) return;
+    const end = Math.max(lift, document.documentElement.scrollHeight - window.innerHeight - lift);
+    const from = window.scrollY;
+    const to = Math.min(end, Math.max(lift, from));
+    if (Math.abs(to - from) < 1) return;
+    const started = performance.now();
+    const frame = (now: number) => {
+      const t = Math.min(1, (now - started) / EASE_BACK);
+      window.scrollTo(0, from + (to - from) * (1 - (1 - t) ** 3));
+      easing = t < 1 ? requestAnimationFrame(frame) : 0;
+    };
+    easing = requestAnimationFrame(frame);
+  };
+  const onScroll = () => {
+    if (easing !== 0) return;
+    clearTimeout(settled);
+    settled = setTimeout(easeBack, SETTLED);
+  };
+  const onTouchStart = () => {
+    touching = true;
+    cancelAnimationFrame(easing);
+    easing = 0;
+  };
+  const onTouchEnd = () => {
+    touching = false;
+    onScroll();
+  };
+
   // pageshow scrolls to the rest position and measures the portrait again.
   const onShow = () => {
     settle();
@@ -152,6 +188,12 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   document.addEventListener('click', onOutside);
   window.addEventListener('resize', measure);
   window.addEventListener('pageshow', onShow);
+  if (lift > 0) {
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchend', onTouchEnd, { passive: true });
+    window.addEventListener('touchcancel', onTouchEnd, { passive: true });
+  }
   return () => {
     clearTimeout(reseedTimer);
     stopArt?.();
@@ -160,5 +202,11 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
     document.removeEventListener('click', onOutside);
     window.removeEventListener('resize', measure);
     window.removeEventListener('pageshow', onShow);
+    window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('touchstart', onTouchStart);
+    window.removeEventListener('touchend', onTouchEnd);
+    window.removeEventListener('touchcancel', onTouchEnd);
+    clearTimeout(settled);
+    cancelAnimationFrame(easing);
   };
 }
