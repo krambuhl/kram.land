@@ -1,6 +1,6 @@
 const MOVE = 450;
 const FADE = 200;
-const LIFT = 72;
+const LIFT = 160;
 const RESEED = 250;
 
 export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCanvasElement): () => void {
