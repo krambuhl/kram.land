@@ -29,8 +29,13 @@ const DRIFT = 0.025;
 // how fast blobs really travel outward, in px/ms. it dates a blob by its distance, so the
 // seed and refills take the colour a blob born on the rim would carry by then.
 const OUTWARD = 0.011;
-const ARM_COUNTS = [1, 2, 3, 5];
-const ARM_HOLD = 40000;
+// each arm count and how long it holds, in ms. fewer arms hold longer.
+const ARMS = [
+  [1, 120000],
+  [2, 90000],
+  [3, 60000],
+  [5, 30000],
+];
 const ARM_BLEND = 8000;
 const JITTER = 3;
 const EDGE_GROWTH = [2, 4];
@@ -128,15 +133,17 @@ export function createField(width: number, height: number, options: FieldOptions
     return history[index];
   };
 
-  // the arm count steps through ARM_COUNTS, and newborns dither between
-  // the old and new count over ARM_BLEND so the change ripples out softly.
-  const armsOrigin = random() * ARM_HOLD * ARM_COUNTS.length;
+  // the arm count steps through ARMS, and newborns dither between the old and new
+  // count over the last ARM_BLEND of each hold so the change ripples out softly.
+  const armsCycle = ARMS.reduce((sum, [, hold]) => sum + hold, 0);
+  const armsOrigin = random() * armsCycle;
   const armsAt = (at: number) => {
-    const t = at + armsOrigin;
-    const stage = Math.floor(t / ARM_HOLD);
-    const into = t - stage * ARM_HOLD;
-    const pick = (n: number) => ARM_COUNTS[((n % ARM_COUNTS.length) + ARM_COUNTS.length) % ARM_COUNTS.length];
-    return random() < smooth((into - (ARM_HOLD - ARM_BLEND)) / ARM_BLEND) ? pick(stage + 1) : pick(stage);
+    let into = (((at + armsOrigin) % armsCycle) + armsCycle) % armsCycle;
+    let stage = 0;
+    while (into >= ARMS[stage][1]) into -= ARMS[stage++][1];
+    const [count, hold] = ARMS[stage];
+    const [next] = ARMS[(stage + 1) % ARMS.length];
+    return random() < smooth((into - (hold - ARM_BLEND)) / ARM_BLEND) ? next : count;
   };
 
   const colorAt = (x: number, y: number, phase: number, arms: number) => {
