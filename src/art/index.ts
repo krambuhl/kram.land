@@ -3,6 +3,9 @@ const SPAWN_ATTEMPTS = 32;
 // newborns need room for SPAWN_ROOM of their size and gap: less squeezes the inner
 // ring, more starves the outward push that keeps the field moving.
 const SPAWN_ROOM = 0.5;
+// a newborn appears at BORN of its rim size, inside the room the spawn check cleared,
+// so it shows at once without pushing into its neighbours.
+const BORN = 0.4;
 const SEED_ROUNDS = 6;
 // circles can't tile the plane, so seeding a full area's worth overfills the screen.
 const SEED_FILL = 0.9;
@@ -353,6 +356,7 @@ export function createField(width: number, height: number, options: FieldOptions
           );
           if (crowded) continue;
           const born = blob(x, y, colorPhase, armsAt(clock));
+          born.r = BORN * newborn;
           blobs.push(born);
           nearRim.push(born);
           break;
