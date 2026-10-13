@@ -52,6 +52,7 @@ const EDGE_ATTEMPTS = 24;
 // the field runs MARGIN px past every screen edge, so refills spawn and culls happen
 // out of sight.
 const MARGIN = 48;
+const HOLE = '#e6e6e6';
 const RAINBOW = ['#5A4D9A', '#A067C3', '#CD361F', '#F07C31', '#E9AC38', '#5B9E47', '#58BABB', '#1079CB'];
 
 interface Blob {
@@ -502,6 +503,14 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
         context.moveTo(x + blob.r, y);
         context.arc(x, y, blob.r, 0, Math.PI * 2);
       }
+      context.fill();
+    }
+    // a light disc under the portrait, so blurring the art gives it a glow instead of
+    // smearing the empty hole into a dark halo.
+    if (anchor !== undefined && anchor.r > 0) {
+      context.fillStyle = HOLE;
+      context.beginPath();
+      context.arc(anchor.x, anchor.y, anchor.r - 1, 0, Math.PI * 2);
       context.fill();
     }
   };
