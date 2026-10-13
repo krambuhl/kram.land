@@ -66,6 +66,29 @@ const EDGE_ATTEMPTS = 24;
 // the field runs MARGIN px past every screen edge, so refills spawn and culls happen
 // out of sight.
 const MARGIN = 48;
+// an eddy sits under the pointer and turns the blobs within EDDY_BLOBS blob spacings of it,
+// at up to EDDY_TURN px/ms a third of the way out. it winds up over EDDY_RISE ms while the
+// pointer is there and down over EDDY_FADE ms once it leaves.
+const EDDY_BLOBS = 4.5;
+const EDDY_TURN = 0.06;
+const EDDY_RISE = 500;
+const EDDY_FADE = 900;
+// blobs within STROKE_BLOBS spacings of a wake younger than WAKE_FRESH step one colour around the palette, one way
+// on each side of the path, and step again only once no fresh wake has covered them for STROKE_GAP ms.
+const STROKE_BLOBS = 2;
+const WAKE_FRESH = 500;
+const STROKE_GAP = 400;
+const WAKES = 16;
+// the pointer drops a wake each time it has moved this many px.
+const WAKE_EVERY = 18;
+// a tap sends out a ring reaching RIPPLE_WIDTH px either side of its crest, at RIPPLE_SPEED
+// px/ms for RIPPLE_LIFE ms. blobs under it swell by up to RIPPLE_SWELL of their size and turn
+// around the tap at up to RIPPLE_SPIN px/ms, so the ring twists as it spreads.
+const RIPPLE_LIFE = 1600;
+const RIPPLE_SPEED = 0.4;
+const RIPPLE_WIDTH = 80;
+const RIPPLE_SWELL = 0.3;
+const RIPPLE_SPIN = 0.25;
 const WARM_STEPS = 30;
 const WARM_PER_FRAME = 3;
 const HOLE = ['#1079CB', '#A067C3', '#5B9E47'];
@@ -82,7 +105,10 @@ interface Blob {
   along: number;
   low: number;
   corner: number;
+  pulse: number;
   color: string;
+  // when a fresh wake last covered this blob, on the field's clock.
+  stroked: number;
 }
 
 interface Anchor {
@@ -103,6 +129,10 @@ interface Field {
   // takes new bounds, anchor and floor without restarting: blobs keep their places and
   // colours, new area fills in, and the next steps reflow around a moved anchor.
   reshape(width: number, height: number, options?: FieldOptions): void;
+  // a pointer at (x, y): given how it moved it leaves a wake that way, otherwise it taps.
+  touch(x: number, y: number, moved?: { x: number; y: number }): void;
+  // where the pointer rests, or nothing once it has gone. an eddy turns under it.
+  hover(at?: { x: number; y: number }): void;
   breath(): { inner: number; outer: number };
 }
 
@@ -120,6 +150,68 @@ export function createField(width: number, height: number, options: FieldOptions
     }))
   );
   const orbitWay = random() < 0.5 ? -1 : 1;
+
+  interface Wake {
+    x: number;
+    y: number;
+    ux: number;
+    uy: number;
+    tap: boolean;
+    age: number;
+    reach: number;
+  }
+  const wakes: Wake[] = [];
+  let pulsing = false;
+  const eddy = { x: 0, y: 0, spin: 1, power: 0, held: false, reach: 0 };
+  // turns the blobs under the eddy, and swells, turns and recolours those near each live wake.
+  const play = (elapsed: number) => {
+    for (const wake of wakes) wake.age += elapsed;
+    for (let i = wakes.length - 1; i >= 0; i--) {
+      if (wakes[i].age > (wakes[i].tap ? RIPPLE_LIFE : WAKE_FRESH)) wakes.splice(i, 1);
+    }
+    if (eddy.held) eddy.power += (1 - eddy.power) * (1 - Math.exp(-elapsed / EDDY_RISE));
+    else eddy.power *= Math.exp(-elapsed / EDDY_FADE);
+    if (eddy.power < 0.01 && !eddy.held) eddy.power = 0;
+    if (wakes.length === 0 && !pulsing && eddy.power === 0) return;
+    pulsing = wakes.some((wake) => wake.tap);
+    for (const b of blobs) {
+      b.pulse = 0;
+      if (eddy.power > 0) {
+        const dx = b.x - eddy.x;
+        const dy = b.y - eddy.y;
+        const far = Math.hypot(dx, dy) / eddy.reach;
+        if (far > 0 && far < 1) {
+          // 6.75·far·(1 − far)² peaks at 1 a third of the way out and is 0 at both ends.
+          const turn = (eddy.spin * EDDY_TURN * eddy.power * 6.75 * (1 - far) ** 2 * elapsed) / eddy.reach;
+          b.x -= dy * turn;
+          b.y += dx * turn;
+        }
+      }
+      for (let i = 0; i < wakes.length; i++) {
+        const wake = wakes[i];
+        const dx = b.x - wake.x;
+        const dy = b.y - wake.y;
+        const away = Math.hypot(dx, dy) || 0.01;
+        if (wake.tap) {
+          const band = (away - RIPPLE_SPEED * wake.age) / RIPPLE_WIDTH;
+          if (Math.abs(band) < 1) {
+            const under = (1 - wake.age / RIPPLE_LIFE) * (1 - band * band);
+            const turn = (eddy.spin * RIPPLE_SPIN * under * elapsed) / away;
+            b.pulse += RIPPLE_SWELL * under;
+            b.x -= dy * turn;
+            b.y += dx * turn;
+          }
+          continue;
+        }
+        if (away > wake.reach) continue;
+        const gone = clock - b.stroked;
+        b.stroked = clock;
+        if (gone <= STROKE_GAP) continue;
+        const step = wake.ux * dy - wake.uy * dx < 0 ? -1 : 1;
+        b.color = RAINBOW[(RAINBOW.indexOf(b.color) + step + RAINBOW.length) % RAINBOW.length];
+      }
+    }
+  };
   const mood = (k: number, at = clock) =>
     waves[k].reduce((sum, w) => sum + Math.sin(at * w.rate + w.offset), 0) / waves[k].length;
   const spinRate = (at: number) => (DRIFT / (BAND * RAINBOW.length)) * SPIN * mood(0, at);
@@ -211,6 +303,8 @@ export function createField(width: number, height: number, options: FieldOptions
     extra: EDGE_GROWTH[0] + random() * (EDGE_GROWTH[1] - EDGE_GROWTH[0]),
     along: 0,
     low: 0,
+    pulse: 0,
+    stroked: -Infinity,
     corner: 0,
     color: colorAt(x, y, phase, arms),
   });
@@ -291,6 +385,28 @@ export function createField(width: number, height: number, options: FieldOptions
     return moved;
   };
 
+  // the distance between neighbouring blob centres at (x, y): a blob's width there plus its gap.
+  const spacingAt = (x: number, y: number) => {
+    const probe: Blob = {
+      x,
+      y,
+      drawX: x,
+      drawY: y,
+      r: 0,
+      extra: (EDGE_GROWTH[0] + EDGE_GROWTH[1]) / 2,
+      along: 0,
+      low: 0,
+      corner: 0,
+      pulse: 0,
+      color: RAINBOW[0],
+      stroked: -Infinity,
+    };
+    probe.low = low(probe);
+    probe.corner = corner(probe);
+    const r = target(probe, travelled(probe));
+    return 2 * r + gapFor(r);
+  };
+
   // adds a blob at (x, y) if it fits among `near` with its full gap, coloured as a blob
   // born on the rim would be by the time it drifted this far out.
   const place = (x: number, y: number, near: Blob[]): Blob | undefined => {
@@ -348,6 +464,7 @@ export function createField(width: number, height: number, options: FieldOptions
       colorPhase += spinRate(clock) * elapsed;
       inner = mood(1);
       outer = mood(2);
+      play(elapsed);
       // spawn checks only look at blobs near the rim, the only ones a newborn can touch.
       const rimBand = anchor.r + 80;
       const nearRim = blobs.filter((b) => (b.x - anchor.x) ** 2 + (b.y - anchor.y) ** 2 < rimBand * rimBand);
@@ -376,7 +493,7 @@ export function createField(width: number, height: number, options: FieldOptions
         b.low = low(b);
         b.corner = corner(b);
         b.along = along(t);
-        b.r += (target(b, t) * breathe(b) - b.r) * GROW;
+        b.r += (target(b, t) * breathe(b) * (1 + b.pulse) - b.r) * GROW;
       }
       const turn = orbitWay * ORBIT * (ORBIT_CALM + (1 - ORBIT_CALM) * (0.5 + 0.5 * mood(3))) * elapsed;
       for (const b of blobs) {
@@ -451,6 +568,23 @@ export function createField(width: number, height: number, options: FieldOptions
         place(x, y, near);
       }
     },
+    touch(x, y, moved) {
+      const length = moved === undefined ? 0 : Math.hypot(moved.x, moved.y);
+      const tap = moved === undefined || length === 0;
+      const reach = STROKE_BLOBS * spacingAt(x, y);
+      wakes.push({ x, y, ux: tap ? 0 : moved.x / length, uy: tap ? 0 : moved.y / length, tap, age: 0, reach });
+      if (wakes.length > WAKES) wakes.shift();
+      if (tap) return;
+      // the eddy turns the way the pointer last went around the portrait.
+      eddy.spin = (x - anchor.x) * moved.y - (y - anchor.y) * moved.x < 0 ? -1 : 1;
+    },
+    hover(at) {
+      eddy.held = at !== undefined;
+      if (at === undefined) return;
+      eddy.x = at.x;
+      eddy.y = at.y;
+      eddy.reach = EDDY_BLOBS * spacingAt(at.x, at.y);
+    },
     breath: () => ({ inner, outer }),
   };
 }
@@ -460,6 +594,8 @@ export interface StartOptions {
   floor?: () => number;
   // called once the field has settled out of sight and drawn its first frame.
   ready?: () => void;
+  // whether the pointer plays with the field. it does unless this returns false.
+  playing?: () => boolean;
 }
 
 export default function start(canvas: HTMLCanvasElement, options: StartOptions = {}): () => void {
@@ -495,6 +631,7 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
 
   // the portrait can move after the field starts, so the hole follows its measured spot.
   const follow = () => {
+    if (options.playing?.() === false) field?.hover();
     const nextAnchor = options.anchor?.();
     const nextFloor = options.floor?.();
     if (nextAnchor === anchor && nextFloor === floor) return;
@@ -563,13 +700,58 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     frame = requestAnimationFrame(loop);
   };
 
+  let trail: { x: number; y: number } | undefined;
+  const point = (event: PointerEvent) => {
+    const area = canvas.getBoundingClientRect();
+    return { x: event.clientX - area.left, y: event.clientY - area.top };
+  };
+  const onMove = (event: PointerEvent) => {
+    if (options.playing?.() === false) {
+      trail = undefined;
+      field?.hover();
+      return;
+    }
+    const at = point(event);
+    field?.hover(at);
+    const moved = trail === undefined ? undefined : { x: at.x - trail.x, y: at.y - trail.y };
+    if (moved !== undefined && Math.hypot(moved.x, moved.y) < WAKE_EVERY) return;
+    if (moved !== undefined) field?.touch(at.x, at.y, moved);
+    trail = at;
+  };
+  const onLeave = () => {
+    trail = undefined;
+    field?.hover();
+  };
+  // a mouse rests on the field between presses, but a finger is gone once it lifts.
+  const onUp = (event: PointerEvent) => {
+    if (event.pointerType === 'touch') onLeave();
+  };
+  const onDown = (event: PointerEvent) => {
+    if (options.playing?.() === false) return;
+    trail = point(event);
+    field?.hover(trail);
+    field?.touch(trail.x, trail.y);
+  };
+
   resize();
   window.addEventListener('resize', resize);
+  if (!still) {
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerdown', onDown);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+    document.documentElement.addEventListener('pointerleave', onLeave);
+  }
   if (still) warm(WARM_STEPS);
   else frame = requestAnimationFrame(loop);
 
   return () => {
     cancelAnimationFrame(frame);
     window.removeEventListener('resize', resize);
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerdown', onDown);
+    window.removeEventListener('pointerup', onUp);
+    window.removeEventListener('pointercancel', onUp);
+    document.documentElement.removeEventListener('pointerleave', onLeave);
   };
 }

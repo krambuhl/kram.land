@@ -133,7 +133,9 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
         reseeding = false;
       }, RESEED);
     };
-    startArt = () => start(canvas, { anchor: () => anchor, floor: () => floor, ready });
+    // the pointer plays with the art only while the page is closed.
+    const playing = () => html.hasAttribute('data-immersive');
+    startArt = () => start(canvas, { anchor: () => anchor, floor: () => floor, ready, playing });
     stopArt = startArt();
   });
   image.addEventListener('click', onClick);

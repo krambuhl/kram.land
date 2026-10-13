@@ -10,6 +10,7 @@ function seeded(seed: number) {
 }
 
 const portrait = { x: 720, y: 450, r: 96 };
+const portrait800 = { x: 400, y: 300, r: 96 };
 
 // the overlap and floor tests run the full simulation for a few hundred steps, which outlasts the 5s
 // default on slower CI runners.
@@ -114,5 +115,70 @@ describe('createField', { timeout: 30_000 }, () => {
     for (let i = 0; i < 10; i++) field.step(16);
     const inside = field.blobs.filter((b) => Math.hypot(b.x - moved.x, b.y - moved.y) < moved.r);
     expect(inside.length).toBe(0);
+  });
+
+  test('a resting pointer turns the blobs around it and leaves distant ones alone', () => {
+    const run = (touched: boolean) => {
+      const field = createField(800, 600, { anchor: portrait800 }, seeded(8));
+      for (let i = 0; i < 40; i++) field.step(16);
+      const angle = (b: { x: number; y: number }, x: number, y: number) => Math.atan2(b.y - y, b.x - x);
+      const near = field.blobs.filter((b) => Math.abs(Math.hypot(b.x - 150, b.y - 150) - 45) < 20);
+      const far = field.blobs.filter((b) => Math.abs(Math.hypot(b.x - 650, b.y - 450) - 45) < 20);
+      const start = new Map([...near, ...far].map((b) => [b, { x: b.x, y: b.y }]));
+      if (touched) field.hover({ x: 150, y: 150 });
+      for (let i = 0; i < 120; i++) field.step(16);
+      const turned = (list: typeof near, x: number, y: number) =>
+        list.reduce((sum, b) => {
+          const from = start.get(b) ?? b;
+          const turn = angle(b, x, y) - angle(from, x, y);
+          return sum + Math.atan2(Math.sin(turn), Math.cos(turn));
+        }, 0) / list.length;
+      return { near: turned(near, 150, 150), far: turned(far, 650, 450) };
+    };
+    const still = run(false);
+    const stirred = run(true);
+    expect(Math.abs(stirred.near - still.near)).toBeGreaterThan(0.1);
+    expect(Math.abs(stirred.far - still.far)).toBeLessThan(0.05);
+  });
+
+  test('each pass of the pointer moves the blobs under it one colour along, and the change stays', () => {
+    const field = createField(800, 600, { anchor: portrait800 }, seeded(9));
+    for (let i = 0; i < 40; i++) field.step(16);
+    const colours = () => new Map(field.blobs.map((b) => [b, b.color]));
+    const changedSince = (from: ReturnType<typeof colours>) =>
+      field.blobs.filter((b) => from.has(b) && b.color !== from.get(b));
+    const pass = () => {
+      field.touch(150, 150, { x: 1, y: 0 });
+      for (let i = 0; i < 5; i++) field.step(16);
+    };
+    const start = colours();
+    pass();
+    pass();
+    const first = changedSince(start);
+    const after = colours();
+    expect(first.length).toBeGreaterThan(4);
+    for (let i = 0; i < 60; i++) field.step(16);
+    expect(first.filter((b) => field.blobs.includes(b)).every((b) => b.color === after.get(b))).toBe(true);
+    pass();
+    expect(changedSince(after).filter((b) => first.includes(b)).length).toBeGreaterThan(2);
+  });
+
+  test('a tap swells the blobs its ring is passing, and they settle back', () => {
+    const run = (tapped: boolean) => {
+      const field = createField(800, 600, { anchor: portrait800 }, seeded(10));
+      for (let i = 0; i < 40; i++) field.step(16);
+      const ring = field.blobs.filter((b) => Math.abs(Math.hypot(b.x - 150, b.y - 150) - 100) < 15);
+      const size = () => ring.reduce((sum, b) => sum + b.r, 0) / ring.length;
+      if (tapped) field.touch(150, 150);
+      for (let i = 0; i < 16; i++) field.step(16);
+      const passing = size();
+      for (let i = 0; i < 120; i++) field.step(16);
+      return { passing, after: size() };
+    };
+    const calm = run(false);
+    const tapped = run(true);
+    expect(tapped.passing).toBeGreaterThan(calm.passing * 1.1);
+    expect(tapped.after / calm.after).toBeGreaterThan(0.9);
+    expect(tapped.after / calm.after).toBeLessThan(1.1);
   });
 });

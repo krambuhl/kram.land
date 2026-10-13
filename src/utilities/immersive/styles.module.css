@@ -57,6 +57,14 @@
   pointer-events: none;
 }
 
+/* closed, the pointer plays with the art, so it shows as a dot. the portrait keeps its own cursor. */
+:root[data-immersive] body {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Ccircle cx='8' cy='8' r='5' fill='%23fff' stroke='%23000' stroke-opacity='.5'/%3E%3C/svg%3E")
+      8 8,
+    default;
+}
+
 /* closed, there is nothing to read, so a finger can't pan the page. the scroll room
    stays, since the script still has to rest the page under the bars. */
 :root[data-immersive],
