@@ -20,7 +20,7 @@ const RELAX = 6;
 const SMOOTH = 0.5;
 const SIZE = 7;
 const MOOD_PERIOD = [12000, 28000];
-const SPIN = 3;
+const SPIN = 2;
 const INNER_BREATHE = 0.18;
 const OUTER_BREATHE = 0.24;
 const SHIFT = 16;
@@ -37,7 +37,12 @@ const ARMS = [
   [5, 60000],
 ];
 const ARM_BLEND = 8000;
-const JITTER = 3;
+const JITTER = 1;
+// a blob keeps its born colour until it has travelled `fray` of the way out, drawn from FRAY_FROM
+// to FRAY_TO, then slips up to FRAY_STEPS colours around the palette. past 1, a blob never slips.
+const FRAY_FROM = 0.15;
+const FRAY_TO = 1.1;
+const FRAY_STEPS = 3;
 const EDGE_GROWTH = [2, 4];
 const EDGE_SWELL = 3;
 const SWELL_FROM = 0.85;
@@ -103,6 +108,10 @@ interface Blob {
   corner: number;
   pulse: number;
   color: string;
+  // how far out the blob's colour slips, by how many palette steps, and whether it has.
+  fray: number;
+  slip: number;
+  frayed: boolean;
 }
 
 interface Anchor {
@@ -296,7 +305,17 @@ export function createField(width: number, height: number, options: FieldOptions
     pulse: 0,
     corner: 0,
     color: colorAt(x, y, phase, arms),
+    fray: FRAY_FROM + random() * (FRAY_TO - FRAY_FROM),
+    slip: (random() < 0.5 ? -1 : 1) * (1 + Math.floor(random() * FRAY_STEPS)),
+    frayed: false,
   });
+
+  // slips a blob's colour once it has travelled past its fray point.
+  const fray = (b: Blob) => {
+    if (b.frayed || b.along < b.fray) return;
+    b.color = RAINBOW[(RAINBOW.indexOf(b.color) + b.slip + RAINBOW.length) % RAINBOW.length];
+    b.frayed = true;
+  };
 
   const gapFor = (r: number) =>
     GAP_MIN + (GAP_MAX - GAP_MIN) * Math.min(1, Math.max(0, (r - GAP_FROM) / (GAP_TO - GAP_FROM)));
@@ -388,6 +407,9 @@ export function createField(width: number, height: number, options: FieldOptions
       corner: 0,
       pulse: 0,
       color: RAINBOW[0],
+      fray: 2,
+      slip: 0,
+      frayed: true,
     };
     probe.low = low(probe);
     probe.corner = corner(probe);
@@ -408,6 +430,7 @@ export function createField(width: number, height: number, options: FieldOptions
       return undefined;
     const age = (Math.hypot(x - anchor.x, y - anchor.y) - anchor.r) / OUTWARD;
     b.color = colorAt(x, y, colorPhase - spinRate(clock) * age, armsAt(clock - age));
+    fray(b);
     blobs.push(b);
     near.push(b);
     return b;
@@ -438,6 +461,7 @@ export function createField(width: number, height: number, options: FieldOptions
     const rim = anchor.r;
     const age = (away - rim) / OUTWARD;
     b.color = colorAt(b.x, b.y, phaseAgo(age), armsAt(-age));
+    fray(b);
   }
   for (const b of blobs) {
     b.drawX = b.x;
@@ -481,6 +505,7 @@ export function createField(width: number, height: number, options: FieldOptions
         b.low = low(b);
         b.corner = corner(b);
         b.along = along(t);
+        fray(b);
         b.r += (target(b, t) * breathe(b) * (1 + b.pulse) - b.r) * GROW;
       }
       const turn = orbitWay * ORBIT * (ORBIT_CALM + (1 - ORBIT_CALM) * (0.5 + 0.5 * mood(3))) * elapsed;

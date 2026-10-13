@@ -32,23 +32,27 @@ describe('createField', { timeout: 30_000 }, () => {
     expect(Math.max(...edge.map((b) => b.r * 2))).toBeLessThanOrEqual(56);
   });
 
-  test('colours fall into bands, so most blobs share a colour with their nearest neighbour', () => {
+  test('colours hold their bands near the portrait and dissolve toward the edges', () => {
     const field = createField(1440, 900, { anchor: portrait }, seeded(4));
     for (let i = 0; i < 120; i++) field.step(16);
-    const sample = field.blobs.slice(0, 400);
-    const shared = sample.filter((a) => {
-      let nearest = field.blobs[0];
-      let best = Infinity;
-      for (const b of field.blobs) {
-        const d = (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
-        if (b !== a && d < best) {
-          best = d;
-          nearest = b;
+    const shared = (list: typeof field.blobs) =>
+      list.filter((a) => {
+        let nearest = field.blobs[0];
+        let best = Infinity;
+        for (const b of field.blobs) {
+          const d = (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
+          if (b !== a && d < best) {
+            best = d;
+            nearest = b;
+          }
         }
-      }
-      return nearest.color === a.color;
-    });
-    expect(shared.length / sample.length).toBeGreaterThan(0.2);
+        return nearest.color === a.color;
+      }).length / list.length;
+    const off = (b: { x: number; y: number }) => Math.hypot(b.x - portrait.x, b.y - portrait.y) - portrait.r;
+    const inner = shared(field.blobs.filter((b) => off(b) < 120));
+    const outer = shared(field.blobs.filter((b) => off(b) > 420 && b.x > 0 && b.x < 1440 && b.y > 0 && b.y < 900));
+    expect(inner).toBeGreaterThan(0.35);
+    expect(outer).toBeLessThan(inner - 0.15);
   });
 
   test('packs against the portrait with no visible overlap as new blobs push out from its rim', () => {
@@ -117,7 +121,7 @@ describe('createField', { timeout: 30_000 }, () => {
     expect(inside.length).toBe(0);
   });
 
-  test('a resting pointer turns the blobs around it and leaves distant ones alone', () => {
+  test('a moving pointer turns the blobs around it and leaves distant ones alone', () => {
     const run = (touched: boolean) => {
       const field = createField(800, 600, { anchor: portrait800 }, seeded(8));
       for (let i = 0; i < 40; i++) field.step(16);
@@ -125,8 +129,10 @@ describe('createField', { timeout: 30_000 }, () => {
       const near = field.blobs.filter((b) => Math.abs(Math.hypot(b.x - 150, b.y - 150) - 45) < 20);
       const far = field.blobs.filter((b) => Math.abs(Math.hypot(b.x - 650, b.y - 450) - 45) < 20);
       const start = new Map([...near, ...far].map((b) => [b, { x: b.x, y: b.y }]));
-      if (touched) field.hover({ x: 150, y: 150 });
-      for (let i = 0; i < 120; i++) field.step(16);
+      for (let i = 0; i < 120; i++) {
+        if (touched) field.hover({ x: 150 + (i % 2), y: 150 });
+        field.step(16);
+      }
       const turned = (list: typeof near, x: number, y: number) =>
         list.reduce((sum, b) => {
           const from = start.get(b) ?? b;
@@ -145,21 +151,20 @@ describe('createField', { timeout: 30_000 }, () => {
     const run = (touched: boolean) => {
       const field = createField(800, 600, { anchor: portrait800 }, seeded(9));
       for (let i = 0; i < 40; i++) field.step(16);
-      const colours = new Map(field.blobs.map((b) => [b, b.color]));
       const near = field.blobs.filter((b) => Math.hypot(b.x - 150, b.y - 150) < 45);
       const size = () => near.reduce((sum, b) => sum + b.r, 0) / near.length;
       if (touched) field.touch(150, 150, { x: 1, y: 0 });
       for (let i = 0; i < 8; i++) field.step(16);
       const passing = size();
-      const kept = field.blobs.filter((b) => colours.has(b)).every((b) => b.color === colours.get(b));
+      const colours = near.map((b) => b.color).join();
       for (let i = 0; i < 90; i++) field.step(16);
-      return { passing, after: size(), kept };
+      return { passing, after: size(), colours };
     };
     const calm = run(false);
     const stirred = run(true);
     expect(stirred.passing).toBeGreaterThan(calm.passing * 1.03);
     expect(Math.abs(stirred.after / calm.after - 1)).toBeLessThan(0.05);
-    expect(stirred.kept).toBe(true);
+    expect(stirred.colours).toBe(calm.colours);
   });
 
   test('a tap swells the blobs its ring is passing, and they settle back', () => {
