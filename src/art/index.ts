@@ -29,12 +29,12 @@ const DRIFT = 0.025;
 // how fast blobs really travel outward, in px/ms. it dates a blob by its distance, so the
 // seed and refills take the colour a blob born on the rim would carry by then.
 const OUTWARD = 0.011;
-// each arm count and how long it holds, in ms. fewer arms hold longer.
+// each arm count and how long it holds, in ms. two and three arms hold longest.
 const ARMS = [
-  [1, 160000],
-  [2, 120000],
-  [3, 80000],
-  [5, 40000],
+  [1, 60000],
+  [2, 140000],
+  [3, 140000],
+  [5, 60000],
 ];
 const ARM_BLEND = 8000;
 const JITTER = 3;
