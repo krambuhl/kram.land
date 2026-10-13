@@ -26,7 +26,6 @@ export default schema.defineTokens({
     x128: { value: '128px' },
   },
   size: {
-    x128: { value: '128px' },
     x192: { value: '192px' },
     x256: { value: '256px' },
     x384: { value: '384px' },

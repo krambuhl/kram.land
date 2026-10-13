@@ -10,13 +10,19 @@
   display: block;
 }
 
-/* smaller on small screens, to leave the art more room around it. */
+/* smaller on smaller screens, to leave the art more room around it. */
 .image > img {
-  width: token('size.x128');
+  width: 154px;
   height: auto;
 }
 
-@media (width >= 32rem) {
+@media (width >= 48rem) {
+  .image > img {
+    width: 172px;
+  }
+}
+
+@media (width >= 64rem) {
   .image > img {
     width: token('size.x192');
   }

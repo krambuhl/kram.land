@@ -53,7 +53,6 @@ export const schema = defineSchema({
   ),
   size: slots(
     [
-      'x128',
       'x192',
       'x256',
       'x384',
