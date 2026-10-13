@@ -81,12 +81,10 @@ const STROKE_GAP = 400;
 const WAKES = 16;
 // the pointer drops a wake each time it has moved this many px.
 const WAKE_EVERY = 18;
-// a tap sends out a ring reaching RIPPLE_WIDTH px either side of its crest, at RIPPLE_SPEED
-// px/ms for RIPPLE_LIFE ms. blobs under it swell by up to RIPPLE_SWELL of their size and turn
-// around the tap at up to RIPPLE_SPIN px/ms, so the ring twists as it spreads.
-const RIPPLE_LIFE = 1600;
-const RIPPLE_SPEED = 0.4;
-const RIPPLE_WIDTH = 80;
+// a tap sends a ring RIPPLE_WIDTH either side of its crest across the whole field at RIPPLE_SPEED.
+// blobs under it swell by up to RIPPLE_SWELL and turn around the tap at up to RIPPLE_SPIN, fading as it spreads.
+const RIPPLE_SPEED = 0.9;
+const RIPPLE_WIDTH = 110;
 const RIPPLE_SWELL = 0.3;
 const RIPPLE_SPIN = 0.25;
 const WARM_STEPS = 30;
@@ -159,6 +157,8 @@ export function createField(width: number, height: number, options: FieldOptions
     tap: boolean;
     age: number;
     reach: number;
+    // how long the wake lasts, in ms.
+    life: number;
   }
   const wakes: Wake[] = [];
   let pulsing = false;
@@ -167,7 +167,7 @@ export function createField(width: number, height: number, options: FieldOptions
   const play = (elapsed: number) => {
     for (const wake of wakes) wake.age += elapsed;
     for (let i = wakes.length - 1; i >= 0; i--) {
-      if (wakes[i].age > (wakes[i].tap ? RIPPLE_LIFE : WAKE_FRESH)) wakes.splice(i, 1);
+      if (wakes[i].age > wakes[i].life) wakes.splice(i, 1);
     }
     if (eddy.held) eddy.power += (1 - eddy.power) * (1 - Math.exp(-elapsed / EDDY_RISE));
     else eddy.power *= Math.exp(-elapsed / EDDY_FADE);
@@ -195,7 +195,7 @@ export function createField(width: number, height: number, options: FieldOptions
         if (wake.tap) {
           const band = (away - RIPPLE_SPEED * wake.age) / RIPPLE_WIDTH;
           if (Math.abs(band) < 1) {
-            const under = (1 - wake.age / RIPPLE_LIFE) * (1 - band * band);
+            const under = (1 - wake.age / wake.life) * (1 - band * band);
             const turn = (eddy.spin * RIPPLE_SPIN * under * elapsed) / away;
             b.pulse += RIPPLE_SWELL * under;
             b.x -= dy * turn;
@@ -203,7 +203,7 @@ export function createField(width: number, height: number, options: FieldOptions
           }
           continue;
         }
-        if (away > wake.reach) continue;
+        if (wake.age > WAKE_FRESH || away > wake.reach) continue;
         const gone = clock - b.stroked;
         b.stroked = clock;
         if (gone <= STROKE_GAP) continue;
@@ -572,7 +572,8 @@ export function createField(width: number, height: number, options: FieldOptions
       const length = moved === undefined ? 0 : Math.hypot(moved.x, moved.y);
       const tap = moved === undefined || length === 0;
       const reach = STROKE_BLOBS * spacingAt(x, y);
-      wakes.push({ x, y, ux: tap ? 0 : moved.x / length, uy: tap ? 0 : moved.y / length, tap, age: 0, reach });
+      const life = tap ? Math.hypot(width, height) / RIPPLE_SPEED : WAKE_FRESH;
+      wakes.push({ x, y, ux: tap ? 0 : moved.x / length, uy: tap ? 0 : moved.y / length, tap, age: 0, reach, life });
       if (wakes.length > WAKES) wakes.shift();
       if (tap) return;
       // the eddy turns the way the pointer last went around the portrait.
