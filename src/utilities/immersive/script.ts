@@ -1,25 +1,24 @@
 const MOVE = 450;
 const FADE = 200;
-const LIFT = 64;
+const LIFT = 72;
 const RESEED = 250;
 
 export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCanvasElement): () => void {
   const html = document.documentElement;
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // safari shows what has scrolled past the top under its top bar, so on touch the page
-  // rests LIFT px down with art above it. if the scroll doesn't take, the padding is removed.
+  // on touch the page rests LIFT px down so art shows under safari's top bar. the scroll
+  // may apply late, so nothing here waits to see whether it took.
   const lift = window.matchMedia('(pointer: coarse)').matches ? LIFT : 0;
-  const rest = () => (html.hasAttribute('data-lifted') ? lift : 0);
   const settle = () => {
     if (lift === 0 || !html.hasAttribute('data-immersive')) return;
-    html.setAttribute('data-lifted', '');
     window.scrollTo(0, lift);
-    requestAnimationFrame(() => {
-      if (html.hasAttribute('data-immersive') && window.scrollY < lift - 1) html.removeAttribute('data-lifted');
-    });
   };
-  if (lift > 0) history.scrollRestoration = 'manual';
-  settle();
+  if (lift > 0) {
+    history.scrollRestoration = 'manual';
+    html.setAttribute('data-lifted', '');
+    html.style.setProperty('--lift', `${lift}px`);
+    settle();
+  }
   let anchor = { x: 0, y: 0, r: 0 };
   let floor = window.innerHeight;
   let stopArt: (() => void) | undefined;
@@ -82,12 +81,17 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
       () => {
         html.removeAttribute('data-closing');
         glide(() => html.setAttribute('data-immersive', ''));
-        window.scrollTo({ top: rest() });
+        window.scrollTo({ top: lift });
       },
       still ? 0 : FADE
     );
   };
 
+  // pageshow scrolls to the rest position and measures the portrait again.
+  const onShow = () => {
+    settle();
+    measure();
+  };
   const onClick = () => (html.hasAttribute('data-immersive') ? open() : close());
   const onKey = (event: KeyboardEvent) => {
     if (event.key !== 'Escape') return;
@@ -132,7 +136,7 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   window.addEventListener('keydown', onKey);
   document.addEventListener('click', onOutside);
   window.addEventListener('resize', measure);
-  window.addEventListener('pageshow', settle);
+  window.addEventListener('pageshow', onShow);
   return () => {
     clearTimeout(reseedTimer);
     stopArt?.();
@@ -140,6 +144,6 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
     window.removeEventListener('keydown', onKey);
     document.removeEventListener('click', onOutside);
     window.removeEventListener('resize', measure);
-    window.removeEventListener('pageshow', settle);
+    window.removeEventListener('pageshow', onShow);
   };
 }

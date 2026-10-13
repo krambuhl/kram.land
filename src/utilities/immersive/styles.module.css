@@ -37,13 +37,9 @@
 }
 
 /* on touch devices the page rests scrolled past a strip of art above the content, so
-   the art shows under the browser's top bar. */
-:root[data-lifted] {
-  --lift: 64px;
-}
-
+   the art shows under the browser's top bar. --lift is set by the script. */
 :root[data-lifted] body {
-  padding-top: calc(env(safe-area-inset-top) + var(--lift));
+  padding-top: calc(env(safe-area-inset-top) + var(--lift, 0px));
 }
 
 /* the frame sits on the page, not the screen, so the art scrolls with the open content.
@@ -54,18 +50,18 @@
   left: 0;
   z-index: 0;
   width: 100%;
-  height: calc(100vh + var(--scrolls, 0px));
-  height: calc(100lvh + var(--scrolls, 0px));
+  height: calc(100vh + var(--scrolls, 0px) + var(--lift, 0px));
+  height: calc(100lvh + var(--scrolls, 0px) + var(--lift, 0px));
   margin: 0;
   overflow: hidden;
   pointer-events: none;
 }
 
-/* closed, the frame ends a screen below the rest position, so the page can scroll to
-   it and no further, without hiding overflow. */
+/* closed, the frame is a screen tall with the lift above and below it, so the page can
+   scroll to its rest position without hiding overflow. */
 :root[data-immersive] .frame {
-  height: calc(100vh + var(--lift, 0px));
-  height: calc(100lvh + var(--lift, 0px));
+  height: calc(100vh + 2 * var(--lift, 0px));
+  height: calc(100lvh + 2 * var(--lift, 0px));
 }
 
 .art {
@@ -75,8 +71,8 @@
   top: calc(-1 * var(--bleed));
   left: calc(-1 * var(--bleed));
   width: calc(100% + 2 * var(--bleed));
-  height: calc(100vh + var(--scrolls, 0px) + 2 * var(--bleed) + var(--travel, 0px));
-  height: calc(100lvh + var(--scrolls, 0px) + 2 * var(--bleed) + var(--travel, 0px));
+  height: calc(100vh + var(--scrolls, 0px) + var(--lift, 0px) + 2 * var(--bleed) + var(--travel, 0px));
+  height: calc(100lvh + var(--scrolls, 0px) + var(--lift, 0px) + 2 * var(--bleed) + var(--travel, 0px));
   background: #000;
   opacity: 0;
   transition:
