@@ -70,7 +70,7 @@ const MARGIN = 48;
 // at up to EDDY_TURN px/ms a third of the way out. it winds up over EDDY_RISE ms while the
 // pointer is there and down over EDDY_FADE ms once it leaves.
 const EDDY_BLOBS = 4.5;
-const EDDY_TURN = 0.06;
+const EDDY_TURN = 0.03;
 const EDDY_RISE = 500;
 const EDDY_FADE = 900;
 // blobs within STROKE_BLOBS spacings of a wake younger than WAKE_FRESH step one colour around the palette, one way
