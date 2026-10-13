@@ -23,6 +23,9 @@ const OUTER_BREATHE = 0.24;
 const SHIFT = 16;
 const BAND = 50;
 const DRIFT = 0.025;
+// how fast blobs really travel outward, in px/ms. it dates a blob by its distance, so the
+// seed and refills take the colour a blob born on the rim would carry by then.
+const OUTWARD = 0.011;
 const ARM_COUNTS = [1, 2, 3, 5];
 const ARM_HOLD = 40000;
 const ARM_BLEND = 8000;
@@ -287,7 +290,7 @@ export function createField(width: number, height: number, options: FieldOptions
     b.r = target(b, t) * breathe(b);
     if (near.some((o) => (o.x - x) ** 2 + (o.y - y) ** 2 < (o.r + b.r + gapFor((o.r + b.r) / 2)) ** 2))
       return undefined;
-    const age = (Math.hypot(x - anchor.x, y - anchor.y) - anchor.r) / DRIFT;
+    const age = (Math.hypot(x - anchor.x, y - anchor.y) - anchor.r) / OUTWARD;
     b.color = colorAt(x, y, colorPhase - spinRate(clock) * age, armsAt(clock - age));
     blobs.push(b);
     near.push(b);
@@ -317,7 +320,7 @@ export function createField(width: number, height: number, options: FieldOptions
     const dy = b.y - anchor.y;
     const away = Math.hypot(dx, dy) || 0.01;
     const rim = anchor.r;
-    const age = (away - rim) / DRIFT;
+    const age = (away - rim) / OUTWARD;
     b.color = colorAt(b.x, b.y, phaseAgo(age), armsAt(-age));
   }
   for (const b of blobs) {
