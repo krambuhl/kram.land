@@ -31,10 +31,10 @@ const DRIFT = 0.025;
 const OUTWARD = 0.011;
 // each arm count and how long it holds, in ms. fewer arms hold longer.
 const ARMS = [
-  [1, 120000],
-  [2, 90000],
-  [3, 60000],
-  [5, 30000],
+  [1, 160000],
+  [2, 120000],
+  [3, 80000],
+  [5, 40000],
 ];
 const ARM_BLEND = 8000;
 const JITTER = 3;
