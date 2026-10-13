@@ -8,7 +8,7 @@ const SPAWN_ROOM = 0.5;
 const BORN = 0.4;
 const SEED_ROUNDS = 6;
 // circles can't tile the plane, so seeding a full area's worth overfills the screen.
-const SEED_FILL = 0.9;
+const SEED_FILL = 0.8;
 const GROW = 0.08;
 // the gap between neighbours scales with their size, from GAP_MIN px at radius
 // GAP_FROM to GAP_MAX px at radius GAP_TO, so it reads the same at every size.
@@ -66,6 +66,8 @@ const EDGE_ATTEMPTS = 24;
 // the field runs MARGIN px past every screen edge, so refills spawn and culls happen
 // out of sight.
 const MARGIN = 48;
+const WARM_STEPS = 30;
+const WARM_PER_FRAME = 3;
 const HOLE = ['#1079CB', '#A067C3', '#5B9E47'];
 const HOLE_TURN = 40000;
 const RAINBOW = ['#5A4D9A', '#A067C3', '#CD361F', '#F07C31', '#E9AC38', '#5B9E47', '#58BABB', '#1079CB'];
@@ -456,6 +458,8 @@ export function createField(width: number, height: number, options: FieldOptions
 export interface StartOptions {
   anchor?: () => Anchor;
   floor?: () => number;
+  // called once the field has settled out of sight and drawn its first frame.
+  ready?: () => void;
 }
 
 export default function start(canvas: HTMLCanvasElement, options: StartOptions = {}): () => void {
@@ -538,17 +542,30 @@ export default function start(canvas: HTMLCanvasElement, options: StartOptions =
     }
   };
 
+  // the seed spreads for its first steps, so they run before anything is shown, a few
+  // per frame so the page stays responsive.
+  let warming = WARM_STEPS;
+  const warm = (steps: number) => {
+    for (let i = 0; i < steps && warming > 0; i++, warming--) field?.step(16);
+    if (warming > 0) return;
+    draw();
+    options.ready?.();
+  };
+
   const loop = (now: number) => {
     follow();
-    field?.step(Math.min(64, last === 0 ? 16 : now - last));
+    if (warming > 0) warm(WARM_PER_FRAME);
+    else {
+      field?.step(Math.min(64, last === 0 ? 16 : now - last));
+      draw();
+    }
     last = now;
-    draw();
     frame = requestAnimationFrame(loop);
   };
 
   resize();
   window.addEventListener('resize', resize);
-  if (still) draw();
+  if (still) warm(WARM_STEPS);
   else frame = requestAnimationFrame(loop);
 
   return () => {

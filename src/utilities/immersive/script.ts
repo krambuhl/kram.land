@@ -109,11 +109,6 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
     requestAnimationFrame(() => {
       reseedTimer = setTimeout(() => {
         stopArt = startArt?.();
-        html.setAttribute('data-art', '');
-        reseedTimer = setTimeout(() => {
-          html.removeAttribute('data-reseed');
-          reseeding = false;
-        }, RESEED);
       });
     });
   };
@@ -128,9 +123,18 @@ export function immersive(image: HTMLElement, text: HTMLElement, canvas: HTMLCan
   // the open layout depends on the text, so it's measured again once the web fonts load.
   void document.fonts?.ready.then(measure);
   import('../../art/index.ts').then(({ default: start }) => {
-    startArt = () => start(canvas, { anchor: () => anchor, floor: () => floor });
+    // the art is shown once it has settled. after a reseed the quick fade's flag clears
+    // once that fade has run.
+    const ready = () => {
+      html.setAttribute('data-art', '');
+      if (!reseeding) return;
+      reseedTimer = setTimeout(() => {
+        html.removeAttribute('data-reseed');
+        reseeding = false;
+      }, RESEED);
+    };
+    startArt = () => start(canvas, { anchor: () => anchor, floor: () => floor, ready });
     stopArt = startArt();
-    html.setAttribute('data-art', '');
   });
   image.addEventListener('click', onClick);
   window.addEventListener('keydown', onKey);
