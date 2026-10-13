@@ -122,7 +122,7 @@
    darkens it because blur alone leaves the light text hard to read over the palette's
    brightest colours. */
 :root:not([data-immersive], [data-closing]) .art {
-  filter: blur(14px) brightness(0.55);
+  filter: blur(8px) brightness(0.55);
 }
 
 :root[data-measuring] .art,
