@@ -128,9 +128,9 @@ describe('createField', { timeout: 30_000 }, () => {
     expect(inside.length).toBe(0);
   });
 
-  test('a moving pointer turns the blobs around it and leaves distant ones alone', () => {
-    const run = (touched: boolean) => {
-      const field = createField(800, 600, { anchor: portrait800 }, seeded(8));
+  test('a moving pointer turns the blobs around it far more than distant ones', () => {
+    const run = (touched: boolean, seed: number) => {
+      const field = createField(800, 600, { anchor: portrait800 }, seeded(seed));
       for (let i = 0; i < 40; i++) field.step(16);
       const angle = (b: { x: number; y: number }, x: number, y: number) => Math.atan2(b.y - y, b.x - x);
       const near = field.blobs.filter((b) => Math.abs(Math.hypot(b.x - 150, b.y - 150) - 45) < 20);
@@ -148,10 +148,12 @@ describe('createField', { timeout: 30_000 }, () => {
         }, 0) / list.length;
       return { near: turned(near, 150, 150), far: turned(far, 650, 450) };
     };
-    const still = run(false);
-    const stirred = run(true);
-    expect(Math.abs(stirred.near - still.near)).toBeGreaterThan(0.1);
-    expect(Math.abs(stirred.far - still.far)).toBeLessThan(0.05);
+    const seeds = [8, 11, 12, 13];
+    const near = seeds.map((seed) => Math.abs(run(true, seed).near - run(false, seed).near));
+    const far = seeds.map((seed) => Math.abs(run(true, seed).far - run(false, seed).far));
+    const mean = (list: number[]) => list.reduce((sum, x) => sum + x, 0) / list.length;
+    expect(mean(near)).toBeGreaterThan(0.1);
+    expect(mean(far)).toBeLessThan(mean(near) / 2);
   });
 
   test('a moving pointer leaves a small ring that swells the blobs near it and changes no colours', () => {

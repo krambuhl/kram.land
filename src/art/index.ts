@@ -21,8 +21,13 @@ const SMOOTH = 0.5;
 const SIZE = 7;
 const MOOD_PERIOD = [12000, 28000];
 const SPIN = 2;
-const INNER_BREATHE = 0.18;
-const OUTER_BREATHE = 0.24;
+const INNER_BREATHE = 0.1;
+const OUTER_BREATHE = 0.12;
+// a breath, in ms: in for BREATH[0], out for BREATH[1], held out for BREATH[2], the outer band
+// BREATH_LAG behind. gutters scale by 1 ± GUTTER_BREATHE, widening as blobs shrink to keep holes from opening.
+const BREATH = [7000, 10000, 3000];
+const BREATH_LAG = 1500;
+const GUTTER_BREATHE = 0.5;
 const SHIFT = 16;
 const BAND = 50;
 const DRIFT = 0.025;
@@ -56,7 +61,7 @@ const OUTER_FROM = 0.6;
 const OUTER_SWELL = 0.2;
 // the outer band orbits the portrait one way per field at up to ORBIT px/ms and the
 // inner field the other way at ORBIT_INNER of that. a mood eases the speed between ORBIT_CALM and full.
-const ORBIT = 0.026;
+const ORBIT = 0.018;
 const ORBIT_CALM = 0.3;
 const ORBIT_INNER = 0.1;
 const ORBIT_FROM = 0.5;
@@ -137,7 +142,7 @@ export function createField(width: number, height: number, options: FieldOptions
   let clock = 0;
   let colorPhase = 0;
 
-  const waves = Array.from({ length: 4 }, () =>
+  const waves = Array.from({ length: 2 }, () =>
     Array.from({ length: 3 }, () => ({
       rate: (Math.PI * 2) / (MOOD_PERIOD[0] + random() * (MOOD_PERIOD[1] - MOOD_PERIOD[0])),
       offset: random() * Math.PI * 2,
@@ -274,8 +279,16 @@ export function createField(width: number, height: number, options: FieldOptions
       Math.max(FLOOR_SWELL * b.low, CORNER_SWELL * b.corner));
 
   // the breath is part of each blob's physical size, so neighbours make room for it.
-  let inner = mood(1);
-  let outer = mood(2);
+  const breathCycle = BREATH[0] + BREATH[1] + BREATH[2];
+  const breathOrigin = random() * breathCycle;
+  const breathAt = (at: number) => {
+    const into = (((at + breathOrigin) % breathCycle) + breathCycle) % breathCycle;
+    if (into < BREATH[0]) return -Math.cos((Math.PI * into) / BREATH[0]);
+    if (into < BREATH[0] + BREATH[1]) return Math.cos((Math.PI * (into - BREATH[0])) / BREATH[1]);
+    return -1;
+  };
+  let inner = breathAt(clock);
+  let outer = breathAt(clock - BREATH_LAG);
   const breathe = (b: Blob) =>
     1 +
     INNER_BREATHE * inner * (1 - b.along) +
@@ -300,6 +313,7 @@ export function createField(width: number, height: number, options: FieldOptions
 
   const gapFor = (r: number) =>
     GAP_MIN + (GAP_MAX - GAP_MIN) * Math.min(1, Math.max(0, (r - GAP_FROM) / (GAP_TO - GAP_FROM)));
+  const gutter = (b: Blob) => gapFor(b.r) * (1 - GUTTER_BREATHE * (inner * (1 - b.along) + outer * b.along));
 
   // the collision grid is stored as linked lists in typed arrays: head[cell] is the
   // first blob in a cell, next[i] the one after blob i.
@@ -314,7 +328,7 @@ export function createField(width: number, height: number, options: FieldOptions
     let widest = 0;
     let total = 0;
     for (let i = 0; i < blobs.length; i++) {
-      extent[i] = blobs[i].r + gapFor(blobs[i].r) / 2;
+      extent[i] = blobs[i].r + gutter(blobs[i]) / 2;
       widest = Math.max(widest, extent[i]);
       total += extent[i];
     }
@@ -340,7 +354,7 @@ export function createField(width: number, height: number, options: FieldOptions
         const ax = a.x - anchor.x;
         const ay = a.y - anchor.y;
         const away = Math.hypot(ax, ay) || 0.01;
-        const clear = anchor.r + a.r + gapFor(a.r);
+        const clear = anchor.r + a.r + gutter(a);
         if (away < clear) {
           a.x = anchor.x + (ax / away) * clear;
           a.y = anchor.y + (ay / away) * clear;
@@ -450,8 +464,8 @@ export function createField(width: number, height: number, options: FieldOptions
       sinceSpawn += elapsed;
       clock += elapsed;
       colorPhase += spinRate(clock) * elapsed;
-      inner = mood(1);
-      outer = mood(2);
+      inner = breathAt(clock);
+      outer = breathAt(clock - BREATH_LAG);
       play(elapsed);
       // spawn checks only look at blobs near the rim, the only ones a newborn can touch.
       const rimBand = anchor.r + 80;
@@ -483,7 +497,7 @@ export function createField(width: number, height: number, options: FieldOptions
         b.along = along(t);
         b.r += (target(b, t) * breathe(b) * (1 + b.pulse) - b.r) * GROW;
       }
-      const turn = orbitWay * ORBIT * (ORBIT_CALM + (1 - ORBIT_CALM) * (0.5 + 0.5 * mood(3))) * elapsed;
+      const turn = orbitWay * ORBIT * (ORBIT_CALM + (1 - ORBIT_CALM) * (0.5 + 0.5 * mood(1))) * elapsed;
       for (const b of blobs) {
         const dx = b.x - anchor.x;
         const dy = b.y - anchor.y;
