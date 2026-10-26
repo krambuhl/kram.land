@@ -62,6 +62,22 @@ describe('createField', { timeout: 30_000 }, () => {
     expect(changed).toHaveLength(0);
   });
 
+  test('blobs are born at a steady rate through the whole breath', () => {
+    const field = createField(1440, 900, { anchor: portrait }, seeded(12));
+    let known = new Set(field.blobs);
+    const windows: number[] = [];
+    for (let i = 0; i < 1250; i++) {
+      if (i % 125 === 0) windows.push(0);
+      field.step(16);
+      const born = field.blobs.filter(
+        (b) => !known.has(b) && Math.hypot(b.x - portrait.x, b.y - portrait.y) < portrait.r + 40
+      );
+      windows[windows.length - 1] += born.length;
+      known = new Set(field.blobs);
+    }
+    expect(Math.min(...windows)).toBeGreaterThan(Math.max(...windows) * 0.8);
+  });
+
   test('packs against the portrait with no visible overlap as new blobs push out from its rim', () => {
     const field = createField(1440, 900, { anchor: portrait }, seeded(2));
     for (let i = 0; i < 300; i++) field.step(16);

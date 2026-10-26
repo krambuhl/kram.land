@@ -1,10 +1,8 @@
-const SPAWN_EVERY = 1;
+// a newborn appears on the portrait's rim every SPAWN_EVERY ms, at the roomiest of SPAWN_ATTEMPTS
+// spots, so births hold steady while the breath squeezes and frees the rim.
+const SPAWN_EVERY = 20;
 const SPAWN_ATTEMPTS = 32;
-// newborns need room for SPAWN_ROOM of their size and gap: less squeezes the inner
-// ring, more starves the outward push that keeps the field moving.
-const SPAWN_ROOM = 0.5;
-// a newborn appears at BORN of its rim size, inside the room the spawn check cleared,
-// so it shows at once without pushing into its neighbours.
+// a newborn appears at BORN of its rim size, small enough to squeeze in where the rim is tight.
 const BORN = 0.4;
 const SEED_ROUNDS = 6;
 // circles can't tile the plane, so seeding a full area's worth overfills the screen.
@@ -475,23 +473,20 @@ export function createField(width: number, height: number, options: FieldOptions
       const nearRim = blobs.filter((b) => (b.x - anchor.x) ** 2 + (b.y - anchor.y) ** 2 < rimBand * rimBand);
       while (sinceSpawn >= SPAWN_EVERY) {
         sinceSpawn -= SPAWN_EVERY;
+        let best = { x: 0, y: 0, room: -Infinity };
         for (let attempt = 0; attempt < SPAWN_ATTEMPTS; attempt++) {
           const angle = random() * Math.PI * 2;
-          const ux = Math.cos(angle);
-          const uy = Math.sin(angle);
           const rim = anchor.r + gapFor(newborn) + 1;
-          const x = anchor.x + ux * rim;
-          const y = anchor.y + uy * rim;
-          const crowded = nearRim.some(
-            (b) => (b.x - x) ** 2 + (b.y - y) ** 2 < (b.r + SPAWN_ROOM * (newborn + gapFor(newborn))) ** 2
-          );
-          if (crowded) continue;
-          const born = blob(x, y, colorPhase, armsAt(clock));
-          born.r = BORN * newborn;
-          blobs.push(born);
-          nearRim.push(born);
-          break;
+          const x = anchor.x + Math.cos(angle) * rim;
+          const y = anchor.y + Math.sin(angle) * rim;
+          let room = Infinity;
+          for (const b of nearRim) room = Math.min(room, Math.hypot(b.x - x, b.y - y) - b.r);
+          if (room > best.room) best = { x, y, room };
         }
+        const born = blob(best.x, best.y, colorPhase, armsAt(clock));
+        born.r = BORN * newborn;
+        blobs.push(born);
+        nearRim.push(born);
       }
       for (const b of blobs) {
         const t = travelled(b);
