@@ -41,7 +41,7 @@ const ARMS = [
   [3, 140000],
   [5, 60000],
 ];
-const ARM_BLEND = 8000;
+const ARM_BLEND = 20000;
 const JITTER = 1;
 const EDGE_GROWTH = [2, 4];
 const EDGE_SWELL = 3;
@@ -222,8 +222,8 @@ export function createField(width: number, height: number, options: FieldOptions
     return history[index];
   };
 
-  // the arm count steps through ARMS, and newborns dither between the old and new
-  // count over the last ARM_BLEND of each hold so the change ripples out softly.
+  // the arm count steps through ARMS, easing to the next count over the last ARM_BLEND of each
+  // hold. newborns take the count of their moment, so the change ripples out from the rim.
   const armsCycle = ARMS.reduce((sum, [, hold]) => sum + hold, 0);
   const armsOrigin = random() * armsCycle;
   const armsAt = (at: number) => {
@@ -232,11 +232,14 @@ export function createField(width: number, height: number, options: FieldOptions
     while (into >= ARMS[stage][1]) into -= ARMS[stage++][1];
     const [count, hold] = ARMS[stage];
     const [next] = ARMS[(stage + 1) % ARMS.length];
-    return random() < smooth((into - (hold - ARM_BLEND)) / ARM_BLEND) ? next : count;
+    return count + (next - count) * smooth((into - (hold - ARM_BLEND)) / ARM_BLEND);
   };
 
+  // a fractional arm count leaves one seam where the turn wraps. it sits at a random angle and
+  // closes again once the count lands on a whole number.
+  const seam = random() * Math.PI * 2;
   const colorAt = (x: number, y: number, phase: number, arms: number) => {
-    const turn = Math.atan2(y - anchor.y, x - anchor.x) / (Math.PI * 2);
+    const turn = ((((Math.atan2(y - anchor.y, x - anchor.x) - seam) / (Math.PI * 2)) % 1) + 1) % 1;
     const blur = ((random() - 0.5) * JITTER) / RAINBOW.length;
     const k = (((turn * arms + phase + blur) % 1) + 1) % 1;
     return RAINBOW[Math.floor(k * RAINBOW.length)];
