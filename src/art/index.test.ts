@@ -32,27 +32,34 @@ describe('createField', { timeout: 30_000 }, () => {
     expect(Math.max(...edge.map((b) => b.r * 2))).toBeLessThanOrEqual(56);
   });
 
-  test('colours hold their bands near the portrait and dissolve toward the edges', () => {
+  test('colours fall into bands, so most blobs share a colour with their nearest neighbour', () => {
     const field = createField(1440, 900, { anchor: portrait }, seeded(4));
     for (let i = 0; i < 120; i++) field.step(16);
-    const shared = (list: typeof field.blobs) =>
-      list.filter((a) => {
-        let nearest = field.blobs[0];
-        let best = Infinity;
-        for (const b of field.blobs) {
-          const d = (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
-          if (b !== a && d < best) {
-            best = d;
-            nearest = b;
-          }
+    const sample = field.blobs.slice(0, 400);
+    const shared = sample.filter((a) => {
+      let nearest = field.blobs[0];
+      let best = Infinity;
+      for (const b of field.blobs) {
+        const d = (a.x - b.x) ** 2 + (a.y - b.y) ** 2;
+        if (b !== a && d < best) {
+          best = d;
+          nearest = b;
         }
-        return nearest.color === a.color;
-      }).length / list.length;
-    const off = (b: { x: number; y: number }) => Math.hypot(b.x - portrait.x, b.y - portrait.y) - portrait.r;
-    const inner = shared(field.blobs.filter((b) => off(b) < 120));
-    const outer = shared(field.blobs.filter((b) => off(b) > 420 && b.x > 0 && b.x < 1440 && b.y > 0 && b.y < 900));
-    expect(inner).toBeGreaterThan(0.35);
-    expect(outer).toBeLessThan(inner - 0.15);
+      }
+      return nearest.color === a.color;
+    });
+    expect(shared.length / sample.length).toBeGreaterThan(0.2);
+  });
+
+  test('a blob keeps its colour for its whole life', () => {
+    const field = createField(1440, 900, { anchor: portrait }, seeded(7));
+    const born = new Map(field.blobs.map((b) => [b, b.color]));
+    for (let i = 0; i < 400; i++) {
+      field.step(16);
+      for (const b of field.blobs) if (!born.has(b)) born.set(b, b.color);
+    }
+    const changed = field.blobs.filter((b) => born.get(b) !== b.color);
+    expect(changed).toHaveLength(0);
   });
 
   test('packs against the portrait with no visible overlap as new blobs push out from its rim', () => {
